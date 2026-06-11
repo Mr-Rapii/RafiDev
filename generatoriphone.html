@@ -2,21 +2,32 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viral iPhone Message Context Menu Generator - Teks Pojok Pas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Viral iPhone Message Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #121212;
             color: #fff;
             display: flex;
-            justify-content: center;
+            flex-direction: column; /* Menyusun ke bawah secara default (untuk HP) */
             align-items: center;
             min-height: 100vh;
             margin: 0;
             padding: 20px;
-            gap: 40px;
+            gap: 30px;
             box-sizing: border-box;
+        }
+
+        /* Layout untuk Desktop/Layar Lebar */
+        @media (min-width: 768px) {
+            body {
+                flex-direction: row; /* Bersebelahan di PC */
+                justify-content: center;
+                align-items: flex-start;
+                padding: 40px;
+            }
         }
 
         /* Panel Kontrol */
@@ -24,10 +35,10 @@
             background-color: #1e1e1e;
             padding: 25px;
             border-radius: 16px;
-            width: 320px;
+            width: 100%;
+            max-width: 320px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-            max-height: 90vh;
-            overflow-y: auto;
+            box-sizing: border-box;
         }
 
         .controls h2 {
@@ -58,7 +69,7 @@
             color: #aaa;
         }
 
-        .input-group input, .input-group textarea, .input-group select {
+        .input-group input, .input-group textarea {
             width: 100%;
             padding: 10px;
             box-sizing: border-box;
@@ -97,23 +108,54 @@
             width: auto;
         }
 
+        /* Tombol Download */
+        .btn-download {
+            width: 100%;
+            padding: 15px;
+            background-color: #0A84FF;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.2s;
+        }
+        .btn-download:hover {
+            background-color: #0070E0;
+        }
+        .btn-download:active {
+            transform: scale(0.98);
+        }
+
         /* Desain Mockup iPhone */
         .iphone-frame {
             width: 320px;
-            height: 692px; /* Proporsi lebih akurat */
+            height: 692px;
             background-color: #000;
             border: 16px solid #222;
             border-radius: 54px;
             position: relative;
             box-shadow: 0 0 0 3px #444, 0 30px 60px rgba(0,0,0,0.9);
             overflow: hidden;
-            background-image: url('https://images.unsplash.com/photo-1620121692029-d088224ddc74?q=80&w=2000&auto=format&fit=crop'); /* Gambar dasar gelap */
+            background-image: url('https://images.unsplash.com/photo-1620121692029-d088224ddc74?q=80&w=2000&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
-            transition: background-image 0.3s ease;
+            /* Penting untuk html2canvas agar dirender lurus */
+            transform: scale(1); 
+            flex-shrink: 0;
         }
 
-        /* Dynamic Island */
+        /* Skala pengecilan otomatis khusus layar HP yang sangat kecil */
+        @media (max-width: 380px) {
+            .iphone-frame {
+                transform: scale(0.9);
+                transform-origin: top center;
+                margin-bottom: -70px; /* Kompensasi ruang kosong akibat scale */
+            }
+        }
+
         .dynamic-island {
             width: 106px;
             height: 31px;
@@ -127,7 +169,6 @@
             box-shadow: inset 0 0 5px rgba(255,255,255,0.1);
         }
 
-        /* Status Bar */
         .status-bar {
             position: absolute;
             top: 0;
@@ -144,9 +185,7 @@
             font-weight: 600;
             box-sizing: border-box;
         }
-        .status-bar-time {
-            padding-top: 15px;
-        }
+        .status-bar-time { padding-top: 15px; }
         .status-bar-icons {
             display: flex;
             gap: 6px;
@@ -154,47 +193,43 @@
             padding-top: 15px;
         }
         .icon-signal { width: 16px; height: 10px; background: #fff; border-radius: 1px; }
-        .icon-wifi { width: 16px; height: 12px; } /* SVG ideal */
+        .icon-wifi { width: 16px; height: 12px; }
         .icon-battery { width: 22px; height: 11px; border: 1.5px solid #fff; border-radius: 3px; position: relative; }
         .icon-battery::after { content: ''; position: absolute; right: -3px; top: 3px; width: 2px; height: 4px; background: #fff; border-radius: 0 1px 1px 0; }
 
-        /* Latar Belakang Buram yang Sangat Gelap */
         .context-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); /* Latar belakang sangat gelap */
+            background-color: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             z-index: 10;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* Memosisikan konten di bagian bawah */
-            padding-bottom: 60px; /* Jarak dari Home Bar */
+            justify-content: flex-end;
+            padding-bottom: 60px;
             box-sizing: border-box;
         }
 
-        /* Gelembung Pesan */
         .context-message {
-            background-color: #1c1c1e; /* Warna gelap pesan */
+            background-color: #1c1c1e;
             color: #ddd;
             padding: 12px 16px;
             border-radius: 20px;
-            margin: 0 20px 20px 20px; /* Jarak dari samping dan bawah */
+            margin: 0 20px 20px 20px;
             max-width: 80%;
-            align-self: flex-start; /* Pesan dari kiri */
+            align-self: flex-start;
             position: relative;
         }
-
         .message-text {
             font-size: 15px;
             line-height: 1.4;
-            font-weight: 300; /* Lebih tipis seperti di gambar */
+            font-weight: 300;
             margin: 0;
         }
-
         .message-time {
             font-size: 11px;
             color: #8e8e93;
@@ -203,7 +238,6 @@
             display: block;
         }
 
-        /* Gelembung Reaksi di Atas Pesan */
         .context-reactions {
             background-color: rgba(44, 44, 46, 0.8);
             backdrop-filter: blur(10px);
@@ -213,16 +247,12 @@
             gap: 10px;
             align-self: flex-start;
             margin-left: 20px;
-            margin-bottom: -15px; /* Bertumpuk sedikit dengan pesan */
+            margin-bottom: -15px;
             z-index: 20;
             position: relative;
         }
+        .reaction { font-size: 20px; }
 
-        .reaction {
-            font-size: 20px;
-        }
-
-        /* Blok Menu di Bawah Pesan */
         .context-menu {
             background-color: rgba(28, 28, 30, 0.9);
             backdrop-filter: blur(10px);
@@ -232,7 +262,6 @@
             display: flex;
             flex-direction: column;
         }
-
         .menu-item {
             display: flex;
             justify-content: space-between;
@@ -243,10 +272,7 @@
             cursor: pointer;
             border-bottom: 1px solid #3a3a3c;
         }
-        .menu-item:last-child {
-            border-bottom: none;
-        }
-
+        .menu-item:last-child { border-bottom: none; }
         .menu-icon {
             width: 20px;
             height: 20px;
@@ -255,42 +281,24 @@
             justify-content: center;
             align-items: center;
         }
+        .svg-icon { width: 100%; height: 100%; fill: currentColor; }
+        
+        .menu-text-delete { color: #ff3b30; }
+        .menu-item-delete .menu-icon { color: #ff3b30; }
+        .menu-item-more .menu-icon { width: 12px; height: 12px; color: #8e8e93; }
 
-        /* Ikon SVG Inline yang Sangat Mirip */
-        .svg-icon {
-            width: 100%;
-            height: 100%;
-            fill: currentColor;
-        }
-
-        .menu-text-delete {
-            color: #ff3b30; /* Warna merah default 'Hapus' */
-        }
-        .menu-item-delete .menu-icon {
-            color: #ff3b30;
-        }
-
-        .menu-item-more .menu-icon {
-            width: 12px;
-            height: 12px;
-            color: #8e8e93;
-        }
-
-        /* Watermark di Pojok Kanan Bawah */
-        /* --- DIPERBARUI: Teks Lebih Kecil dan Pas --- */
         .watermark {
             position: absolute;
-            bottom: 25px; /* Sedikit lebih turun */
-            right: 15px;  /* Sedikit lebih mepet ke kanan */
+            bottom: 25px;
+            right: 15px;
             color: rgba(255, 255, 255, 0.6);
-            font-size: 9px;  /* Mengecilkan font jadi 9px (sebelumnya 10px) */
+            font-size: 9px;
             text-align: right;
             line-height: 1.2;
             z-index: 80;
-            display: none; /* Disembunyikan secara default, diaktifkan di JS */
+            display: none;
         }
 
-        /* Home Bar di Bagian Bawah */
         .home-bar {
             position: absolute;
             bottom: 8px;
@@ -302,59 +310,9 @@
             border-radius: 10px;
             z-index: 100;
         }
-
     </style>
 </head>
 <body>
-
-    <div class="controls">
-        <h2>Kontrol Meme</h2>
-        
-        <h3>Status Bar</h3>
-        <div class="input-group">
-            <label for="input-sb-time">Waktu di Atas</label>
-            <input type="text" id="input-sb-time" value="19:32">
-        </div>
-        
-        <h3>Pesan (Gelembung Pesan)</h3>
-        <div class="input-group">
-            <label for="input-msg-text">Isi Pesan</label>
-            <textarea id="input-msg-text">Selayaknya bunga, aku tidak bisa seindah masalalunya.</textarea>
-        </div>
-        <div class="input-group">
-            <label for="input-msg-time">Waktu Pesan</label>
-            <input type="text" id="input-msg-time" value="19:31">
-        </div>
-
-        <h3>Reaksi Emoji</h3>
-        <div class="input-group">
-            <label for="input-reactions">String Emoji (Maks 7)</label>
-            <input type="text" id="input-reactions" value="👍❤️😂😯😢🙏+">
-        </div>
-
-        <h3>Opsi Menu</h3>
-        <div class="input-group"><input type="text" id="input-menu-1" value="Membalas"></div>
-        <div class="input-group"><input type="text" id="input-menu-2" value="Teruskan"></div>
-        <div class="input-group"><input type="text" id="input-menu-3" value="Salin"></div>
-        <div class="input-group"><input type="text" id="input-menu-4" value="Beri Bintang"></div>
-        <div class="input-group"><input type="text" id="input-menu-5" value="Hapus"></div>
-        <div class="input-group color-group">
-            <label for="input-delete-color">Warna Teks Hapus</label>
-            <input type="color" id="input-delete-color" value="#ff3b30">
-        </div>
-        <div class="input-group"><input type="text" id="input-menu-6" value="Lainnya..."></div>
-
-        <h3>Lain-lain</h3>
-        <div class="input-group checkbox-group">
-            <label for="input-show-wm">Tampilkan Teks Kanan Bawah</label>
-            <input type="checkbox" id="input-show-wm">
-        </div>
-        <div class="input-group">
-            <label for="input-wm-text">Teks Kanan Bawah</label>
-            <textarea id="input-wm-text">@_nnaaa_5
-Dari komentar TikTok</textarea>
-        </div>
-    </div>
 
     <div class="iphone-frame" id="iphone-screen">
         <div class="dynamic-island"></div>
@@ -370,7 +328,6 @@ Dari komentar TikTok</textarea>
         </div>
 
         <div class="context-overlay">
-            
             <div class="context-reactions" id="display-reactions">
                 <span class="reaction">👍</span>
                 <span class="reaction">❤️</span>
@@ -389,45 +346,89 @@ Dari komentar TikTok</textarea>
             <div class="context-menu">
                 <div class="menu-item">
                     <span class="menu-text" id="display-menu-1">Membalas</span>
-                    <div class="menu-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
-                    </div>
+                    <div class="menu-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg></div>
                 </div>
                 <div class="menu-item">
                     <span class="menu-text" id="display-menu-2">Teruskan</span>
-                    <div class="menu-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 9V5l7 7-7 7v-4.1c-5 0-8.5 1.6-11 5.1 1-5 4-10 11-11z"/></svg>
-                    </div>
+                    <div class="menu-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 9V5l7 7-7 7v-4.1c-5 0-8.5 1.6-11 5.1 1-5 4-10 11-11z"/></svg></div>
                 </div>
                 <div class="menu-item">
                     <span class="menu-text" id="display-menu-3">Salin</span>
-                    <div class="menu-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3v14h2V3h12V1zm3 4H8C6.9 5 6 5.9 6 7v14C6 22.1 6.9 23 8 23h11C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5zm0 16H8V7h11v14z"/></svg>
-                    </div>
+                    <div class="menu-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3v14h2V3h12V1zm3 4H8C6.9 5 6 5.9 6 7v14C6 22.1 6.9 23 8 23h11C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5zm0 16H8V7h11v14z"/></svg></div>
                 </div>
                 <div class="menu-item">
                     <span class="menu-text" id="display-menu-4">Beri Bintang</span>
-                    <div class="menu-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/></svg>
-                    </div>
+                    <div class="menu-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/></svg></div>
                 </div>
                 <div class="menu-item menu-item-delete">
                     <span class="menu-text menu-text-delete" id="display-menu-5">Hapus</span>
-                    <div class="menu-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 19C6 20.1 6.9 21 8 21h8C17.1 21 18 20.1 18 19V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                    </div>
+                    <div class="menu-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 19C6 20.1 6.9 21 8 21h8C17.1 21 18 20.1 18 19V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></div>
                 </div>
                 <div class="menu-item menu-item-more">
                     <span class="menu-text" id="display-menu-6">Lainnya...</span>
-                    <div class="menu-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-                    </div>
+                    <div class="menu-icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
                 </div>
             </div>
 
             <div class="watermark" id="display-watermark">
                 @_nnaaa_5<br>Dari komentar TikTok
             </div>
+        </div>
+    </div>
 
+    <div class="controls">
+        <h2>Kontrol Meme</h2>
+        
+        <button id="btn-download" class="btn-download">Unduh Gambar (PNG)</button>
+        <hr style="border-color: #333; margin: 20px 0;">
+
+        <h3>Status Bar</h3>
+        <div class="input-group">
+            <label>Waktu di Atas</label>
+            <input type="text" id="input-sb-time" value="19:32">
+        </div>
+        
+        <h3>Pesan</h3>
+        <div class="input-group">
+            <label>Isi Pesan</label>
+            <textarea id="input-msg-text">Selayaknya bunga, aku tidak bisa seindah masalalunya.</textarea>
+        </div>
+        <div class="input-group">
+            <label>Waktu Pesan</label>
+            <input type="text" id="input-msg-time" value="19:31">
+        </div>
+
+        <h3>Reaksi Emoji</h3>
+        <div class="input-group">
+            <label>String Emoji (Maks 7)</label>
+            <input type="text" id="input-reactions" value="👍❤️😂😯😢🙏+">
+        </div>
+
+        <h3>Opsi Menu</h3>
+        <div class="input-group"><input type="text" id="input-menu-1" value="Membalas"></div>
+        <div class="input-group"><input type="text" id="input-menu-2" value="Teruskan"></div>
+        <div class="input-group"><input type="text" id="input-menu-3" value="Salin"></div>
+        <div class="input-group"><input type="text" id="input-menu-4" value="Beri Bintang"></div>
+        <div class="input-group"><input type="text" id="input-menu-5" value="Hapus"></div>
+        <div class="input-group color-group">
+            <label>Warna Teks Hapus</label>
+            <input type="color" id="input-delete-color" value="#ff3b30">
+        </div>
+        <div class="input-group"><input type="text" id="input-menu-6" value="Lainnya..."></div>
+
+        <h3>Lain-lain</h3>
+        <div class="input-group checkbox-group">
+            <label>Tampilkan Teks Kanan Bawah</label>
+            <input type="checkbox" id="input-show-wm">
+        </div>
+        <div class="input-group">
+            <label>Teks Kanan Bawah</label>
+            <textarea id="input-wm-text">@_nnaaa_5
+Dari komentar TikTok</textarea>
         </div>
     </div>
 
     <script>
-        // Tangkap semua input kontrol
         const controls = {
             sbTime: document.getElementById('input-sb-time'),
             msgText: document.getElementById('input-msg-text'),
@@ -444,7 +445,6 @@ Dari komentar TikTok</textarea>
             wmText: document.getElementById('input-wm-text')
         };
 
-        // Tangkap semua elemen tampilan di mockup
         const displays = {
             sbTime: document.getElementById('display-sb-time'),
             msgText: document.getElementById('display-msg-text'),
@@ -459,20 +459,16 @@ Dari komentar TikTok</textarea>
             watermark: document.getElementById('display-watermark')
         };
 
-        // Fungsi Helper untuk update teks sederhana
         function updateText(inputId, displayId, isNewlineSupported = false) {
             controls[inputId].addEventListener('input', (e) => {
-                let val = e.target.value || "Teks Kosong";
-                if (isNewlineSupported) {
-                    val = val.replace(/\n/g, "<br>"); // Mengubah newline jadi <br>
-                }
+                let val = e.target.value || " ";
+                if (isNewlineSupported) val = val.replace(/\n/g, "<br>");
                 displays[displayId].innerHTML = val;
             });
         }
 
-        // Terapkan Event Listeners untuk update real-time
         updateText('sbTime', 'sbTime');
-        updateText('msgText', 'msgText'); // textarea mendukung newline
+        updateText('msgText', 'msgText', true);
         updateText('msgTime', 'msgTime');
         updateText('menu1', 'menu1');
         updateText('menu2', 'menu2');
@@ -481,21 +477,15 @@ Dari komentar TikTok</textarea>
         updateText('menu5', 'menu5');
         updateText('menu6', 'menu6');
         
-        // Kasus Khusus: Warna Teks Hapus
         controls.menu5Color.addEventListener('input', (e) => {
             displays.menu5.style.color = e.target.value;
-            // Ubah warna ikonnya juga
             document.querySelector('.menu-item-delete .menu-icon').style.color = e.target.value;
         });
 
-        // Kasus Khusus: Reaksi Emoji (membuat elemen span baru untuk setiap emoji)
         controls.reactions.addEventListener('input', (e) => {
             const emojiString = e.target.value || "+";
-            displays.reactions.innerHTML = ""; // Bersihkan dulu
-            
-            // Ambil maksimal 7 emoji
-            const emojis = Array.from(emojiString).slice(0, 7);
-            emojis.forEach(emoji => {
+            displays.reactions.innerHTML = "";
+            Array.from(emojiString).slice(0, 7).forEach(emoji => {
                 const span = document.createElement('span');
                 span.className = 'reaction';
                 span.textContent = emoji;
@@ -503,13 +493,37 @@ Dari komentar TikTok</textarea>
             });
         });
 
-        // Kasus Khusus: Watermark (Tampilkan/Sembunyikan & Update Teks)
         controls.showWm.addEventListener('change', (e) => {
             displays.watermark.style.display = e.target.checked ? 'block' : 'none';
         });
-        updateText('wmText', 'watermark', true); // textarea mendukung newline
+        updateText('wmText', 'watermark', true);
 
-    </script>
-</body>
-  </html>
-              
+        // FITUR DOWNLOAD MENGGUNAKAN HTML2CANVAS
+        document.getElementById('btn-download').addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerText;
+            btn.innerText = "Memproses Gambar...";
+            btn.style.backgroundColor = "#555";
+            
+            const screen = document.getElementById('iphone-screen');
+            
+            // Konfigurasi agar gambar tetap tajam dan sesuai ukuran aslinya
+            html2canvas(screen, {
+                scale: 2, // Resolusi 2x lipat agar tidak pecah saat didownload
+                backgroundColor: "#000",
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                // Membuat elemen link tersembunyi untuk proses unduh
+                const link = document.createElement('a');
+                link.download = 'meme-iphone-' + Date.now() + '.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+                // Kembalikan tombol seperti semula
+                btn.innerText = originalText;
+                btn.style.backgroundColor = "#0A84FF";
+            }).catch(err => {
+                alert("Terjadi kesalahan saat menyimpan gambar.");
+                btn.innerText = originalText;
+                btn
