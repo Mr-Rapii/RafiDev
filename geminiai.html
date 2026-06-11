@@ -10,7 +10,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #121212; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
         
-        .chat-container { background-color: #1a1a1a; width: 100%; max-width: 800px; height: 85vh; border-radius: 10px; border: 1px solid #2d2d2d; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(243, 156, 18, 0.3); }
+        .chat-container { background-color: #1a1a1a; width: 100%; max-width: 800px; height: 85vh; border-radius: 10px; border: 1px solid #2d2d2d; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
         
         .chat-header { background-color: #000000; padding: 15px 20px; border-bottom: 2px solid #2d2d2d; display: flex; justify-content: space-between; align-items: center; border-radius: 10px 10px 0 0; }
         .chat-header h2 { font-size: 18px; color: #f39c12; display: flex; align-items: center; gap: 10px; }
@@ -42,14 +42,36 @@
 
         .btn-clear { background-color: #555; color: #fff; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 14px; transition: background 0.3s; }
         .btn-clear:hover { background-color: #666; }
+
+        .api-key-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000; }
+        .api-key-modal.active { display: flex; }
+        .api-key-content { background-color: #1a1a1a; padding: 30px; border-radius: 10px; border: 1px solid #2d2d2d; max-width: 400px; text-align: center; }
+        .api-key-content h3 { color: #f39c12; margin-bottom: 15px; }
+        .api-key-content p { color: #aaa; margin-bottom: 15px; font-size: 14px; }
+        .api-key-content a { color: #f39c12; text-decoration: none; }
+        .api-key-content a:hover { text-decoration: underline; }
+        .api-key-content input { width: 100%; padding: 10px; margin-bottom: 15px; background-color: #000; border: 1px solid #444; border-radius: 5px; color: #fff; }
+        .api-key-content button { background-color: #f39c12; color: black; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .api-key-content button:hover { background-color: #e67e22; }
     </style>
 </head>
 <body>
+
+    <!-- Modal untuk input API Key -->
+    <div class="api-key-modal" id="apiKeyModal">
+        <div class="api-key-content">
+            <h3>⚙️ Setup API Key Gemini</h3>
+            <p>Masukkan API Key Anda dari <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a></p>
+            <input type="password" id="apiKeyInput" placeholder="Masukkan API Key Anda di sini..." onkeypress="handleApiKeyEnter(event)">
+            <button onclick="saveApiKey()">Simpan API Key</button>
+        </div>
+    </div>
 
     <div class="chat-container">
         <div class="chat-header">
             <h2><i class="fas fa-robot"></i> Piwstore AI (Bot Raffi)</h2>
             <div class="header-actions">
+                <button class="btn-clear" onclick="resetApiKey()" title="Reset API Key"><i class="fas fa-cog"></i></button>
                 <button class="btn-clear" onclick="clearChat()" title="Bersihkan chat"><i class="fas fa-trash"></i></button>
                 <a href="index.html" class="btn-back"><i class="fas fa-arrow-left"></i> Kembali</a>
             </div>
@@ -71,27 +93,24 @@
     </div>
 
     <script>
-        // API Key dari Gemini
-        const API_KEY = "AQ.Ab8RN6KpS0VZAombxNWQcdLGO26R-TDU0JbP9hmOml1EgB8TuQ"; 
-
         const chatBox = document.getElementById('chatBox');
         const userInput = document.getElementById('userInput');
         const btnSend = document.getElementById('btnSend');
-        const loadingText = document.getElementById('loadingText');
+        const apiKeyModal = document.getElementById('apiKeyModal');
+        const apiKeyInput = document.getElementById('apiKeyInput');
         const typingIndicator = document.getElementById('typingIndicator');
 
-        // Menyimpan riwayat percakapan untuk konteks
+        let apiKey = localStorage.getItem('gemini_api_key') || '';
         let conversationHistory = [];
 
-        // Sistem prompt untuk membuat AI merespons dengan benar dalam bahasa Indonesia
         const systemPrompt = `Anda adalah Bot Asisten AI Piwstore yang ramah, profesional, dan selalu siap membantu pelanggan.
 
 PETUNJUK PENTING:
 1. SELALU gunakan bahasa Indonesia yang baik dan formal untuk semua respons
-2. Berikan respons yang singkat, jelas, dan mudah dipahami (maksimal 3-4 kalimat per respons)
+2. Berikan respons yang jelas, detail, dan mudah dipahami
 3. Jika pertanyaan di luar bidang Piwstore, tetap membantu dengan ramah dan profesional
-4. Gunakan emoji sesekali untuk membuat percakapan lebih menarik dan hangat
-5. Jika tidak tahu jawaban, katakan dengan jujur: "Saya kurang tahu tentang hal tersebut, tapi akan saya bantu sebaik mungkin"
+4. Gunakan emoji sesekali untuk membuat percakapan lebih menarik
+5. Jika tidak tahu jawaban, katakan dengan jujur dan tawarkan bantuan lain
 6. Selalu berakhir dengan penawaran untuk membantu lebih lanjut
 
 Tentang Piwstore:
@@ -100,7 +119,48 @@ Tentang Piwstore:
 - Produk kami dijamin original, bergaransi, dan bermutu
 - Kami siap membantu 24/7 untuk setiap kebutuhan Anda`;
 
-        // Deteksi tombol Enter
+        // Inisialisasi - cek API Key
+        function initializeApp() {
+            if (!apiKey) {
+                apiKeyModal.classList.add('active');
+            } else {
+                apiKeyModal.classList.remove('active');
+            }
+        }
+
+        // Handle tombol Enter di input API Key
+        function handleApiKeyEnter(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                saveApiKey();
+            }
+        }
+
+        // Simpan API Key
+        function saveApiKey() {
+            const keyValue = apiKeyInput.value.trim();
+            if (!keyValue) {
+                alert('Silakan masukkan API Key Anda!');
+                return;
+            }
+            apiKey = keyValue;
+            localStorage.setItem('gemini_api_key', keyValue);
+            apiKeyInput.value = '';
+            apiKeyModal.classList.remove('active');
+            userInput.focus();
+        }
+
+        // Reset API Key
+        function resetApiKey() {
+            if (confirm('Apakah Anda yakin ingin mereset API Key?')) {
+                localStorage.removeItem('gemini_api_key');
+                apiKey = '';
+                apiKeyModal.classList.add('active');
+                apiKeyInput.focus();
+            }
+        }
+
+        // Handle tombol Enter di chat
         function handleEnter(event) {
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
@@ -108,22 +168,18 @@ Tentang Piwstore:
             }
         }
 
-        // Menampilkan pesan ke layar obrolan
+        // Tampilkan pesan
         function appendMessage(text, sender) {
             const msgDiv = document.createElement('div');
             msgDiv.classList.add('message', sender);
             
-            // Format teks tebal dari markdown AI
+            // Format teks dari markdown
             let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-            // Format italic
             formattedText = formattedText.replace(/\*(.*?)\*/g, '<i>$1</i>');
-            // Format enter/baris baru dari AI
             formattedText = formattedText.replace(/\n/g, '<br>');
             
             msgDiv.innerHTML = formattedText;
             chatBox.appendChild(msgDiv);
-            
-            // Otomatis scroll ke bawah setiap ada pesan baru
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
@@ -135,107 +191,123 @@ Tentang Piwstore:
             }
         }
 
-        // Mengirim data ke server Google dengan riwayat percakapan
+        // Kirim pesan ke API Gemini
         async function sendMessage() {
+            if (!apiKey) {
+                alert('Silakan setup API Key terlebih dahulu!');
+                apiKeyModal.classList.add('active');
+                return;
+            }
+
             const text = userInput.value.trim();
             if (!text) return;
 
-            // Tampilkan pesan pengguna
             appendMessage(text, 'user');
             userInput.value = '';
             
-            // Kunci tombol input saat loading
             btnSend.disabled = true;
             userInput.disabled = true;
             typingIndicator.style.display = 'flex';
 
             try {
-                // Tambahkan pesan pengguna ke riwayat
+                // Tambahkan ke history
                 conversationHistory.push({
                     role: "user",
                     parts: [{ text: text }]
                 });
 
-                // Siapkan konten dengan sistem prompt dan riwayat percakapan
-                const contents = [
-                    {
-                        role: "user",
-                        parts: [{ text: systemPrompt }]
+                // Siapkan request dengan format yang benar
+                const requestBody = {
+                    system: [{
+                        text: systemPrompt
+                    }],
+                    contents: conversationHistory.map(msg => ({
+                        role: msg.role,
+                        parts: msg.parts
+                    })),
+                    generationConfig: {
+                        temperature: 0.9,
+                        maxOutputTokens: 1024,
+                        topP: 0.95,
+                        topK: 40
                     },
-                    {
-                        role: "model",
-                        parts: [{ text: "Saya memahami. Saya akan selalu merespons dalam bahasa Indonesia yang baik dan profesional sebagai Bot Asisten Piwstore yang ramah dan siap membantu." }]
-                    },
-                    ...conversationHistory
-                ];
+                    safetySettings: [
+                        {
+                            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                            threshold: "BLOCK_NONE"
+                        },
+                        {
+                            category: "HARM_CATEGORY_HATE_SPEECH",
+                            threshold: "BLOCK_NONE"
+                        },
+                        {
+                            category: "HARM_CATEGORY_HARASSMENT",
+                            threshold: "BLOCK_NONE"
+                        },
+                        {
+                            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                            threshold: "BLOCK_NONE"
+                        }
+                    ]
+                };
 
-                // URL Endpoint Gemini 2.0 Flash (lebih cepat dan akurat)
-                const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+                // URL API yang benar untuk Gemini
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
                 
-                // Fetch request dengan format yang benar
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 
-                        'Content-Type': 'application/json',
-                        'X-goog-api-key': API_KEY 
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        contents: contents,
-                        generationConfig: {
-                            temperature: 0.7,
-                            maxOutputTokens: 500,
-                            topP: 0.9,
-                        },
-                        safetySettings: [
-                            {
-                                category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                                threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                            }
-                        ]
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
                 const data = await response.json();
 
-                // Membaca respons dan menampilkannya
-                if (data.candidates && data.candidates.length > 0) {
+                // Handle respons
+                if (response.ok && data.candidates && data.candidates.length > 0) {
                     const aiReply = data.candidates[0].content.parts[0].text;
                     appendMessage(aiReply, 'bot');
                     
-                    // Tambahkan respons AI ke riwayat
+                    // Tambah ke history
                     conversationHistory.push({
                         role: "model",
                         parts: [{ text: aiReply }]
                     });
 
-                    // Batasi riwayat ke 20 pesan terakhir untuk efisiensi
-                    if (conversationHistory.length > 20) {
-                        conversationHistory = conversationHistory.slice(-20);
+                    // Batasi history
+                    if (conversationHistory.length > 30) {
+                        conversationHistory = conversationHistory.slice(-30);
                     }
 
                 } else if (data.error) {
                     console.error("API Error:", data.error);
                     let errorMsg = "Maaf, terjadi kesalahan pada server. Silakan coba lagi.";
-                    if (data.error.message && data.error.message.includes('API key')) {
-                        errorMsg = "Konfigurasi API tidak valid. Silakan hubungi administrator.";
+                    
+                    if (data.error.message.includes('API key')) {
+                        errorMsg = "❌ API Key tidak valid. Silakan cek dan reset API Key Anda.";
+                    } else if (data.error.message.includes('quota')) {
+                        errorMsg = "⚠️ Quota API telah habis. Silakan coba lagi nanti.";
                     }
+                    
                     appendMessage(errorMsg, 'bot');
                 } else {
-                    appendMessage("Maaf, terjadi kesalahan atau format respons tidak dikenali.", 'bot');
-                    console.log("Response:", data);
+                    appendMessage("Maaf, terjadi kesalahan saat memproses respons.", 'bot');
                 }
 
             } catch (error) {
-                console.error("Fetch Error:", error);
-                appendMessage("Koneksi terputus atau server gagal merespons. Silakan periksa koneksi internet Anda dan coba lagi.", 'bot');
+                console.error("Error:", error);
+                appendMessage("❌ Koneksi terputus atau server gagal merespons. Periksa koneksi internet Anda.", 'bot');
             } finally {
-                // Buka kembali kunci tombol input
                 btnSend.disabled = false;
                 userInput.disabled = false;
                 typingIndicator.style.display = 'none';
                 userInput.focus();
             }
         }
+
+        // Jalankan inisialisasi saat halaman dimuat
+        window.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
 </html>
