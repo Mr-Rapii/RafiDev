@@ -3,111 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Downloader - Piwstore</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        /* CSS DASAR & TEMA */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #121212; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
-        
-        .container { background-color: #1a1a1a; padding: 30px; border-radius: 10px; border: 1px solid #2d2d2d; width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; }
-        .container h2 { color: #f39c12; margin-bottom: 10px; }
-        .container p { color: #aaa; font-size: 14px; margin-bottom: 25px; }
-
-        /* Form Input */
-        .input-group { display: flex; gap: 10px; margin-bottom: 20px; flex-direction: column; }
-        .input-group input { width: 100%; padding: 15px; background-color: #2d2d2d; border: 1px solid #444; border-radius: 5px; color: #fff; font-size: 16px; outline: none; }
-        .input-group input:focus { border-color: #f39c12; }
-        
-        .btn-process { background-color: #f39c12; color: black; border: none; padding: 15px; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; transition: background 0.3s; }
-        .btn-process:hover { background-color: #e67e22; color: white; }
-        .btn-process:disabled { background-color: #555; cursor: not-allowed; color: #888; }
-
-        /* Area Hasil */
-        #resultArea { display: none; margin-top: 30px; padding-top: 20px; border-top: 1px solid #2d2d2d; }
-        .video-info { margin-bottom: 20px; }
-        .video-info img { max-width: 150px; border-radius: 8px; margin-bottom: 10px; }
-        .video-info h4 { font-size: 14px; color: #ddd; margin-bottom: 15px; word-wrap: break-word; }
-        
-        .btn-download { display: inline-block; background-color: #4CAF50; color: white; padding: 12px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-bottom: 10px; }
-        .btn-download:hover { background-color: #45a049; }
-
-        .btn-back { display: inline-block; margin-top: 20px; color: #f39c12; text-decoration: none; font-size: 14px; }
-        .btn-back:hover { text-decoration: underline; }
-    </style>
+    <title>RafiDev Dashboard</title>
+    <meta http-equiv="refresh" content="0; url=tampilan.html">
 </head>
 <body>
-
-    <div class="container">
-        <h2><i class="fab fa-tiktok"></i> TikTok Downloader</h2>
-        <p>Unduh video TikTok tanpa watermark secara gratis.</p>
-
-        <div class="input-group">
-            <input type="text" id="tiktokUrl" placeholder="Tempel link video TikTok di sini...">
-            <button class="btn-process" id="btnProcess" onclick="fetchTikTokData()">Proses Video</button>
-        </div>
-
-        <p id="loadingText" style="display: none; color: #f39c12;">Memproses data dari server, harap tunggu...</p>
-
-        <div id="resultArea">
-            <div class="video-info">
-                <img id="videoCover" src="" alt="Thumbnail Video">
-                <h4 id="videoTitle">Judul Video</h4>
-            </div>
-            <a href="#" id="downloadLink" class="btn-download" target="_blank"><i class="fas fa-download"></i> Download Video (No Watermark)</a>
-        </div>
-        
-        <a href="index.html" class="btn-back"><i class="fas fa-arrow-left"></i> Kembali ke Beranda</a>
-    </div>
-
-    <script>
-        // FUNGSI JAVASCRIPT UNTUK MEMANGGIL API
-        async function fetchTikTokData() {
-            const urlInput = document.getElementById('tiktokUrl').value;
-            const btnProcess = document.getElementById('btnProcess');
-            const loadingText = document.getElementById('loadingText');
-            const resultArea = document.getElementById('resultArea');
-
-            // Validasi jika input kosong
-            if (!urlInput) {
-                alert("Silakan masukkan link TikTok terlebih dahulu!");
-                return;
-            }
-
-            // Ubah tampilan saat memproses
-            btnProcess.disabled = true;
-            btnProcess.innerText = "Memproses...";
-            loadingText.style.display = "block";
-            resultArea.style.display = "none";
-
-            try {
-                // Mengambil data dari API publik TikWM
-                const apiUrl = `https://www.tikwm.com/api/?url=${encodeURIComponent(urlInput)}`;
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-
-                // Cek apakah API berhasil menemukan video
-                if (data.code === 0) {
-                    // Masukkan data dari API ke dalam HTML
-                    document.getElementById('videoCover').src = data.data.cover;
-                    document.getElementById('videoTitle').innerText = data.data.title;
-                    document.getElementById('downloadLink').href = data.data.play; // Link video tanpa watermark
-
-                    // Tampilkan area hasil
-                    resultArea.style.display = "block";
-                } else {
-                    alert("Gagal memproses video. Pastikan link benar atau coba lagi nanti.");
-                }
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Terjadi kesalahan jaringan atau API sedang gangguan.");
-            } finally {
-                // Kembalikan tombol seperti semula
-                btnProcess.disabled = false;
-                btnProcess.innerText = "Proses Video";
-                loadingText.style.display = "none";
-            }
-        }
-    </script>
+    <!-- Redirect ke tampilan.html -->
+    <p>Mengarahkan ke halaman dashboard... <a href="tampilan.html">Klik di sini jika tidak diarahkan otomatis</a></p>
 </body>
 </html>
