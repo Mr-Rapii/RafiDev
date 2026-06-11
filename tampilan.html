@@ -249,6 +249,27 @@
             font-size: 0.85em;
             line-height: 1.4;
         }
+
+        .badge-new {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: 600;
+            margin-left: 5px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
     </style>
 </head>
 <body>
@@ -292,6 +313,10 @@
                     <h4>📺 YouTube Generator</h4>
                     <p>Cari dan jelajahi video YouTube mudah</p>
                 </div>
+                <div class="feature-card">
+                    <h4>📷 Instagram Downloader <span class="badge-new">NEW</span></h4>
+                    <p>Download foto & video Instagram berkualitas</p>
+                </div>
             </div>
 
             <div class="buttons-grid">
@@ -302,6 +327,10 @@
                 <a href="youtube.html" class="btn btn-success">
                     <i class="fab fa-youtube"></i>
                     <span>YouTube Generator</span>
+                </a>
+                <a href="instagram.html" class="btn btn-secondary">
+                    <i class="fab fa-instagram"></i>
+                    <span>Instagram Downloader</span>
                 </a>
             </div>
 
@@ -337,20 +366,12 @@
             </h2>
             <div class="feature-grid">
                 <div class="feature-card">
-                    <h4>📷 Instagram Downloader</h4>
-                    <p>Download foto & video Instagram dengan mudah</p>
-                </div>
-                <div class="feature-card">
                     <h4>🎵 Music Converter</h4>
                     <p>Konversi musik ke berbagai format audio</p>
                 </div>
             </div>
 
             <div class="buttons-grid">
-                <a href="instagram.html" class="btn btn-secondary">
-                    <i class="fas fa-camera"></i>
-                    <span>Instagram Downloader</span>
-                </a>
                 <button class="btn btn-dark" disabled>
                     <i class="fas fa-music"></i>
                     <span>Music Converter</span>
