@@ -1,1 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - RafiDev</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 20px;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .btn-dark {
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        .output-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .output-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        #output {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 80px;
+            color: #333;
+            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+            border: 1px solid #e0e0e0;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @media (max-width: 600px) {
+            .buttons-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #667eea;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 RafiDev Dashboard</h1>
+            <p>Selamat datang di panel kontrol interaktif</p>
+        </div>
+
+        <div class="content">
+            <div class="buttons-grid">
+                <button class="btn btn-primary" onclick="handleButtonClick('Tombol 1', 'Anda mengklik tombol pertama!')">Tombol 1</button>
+                <button class="btn btn-success" onclick="handleButtonClick('Tombol 2', 'Fitur kedua telah diaktifkan!')">Tombol 2</button>
+                <button class="btn btn-warning" onclick="handleButtonClick('Tombol 3', 'Tombol ketiga memberikan peringatan!')">Tombol 3</button>
+                <button class="btn btn-info" onclick="handleButtonClick('Tombol 4', 'Informasi telah ditampilkan!')">Tombol 4</button>
+                <button class="btn btn-secondary" onclick="handleButtonClick('Tombol 5', 'Mode sekunder telah diaktifkan!')">Tombol 5</button>
+                <button class="btn btn-dark" onclick="handleButtonClick('Tombol 6', 'Mode gelap diaktifkan!')">Tombol 6</button>
+            </div>
+
+            <div class="output-section">
+                <h3>📊 Output Hasil</h3>
+                <div id="output">Klik salah satu tombol untuk melihat hasilnya di sini...</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2026 RafiDev. Semua hak dilindungi. | Versi 1.0</p>
+        </div>
+    </div>
+
+    <script>
+        function handleButtonClick(buttonName, message) {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleString('id-ID');
+            
+            output.textContent = `[${timestamp}]\n${buttonName}: ${message}\n\n✅ Status: Berhasil Dieksekusi`;
+            
+            showNotification(buttonName + ' diklik!');
+            
+            console.log(`Button clicked: ${buttonName}`);
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = '✓ ' + message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
