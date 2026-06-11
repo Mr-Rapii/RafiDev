@@ -3,54 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar - Piwstore</title>
+    <title>Beranda - Piwstore</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #ffffff; }
-        .register-container { background-color: #2d2d2d; padding: 40px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); width: 100%; max-width: 400px; margin: 20px; }
-        .register-container h2 { text-align: center; margin-bottom: 30px; color: #4CAF50; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 8px; font-size: 14px; }
-        .input-group input { width: 100%; padding: 10px; border: 1px solid #444; border-radius: 5px; background-color: #1a1a1a; color: #fff; font-size: 15px; }
-        .input-group input:focus { outline: none; border-color: #4CAF50; }
-        .btn-register { width: 100%; padding: 12px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background-color 0.3s; margin-top: 10px; }
-        .btn-register:hover { background-color: #45a049; }
-        .footer-text { text-align: center; margin-top: 20px; font-size: 14px; }
-        .footer-text a { color: #4CAF50; text-decoration: none; }
-        .footer-text a:hover { text-decoration: underline; }
+        body { background-color: #1a1a1a; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Navigasi / Header */
+        .navbar { background-color: #2d2d2d; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .navbar h1 { color: #4CAF50; font-size: 24px; }
+        .nav-right { display: flex; align-items: center; gap: 20px; }
+        .user-email { font-size: 14px; color: #ccc; }
+        
+        /* Tombol Logout */
+        .btn-logout { background-color: #f44336; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
+        .btn-logout:hover { background-color: #d32f2f; }
+
+        /* Konten Utama */
+        .container { padding: 40px 30px; flex-grow: 1; text-align: center; }
+        .container h2 { margin-bottom: 10px; font-size: 28px; }
+        .container p { color: #aaa; margin-bottom: 40px; }
+
+        /* Grid Produk Sederhana */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
+        .product-card { background-color: #2d2d2d; padding: 20px; border-radius: 10px; text-align: left; }
+        .product-img { width: 100%; height: 150px; background-color: #444; border-radius: 5px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; color: #777; }
+        .product-card h3 { font-size: 18px; margin-bottom: 10px; }
+        .product-card .price { color: #4CAF50; font-weight: bold; font-size: 16px; margin-bottom: 15px; }
+        .btn-buy { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-buy:hover { background-color: #45a049; }
     </style>
 </head>
 <body>
 
-    <div class="register-container">
-        <h2>Daftar Akun Baru</h2>
-        <form id="registerForm">
-            <div class="input-group">
-                <label for="name">Nama Lengkap</label>
-                <input type="text" id="name" required>
+    <div class="navbar">
+        <h1>Piwstore</h1>
+        <div class="nav-right">
+            <span class="user-email" id="userEmail">Memuat...</span>
+            <button id="btnLogout" class="btn-logout">Keluar</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Selamat Datang di Piwstore</h2>
+        <p>Anda telah berhasil masuk ke dalam sistem.</p>
+
+        <div class="product-grid">
+            <div class="product-card">
+                <div class="product-img">Gambar Produk</div>
+                <h3>Produk Contoh 1</h3>
+                <div class="price">Rp 150.000</div>
+                <button class="btn-buy" onclick="alert('Ini hanya contoh!')">Beli Sekarang</button>
             </div>
-            <div class="input-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" required>
+            <div class="product-card">
+                <div class="product-img">Gambar Produk</div>
+                <h3>Produk Contoh 2</h3>
+                <div class="price">Rp 250.000</div>
+                <button class="btn-buy" onclick="alert('Ini hanya contoh!')">Beli Sekarang</button>
             </div>
-            <div class="input-group">
-                <label for="password">Kata Sandi (Min. 6 Karakter)</label>
-                <input type="password" id="password" required minlength="6">
+            <div class="product-card">
+                <div class="product-img">Gambar Produk</div>
+                <h3>Produk Contoh 3</h3>
+                <div class="price">Rp 99.000</div>
+                <button class="btn-buy" onclick="alert('Ini hanya contoh!')">Beli Sekarang</button>
             </div>
-            <div class="input-group">
-                <label for="confirm_password">Konfirmasi Kata Sandi</label>
-                <input type="password" id="confirm_password" required minlength="6">
-            </div>
-            <button type="submit" class="btn-register" id="btnSubmit">Daftar Sekarang</button>
-        </form>
-        <div class="footer-text">
-            Sudah punya akun? <a href="login.html">Masuk di sini</a>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        // Import fungsi onAuthStateChanged (cek status) dan signOut (keluar)
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
         // Konfigurasi asli Anda
         const firebaseConfig = {
@@ -66,34 +88,28 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        const registerForm = document.getElementById('registerForm');
-        registerForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm_password').value;
-            const btnSubmit = document.getElementById('btnSubmit');
-
-            if (password !== confirmPassword) {
-                alert("Kata sandi dan konfirmasi tidak cocok!");
-                return;
+        // 1. SISTEM PROTEKSI HALAMAN
+        // Fungsi ini berjalan otomatis saat halaman dibuka
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Jika user sudah login, tampilkan emailnya di pojok kanan atas
+                document.getElementById('userEmail').innerText = user.email;
+            } else {
+                // Jika tidak ada user yang login, tendang kembali ke halaman login
+                window.location.href = "login.html";
             }
+        });
 
-            btnSubmit.innerHTML = "Memproses...";
-            btnSubmit.disabled = true;
-
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    alert("Pendaftaran berhasil! Silakan masuk.");
-                    window.location.href = "login.html"; 
-                })
-                .catch((error) => {
-                    alert("Error: Pendaftaran gagal (Mungkin email sudah terdaftar atau jaringan bermasalah).");
-                    console.error(error);
-                    btnSubmit.innerHTML = "Daftar Sekarang";
-                    btnSubmit.disabled = false;
-                });
+        // 2. FUNGSI TOMBOL KELUAR (LOGOUT)
+        const btnLogout = document.getElementById('btnLogout');
+        btnLogout.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                // Setelah berhasil keluar, arahkan ke halaman login
+                window.location.href = "login.html";
+            }).catch((error) => {
+                alert("Terjadi kesalahan saat proses keluar.");
+                console.error(error);
+            });
         });
     </script>
 </body>
