@@ -4,74 +4,137 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beranda - Piwstore</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* --- CSS DASAR & TEMA --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #1a1a1a; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
+        body { background-color: #121212; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; }
+        a { text-decoration: none; color: inherit; }
+
+        /* --- SISTEM PROTEKSI: Sembunyikan Konten Secara Bawaan --- */
+        #mainContent { display: none; }
+
+        /* --- HEADER --- */
+        .header { background-color: #000000; border-bottom: 2px solid #2d2d2d; }
         
-        /* Navigasi / Header */
-        .navbar { background-color: #2d2d2d; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .navbar h1 { color: #4CAF50; font-size: 24px; }
-        .nav-right { display: flex; align-items: center; gap: 20px; }
+        /* NavAtas: Logo, Search, User */
+        .nav-top { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+        .logo { font-size: 24px; font-weight: bold; color: #ffffff; }
+        .logo span { color: #f39c12; } /* Aksen oranye pada logo */
+
+        .search-bar { flex-grow: 1; max-width: 500px; position: relative; }
+        .search-bar input { width: 100%; padding: 10px 15px; background-color: #2d2d2d; border: 1px solid #444; border-radius: 5px; color: #fff; }
+        .search-bar .fa-search { position: absolute; right: 15px; top: 13px; color: #777; }
+
+        .user-section { display: flex; align-items: center; gap: 15px; }
         .user-email { font-size: 14px; color: #ccc; }
+        .btn-logout { background-color: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; }
+
+        /* NavBawah: Link Navigasi */
+        .nav-bottom { background-color: #1a1a1a; padding: 10px 30px; border-top: 1px solid #2d2d2d; }
+        .nav-links { display: flex; gap: 25px; list-style: none; }
+        .nav-links a { font-size: 14px; transition: color 0.3s; }
+        .nav-links a:hover { color: #f39c12; }
+
+        /* --- KONTEN UTAMA --- */
+        .main { padding: 30px; flex-grow: 1; }
+
+        /* Judul Kategori */
+        .category-header { font-size: 18px; color: #aaa; margin-bottom: 20px; border-bottom: 1px solid #2d2d2d; padding-bottom: 10px; }
+
+        /* Grid Produk */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+
+        /* Kartu Produk (Desain dari screenshot) */
+        .product-card { background-color: #1a1a1a; border-radius: 8px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #2d2d2d; position: relative; }
+        .product-card:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(243, 156, 18, 0.2); border-color: #f39c12; }
+
+        .product-img { width: 100%; height: 120px; background-color: #333; /* Placeholder Gambar */ display: flex; justify-content: center; align-items: center; color: #777; font-size: 14px; }
+        .product-info { padding: 15px; }
+        .product-card h3 { font-size: 16px; margin-bottom: 5px; color: #ffffff; }
+        .product-card .price { color: #f39c12; /* Warna Oranye */ font-weight: bold; font-size: 14px; }
         
-        /* Tombol Logout */
-        .btn-logout { background-color: #f44336; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
-        .btn-logout:hover { background-color: #d32f2f; }
-
-        /* Konten Utama */
-        .container { padding: 40px 30px; flex-grow: 1; text-align: center; }
-        .container h2 { margin-bottom: 10px; font-size: 28px; }
-        .container p { color: #aaa; margin-bottom: 40px; }
-
-        /* Grid Produk Sederhana */
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
-        .product-card { background-color: #2d2d2d; padding: 20px; border-radius: 10px; text-align: left; }
-        .product-img { width: 100%; height: 150px; background-color: #444; border-radius: 5px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; color: #777; }
-        .product-card h3 { font-size: 18px; margin-bottom: 10px; }
-        .product-card .price { color: #4CAF50; font-weight: bold; font-size: 16px; margin-bottom: 15px; }
-        .btn-buy { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-buy:hover { background-color: #45a049; }
+        /* Ikon panah di dalam kartu */
+        .product-card .fa-chevron-right { position: absolute; right: 15px; top: 15px; color: #555; }
+        .product-card:hover .fa-chevron-right { color: #f39c12; }
     </style>
 </head>
 <body>
 
-    <div class="navbar">
-        <h1>Piwstore</h1>
-        <div class="nav-right">
-            <span class="user-email" id="userEmail">Memuat...</span>
-            <button id="btnLogout" class="btn-logout">Keluar</button>
-        </div>
-    </div>
+    <div id="mainContent">
+        <header class="header">
+            <div class="nav-top">
+                <div class="logo"><span>Piw</span>Store</div>
+                <div class="search-bar">
+                    <input type="text" placeholder="Cari layanan...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="user-section">
+                    <i class="fas fa-user-circle fa-lg" style="color: #555;"></i>
+                    <span class="user-email" id="userEmail">Memuat...</span>
+                    <button id="btnLogout" class="btn-logout">Keluar</button>
+                </div>
+            </div>
+            
+            <div class="nav-bottom">
+                <ul class="nav-links">
+                    <li><a href="#"><i class="fas fa-home"></i> BERANDA</a></li>
+                    <li><a href="#"><i class="fas fa-list"></i> ORDER</a></li>
+                    <li><a href="#"><i class="fas fa-comment-dots"></i> LAINNYA</a></li>
+                </ul>
+            </div>
+        </header>
 
-    <div class="container">
-        <h2>Selamat Datang di Piwstore</h2>
-        <p>Anda telah berhasil masuk ke dalam sistem.</p>
+        <main class="main">
+            <div class="category-header">KATEGORI PRODUK</div>
 
-        <div class="product-grid">
-            <div class="product-card">
-                <div class="product-img">Gambar Produk</div>
-                <h3>Produk Contoh 1</h3>
-                <div class="price">Rp 150.000</div>
-                <button class="btn-buy" onclick="alert('Ini hanya contoh!')">Beli Sekarang</button>
+            <div class="product-grid">
+                <a href="#" class="product-card">
+                    <div class="product-img">Gambar</div>
+                    <div class="product-info">
+                        <h3>Diamond MLBB</h3>
+                        <div class="price">Mulai Rp 1.579</div>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="#" class="product-card">
+                    <div class="product-img">Gambar</div>
+                    <div class="product-info">
+                        <h3>Voucher Garena</h3>
+                        <div class="price">Mulai Rp 10.000</div>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="#" class="product-card">
+                    <div class="product-img">Gambar</div>
+                    <div class="product-info">
+                        <h3>Diamond Free Fire</h3>
+                        <div class="price">Mulai Rp 2.500</div>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="#" class="product-card">
+                    <div class="product-img">Gambar</div>
+                    <div class="product-info">
+                        <h3>Pulsa All Operator</h3>
+                        <div class="price">Mulai Rp 5.000</div>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="#" class="product-card">
+                    <div class="product-img">Gambar</div>
+                    <div class="product-info">
+                        <h3>Paket Data</h3>
+                        <div class="price">Mulai Rp 15.000</div>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
             </div>
-            <div class="product-card">
-                <div class="product-img">Gambar Produk</div>
-                <h3>Produk Contoh 2</h3>
-                <div class="price">Rp 250.000</div>
-                <button class="btn-buy" onclick="alert('Ini hanya contoh!')">Beli Sekarang</button>
-            </div>
-            <div class="product-card">
-                <div class="product-img">Gambar Produk</div>
-                <h3>Produk Contoh 3</h3>
-                <div class="price">Rp 99.000</div>
-                <button class="btn-buy" onclick="alert('Ini hanya contoh!')">Beli Sekarang</button>
-            </div>
-        </div>
+        </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        // Import fungsi onAuthStateChanged (cek status) dan signOut (keluar)
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
         // Konfigurasi asli Anda
@@ -88,27 +151,27 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // 1. SISTEM PROTEKSI HALAMAN
-        // Fungsi ini berjalan otomatis saat halaman dibuka
+        const mainContent = document.getElementById('mainContent');
+        const userEmailDisplay = document.getElementById('userEmail');
+
+        // --- SISTEM PROTEKSI & PENAMPILAN HALAMAN ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Jika user sudah login, tampilkan emailnya di pojok kanan atas
-                document.getElementById('userEmail').innerText = user.email;
+                // JIKA USER SUDAH LOGIN
+                userEmailDisplay.innerText = user.email; // Tampilkan email
+                mainContent.style.display = 'block'; // Tampilkan konten halaman
             } else {
-                // Jika tidak ada user yang login, tendang kembali ke halaman login
+                // JIKA USER BELUM LOGIN, TENDANG KEMBALI KE LOGIN
                 window.location.href = "login.html";
             }
         });
 
-        // 2. FUNGSI TOMBOL KELUAR (LOGOUT)
+        // --- FUNGSI TOMBOL KELUAR (LOGOUT) ---
         const btnLogout = document.getElementById('btnLogout');
         btnLogout.addEventListener('click', () => {
             signOut(auth).then(() => {
                 // Setelah berhasil keluar, arahkan ke halaman login
                 window.location.href = "login.html";
-            }).catch((error) => {
-                alert("Terjadi kesalahan saat proses keluar.");
-                console.error(error);
             });
         });
     </script>
