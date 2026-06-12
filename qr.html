@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asisten Rapi | 🔳 QR Generator</title>
+    <style>
+        :root { 
+            --bg: #0f172a; --glass: rgba(30, 41, 59, 0.7); 
+            --accent: #3b82f6; --success: #10b981; --text: #f8fafc; 
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: radial-gradient(circle at top, #1e293b, #0f172a); color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* Header */
+        header { 
+            padding: 20px; display: flex; align-items: center; justify-content: space-between;
+            background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .back-btn { 
+            color: var(--accent); text-decoration: none; font-size: 0.9rem; 
+            padding: 8px 15px; border-radius: 20px; border: 1px solid var(--accent); transition: 0.3s;
+        }
+        .back-btn:hover { background: var(--accent); color: white; }
+        
+        /* Nav Bar Scroll */
+        .nav-wrapper { padding: 0 15px; }
+        .nav-bar { 
+            display: flex; background: rgba(0,0,0,0.2); padding: 5px; margin-top: 15px; 
+            border-radius: 12px; gap: 5px; overflow-x: auto; white-space: nowrap;
+            scrollbar-width: none; -ms-overflow-style: none;
+        }
+        .nav-bar::-webkit-scrollbar { display: none; }
+        
+        .nav-link { 
+            flex: 0 0 auto; text-align: center; padding: 10px 15px; color: #94a3b8; 
+            text-decoration: none; font-size: 0.85rem; border-radius: 8px; transition: 0.3s; 
+        }
+        .nav-link.active { background: var(--accent); color: white; font-weight: bold; }
+        
+        /* Main Content */
+        .main-content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        .tool-container { 
+            width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; 
+            background: var(--glass); padding: 25px; border-radius: 20px; 
+            border: 1px solid rgba(255,255,255,0.05); animation: slideDown 0.5s ease-out;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        input[type="text"] { 
+            width: 100%; background: rgba(15, 23, 42, 0.6); color: white; 
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; 
+            font-size: 0.95rem; outline: none; transition: 0.3s;
+        }
+        input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+        
+        button.btn-generate { 
+            background: var(--accent); color: white; border: none; border-radius: 12px; 
+            padding: 15px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.3s;
+        }
+        button.btn-generate:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4); }
+        button:disabled { background: #475569; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Loading & Result Area */
+        .status { color: var(--accent); margin: 15px 0; font-style: italic; display: none; animation: pulse 1.5s infinite; text-align: center; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        
+        .result-area { 
+            width: 100%; max-width: 350px; background: rgba(30, 41, 59, 0.6); 
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 20px; padding: 25px; display: none; flex-direction: column; 
+            gap: 20px; align-items: center; margin-top: 20px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .qr-wrapper {
+            background: white; padding: 15px; border-radius: 15px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; display: flex; justify-content: center;
+        }
+        .result-area img { width: 100%; max-width: 250px; display: block; }
+        
+        a.download-btn { 
+            background: var(--success); color: white; width: 100%; padding: 15px; 
+            text-align: center; text-decoration: none; border-radius: 12px; 
+            font-weight: bold; transition: 0.3s;
+        }
+        a.download-btn:hover { background: #059669; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="back-btn">← Portofolio</a>
+        <h3 style="margin: 0; font-size: 1.1rem;">🔳 QR Generator</h3>
+        <div style="width: 80px;"></div> </header>
+    
+    <div class="nav-wrapper">
+        <div class="nav-bar">
+            <a href="chatbot.html" class="nav-link">💬 Chat</a>
+            <a href="gambar.html" class="nav-link">🎨 Gambar</a>
+            <a href="konten.html" class="nav-link">📱 Konten</a>
+            <a href="chord.html" class="nav-link">🎸 Chord</a>
+            <a href="tiktok.html" class="nav-link">🎵 TikTok</a>
+            <a href="teks.html" class="nav-link">✨ Teks</a>
+            <a href="suara.html" class="nav-link">🎙️ Suara</a>
+            <a href="qr.html" class="nav-link active">🔳 QR</a>
+            <a href="penghitung.html" class="nav-link">📝 Penghitung</a>
+            <a href="tugas.html" class="nav-link">📚 Tugas</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="tool-container">
+            <input type="text" id="qrInput" placeholder="Masukkan Link (contoh: https://github.com)..." onkeypress="handleEnter(event)">
+            <button id="generateBtn" class="btn-generate" onclick="buatQR()">Buat QR Code</button>
+        </div>
+
+        <div id="statusText" class="status">Merender kode QR...</div>
+        
+        <div class="result-area" id="resultArea">
+            <div class="qr-wrapper">
+                <img id="qrImage" src="" alt="QR Code">
+            </div>
+            <a id="downloadBtn" class="download-btn" href="#" download="QRCode.png">⬇️ Simpan ke Galeri</a>
+        </div>
+    </div>
+
+    <script>
+        function handleEnter(event) {
+            if (event.key === 'Enter') buatQR();
+        }
+
+        async function buatQR() {
+            const qrInput = document.getElementById('qrInput').value.trim();
+            const btn = document.getElementById('generateBtn');
+            const status = document.getElementById('statusText');
+            const resultArea = document.getElementById('resultArea');
+            const qrImage = document.getElementById('qrImage');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            if (!qrInput) return alert("Kotak teks tidak boleh kosong.");
+
+            btn.disabled = true;
+            status.style.display = 'block';
+            resultArea.style.display = 'none';
+
+            // API URL dengan resolusi tinggi dan margin yang pas
+            const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&margin=10&data=${encodeURIComponent(qrInput)}`;
+
+            try {
+                // Fetch to Blob sangat bagus untuk memastikan gambar selesai diunduh sebelum ditampilkan
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error("Gagal merender gambar.");
+
+                const imageBlob = await response.blob();
+                const imageObjectURL = URL.createObjectURL(imageBlob);
+
+                qrImage.src = imageObjectURL;
+                downloadBtn.href = imageObjectURL;
+                downloadBtn.download = `QR_RapiDev_${Math.floor(Math.random() * 10000)}.png`;
+                
+                status.style.display = 'none';
+                resultArea.style.display = 'flex';
+
+            } catch (error) {
+                alert("Sistem Error: " + error.message);
+                status.style.display = 'none';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
