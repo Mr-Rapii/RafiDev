@@ -2,71 +2,50 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beri Rating | Rapi-Dev</title>
+    <title>Beri Rating - Rapi-Dev</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --bg: #0f172a; --accent: #3b82f6; --glass: rgba(30, 41, 59, 0.6); --text: #f8fafc; }
-        body { 
-            margin: 0; min-height: 100vh; font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at top, #1e3a8a, #0f172a); color: var(--text);
-            display: flex; justify-content: center; align-items: center; padding: 20px;
-        }
-        .container {
-            background: var(--glass); backdrop-filter: blur(15px); padding: 40px;
-            border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
-            width: 100%; max-width: 400px; text-align: center;
-            animation: appear 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes appear { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        
-        h2 { margin-bottom: 20px; }
-        .star-rating { display: flex; flex-direction: row-reverse; justify-content: center; gap: 5px; margin-bottom: 20px; }
-        .star-rating input { display: none; }
-        .star-rating label { font-size: 2rem; color: #475569; cursor: pointer; transition: 0.2s; }
-        .star-rating input:checked ~ label, .star-rating label:hover, .star-rating label:hover ~ label { color: #fbbf24; }
-
-        textarea { width: 100%; height: 100px; background: rgba(0,0,0,0.3); color: white; border: 1px solid #334155; padding: 15px; border-radius: 15px; margin-bottom: 20px; box-sizing: border-box; resize: none; }
-        .btn-glow {
-            background: #1e293b; color: white; padding: 15px 30px; border-radius: 50px;
-            border: 1px solid var(--accent); cursor: pointer; font-weight: bold; transition: 0.4s; width: 100%;
-        }
-        .btn-glow:hover { box-shadow: 0 0 20px var(--accent); transform: scale(1.02); }
-        .back-link { display: block; margin-top: 20px; color: #94a3b8; text-decoration: none; font-size: 0.9rem; }
+        /* Tambahkan CSS estetik sesuai desain dashboard utama */
+        body { background: #0f172a; color: white; display: flex; justify-content: center; padding: 50px; font-family: sans-serif; }
+        .form-container { background: rgba(30, 41, 59, 0.8); padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; }
+        input, textarea, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 10px; border: none; }
+        button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>Beri Rating AI Hub</h2>
-        <form id="ratingForm" action="https://api.web3forms.com/submit" method="POST">
-            <input type="hidden" name="access_key" value="d6f8fcdc-bba9-41bd-b2cc-24c991d44c36">
-            
-            <div class="star-rating">
-                <input type="radio" name="Bintang" id="s5" value="5"><label for="s5">★</label>
-                <input type="radio" name="Bintang" id="s4" value="4"><label for="s4">★</label>
-                <input type="radio" name="Bintang" id="s3" value="3"><label for="s3">★</label>
-                <input type="radio" name="Bintang" id="s2" value="2"><label for="s2">★</label>
-                <input type="radio" name="Bintang" id="s1" value="1"><label for="s1">★</label>
-            </div>
-            
-            <textarea name="Komentar" placeholder="Bagaimana menurutmu tentang AI Hub ini?" required></textarea>
-            <button type="submit" class="btn-glow">Kirim Rating</button>
-        </form>
-        <a href="index.html" class="back-link">← Kembali ke Dashboard</a>
-    </div>
+<div class="form-container">
+    <h2>Beri Rating</h2>
+    <input type="text" id="username" placeholder="Nama Kamu">
+    <select id="ratingBintang">
+        <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+        <option value="4">⭐⭐⭐⭐ (4)</option>
+        <option value="3">⭐⭐⭐ (3)</option>
+    </select>
+    <textarea id="pesan" placeholder="Ceritakan pengalamanmu..."></textarea>
+    <button onclick="kirimKeSupabase()">Kirim Rating</button>
+</div>
 
-    <script>
-        const form = document.getElementById('ratingForm');
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const btn = this.querySelector('button');
-            btn.innerText = "Mengirim...";
-            
-            fetch(this.action, { method: "POST", body: new FormData(this) })
-            .then(() => {
-                document.querySelector('.container').innerHTML = "<h2>Terima Kasih! ✨</h2><p>Rating kamu sangat berarti untuk Rapi-Dev.</p><a href='index.html' class='back-link'>Kembali</a>";
-            });
-        });
-    </script>
+<script>
+    // MASUKKAN KEMBALI URL & KEY SUPABASE KAMU DI SINI (Gunakan Public Key)
+    const supabase = supabase.createClient('https://tvhhtkkwbxoyztmnkjnh.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2aGh0a2t3YnhveXp0bW5ram5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNzYxMzAsImV4cCI6MjA5Njg1MjEzMH0.ABm1xdmmHnQl9sLW5Xn09OR7hXV38nau7yFSUIgVbTo');
+
+    async function kirimKeSupabase() {
+        const nama = document.getElementById('username').value;
+        const rating = document.getElementById('ratingBintang').value;
+        const pesan = document.getElementById('pesan').value;
+
+        const { data, error } = await supabase
+            .from('testimoni')
+            .insert([{ nama: nama, rating: parseInt(rating), pesan: pesan }]);
+
+        if (error) {
+            alert("Gagal kirim: " + error.message);
+        } else {
+            alert("Terima kasih! Rating berhasil dikirim.");
+            window.location.href = "index.html"; // Balik ke dashboard otomatis
+        }
+    }
+</script>
 </body>
 </html>
