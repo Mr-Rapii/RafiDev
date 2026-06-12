@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asisten Rapi | 🎙️ Studio Voiceover</title>
+    <style>
+        :root { 
+            --bg: #0f172a; --glass: rgba(30, 41, 59, 0.7); 
+            --accent: #3b82f6; --danger: #ef4444; --text: #f8fafc; 
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: radial-gradient(circle at top, #1e293b, #0f172a); color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* Header */
+        header { 
+            padding: 20px; display: flex; align-items: center; justify-content: space-between;
+            background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .back-btn { 
+            color: var(--accent); text-decoration: none; font-size: 0.9rem; 
+            padding: 8px 15px; border-radius: 20px; border: 1px solid var(--accent); transition: 0.3s;
+        }
+        .back-btn:hover { background: var(--accent); color: white; }
+        
+        /* Nav Bar Scroll */
+        .nav-wrapper { padding: 0 15px; }
+        .nav-bar { 
+            display: flex; background: rgba(0,0,0,0.2); padding: 5px; margin-top: 15px; 
+            border-radius: 12px; gap: 5px; overflow-x: auto; white-space: nowrap;
+            scrollbar-width: none; -ms-overflow-style: none;
+        }
+        .nav-bar::-webkit-scrollbar { display: none; }
+        
+        .nav-link { 
+            flex: 0 0 auto; text-align: center; padding: 10px 15px; color: #94a3b8; 
+            text-decoration: none; font-size: 0.85rem; border-radius: 8px; transition: 0.3s; 
+        }
+        .nav-link.active { background: var(--accent); color: white; font-weight: bold; }
+        
+        /* Main Content */
+        .main-content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        .tool-container { 
+            width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 20px; 
+            background: var(--glass); padding: 25px; border-radius: 20px; 
+            border: 1px solid rgba(255,255,255,0.05); animation: slideDown 0.5s ease-out;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Form Elements */
+        textarea { 
+            width: 100%; height: 140px; background: rgba(15, 23, 42, 0.6); color: white; 
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 15px; 
+            font-size: 0.95rem; resize: none; outline: none; line-height: 1.6; transition: 0.3s;
+        }
+        textarea:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+
+        .control-group { display: flex; flex-direction: column; gap: 8px; }
+        label { font-size: 0.85rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; }
+        
+        select { 
+            width: 100%; background: rgba(15, 23, 42, 0.6); color: white; 
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; 
+            outline: none; font-size: 0.9rem; transition: 0.3s; appearance: none;
+        }
+        select:focus { border-color: var(--accent); }
+
+        /* Sliders */
+        input[type="range"] { 
+            width: 100%; appearance: none; background: transparent; cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none; margin-top: -4px; width: 16px; height: 16px; 
+            background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px rgba(59,130,246,0.5);
+        }
+
+        /* Buttons */
+        .btn-container { display: flex; gap: 15px; margin-top: 5px; }
+        button { 
+            flex: 1; border: none; border-radius: 12px; padding: 15px; font-size: 0.95rem; 
+            font-weight: bold; cursor: pointer; transition: 0.3s; color: white; display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        
+        .btn-play { background: var(--accent); }
+        .btn-play:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4); }
+        
+        .btn-stop { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
+        .btn-stop:hover { background: var(--danger); color: white; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="back-btn">← Portofolio</a>
+        <h3 style="margin: 0; font-size: 1.1rem;">🎙️ Studio Voiceover</h3>
+        <div style="width: 80px;"></div> </header>
+    
+    <div class="nav-wrapper">
+        <div class="nav-bar">
+            <a href="chatbot.html" class="nav-link">💬 Chat</a>
+            <a href="gambar.html" class="nav-link">🎨 Gambar</a>
+            <a href="konten.html" class="nav-link">📱 Konten</a>
+            <a href="chord.html" class="nav-link">🎸 Chord</a>
+            <a href="tiktok.html" class="nav-link">🎵 TikTok</a>
+            <a href="teks.html" class="nav-link">✨ Teks</a>
+            <a href="suara.html" class="nav-link active">🎙️ Suara</a>
+            <a href="qr.html" class="nav-link">🔳 QR</a>
+            <a href="penghitung.html" class="nav-link">📝 Penghitung</a>
+            <a href="tugas.html" class="nav-link">📚 Tugas</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="tool-container">
+            
+            <textarea id="textToSpeak" placeholder="Ketik naskah voiceover kamu di sini..."></textarea>
+            
+            <div class="control-group">
+                <label for="voiceSelect"><span>Pilih Suara / Aksen</span></label>
+                <select id="voiceSelect"></select>
+            </div>
+
+            <div class="control-group">
+                <label for="rateSlider"><span>Kecepatan Bicara</span> <span id="rateVal" style="color:var(--accent)">1.0x</span></label>
+                <input type="range" id="rateSlider" min="0.5" max="2" value="1" step="0.1" oninput="document.getElementById('rateVal').innerText = this.value + 'x'">
+            </div>
+
+            <div class="control-group">
+                <label for="pitchSlider"><span>Nada Suara (Pitch)</span> <span id="pitchVal" style="color:var(--accent)">1.0</span></label>
+                <input type="range" id="pitchSlider" min="0.5" max="2" value="1" step="0.1" oninput="document.getElementById('pitchVal').innerText = this.value">
+            </div>
+
+            <div class="btn-container">
+                <button class="btn-play" onclick="playAudio()">▶️ Putar Suara</button>
+                <button class="btn-stop" onclick="stopAudio()">⏹️ Berhenti</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const voiceSelect = document.getElementById('voiceSelect');
+        let voices = [];
+
+        function populateVoiceList() {
+            voices = speechSynthesis.getVoices();
+            voiceSelect.innerHTML = '';
+            
+            if (voices.length === 0) {
+                const option = document.createElement('option');
+                option.textContent = "Memuat suara dari sistem...";
+                voiceSelect.appendChild(option);
+                return;
+            }
+
+            voices.forEach((voice, i) => {
+                const option = document.createElement('option');
+                option.textContent = `${voice.name} (${voice.lang})`;
+                option.value = i;
+                
+                if (voice.lang.includes('id') || voice.lang.includes('ID')) {
+                    option.selected = true;
+                }
+                
+                voiceSelect.appendChild(option);
+            });
+        }
+
+        populateVoiceList();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = populateVoiceList;
+        }
+
+        function playAudio() {
+            const text = document.getElementById('textToSpeak').value.trim();
+            if (text === '') {
+                alert("Silakan ketik naskah terlebih dahulu!");
+                return;
+            }
+
+            speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            const selectedOption = voiceSelect.selectedOptions[0].value;
+            utterance.voice = voices[selectedOption];
+            utterance.rate = document.getElementById('rateSlider').value;
+            utterance.pitch = document.getElementById('pitchSlider').value;
+
+            speechSynthesis.speak(utterance);
+        }
+
+        function stopAudio() {
+            speechSynthesis.cancel();
+        }
+    </script>
+</body>
+</html>
