@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rapi Dev | AI Hub Dashboard</title>
+    <title>Rapi Dev | AI Hub</title>
     <style>
         :root { --bg: #0f172a; --accent: #3b82f6; --glass: rgba(30, 41, 59, 0.5); --text: #f8fafc; }
         body { 
@@ -12,6 +12,7 @@
             display: flex; flex-direction: column; align-items: center; padding: 40px 20px;
         }
 
+        /* Animasi */
         @keyframes appear { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in { animation: appear 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
@@ -27,17 +28,15 @@
         .tool-card { 
             background: var(--glass); backdrop-filter: blur(12px); padding: 20px; border-radius: 20px;
             border: 1px solid rgba(255,255,255,0.1); text-decoration: none; color: white;
-            display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;
-            opacity: 0; /* Animasi diatur via JS */
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
         }
-        .tool-card:hover { transform: translateY(-8px); background: rgba(59, 130, 246, 0.3); border-color: var(--accent); }
-        .icon { font-size: 1.8rem; }
+        .tool-card:hover { transform: translateY(-5px); background: rgba(59, 130, 246, 0.3); }
 
         .interactive-box {
             background: var(--glass); backdrop-filter: blur(12px); padding: 25px; border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 500px; margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 500px; margin-bottom: 20px; text-align: center;
         }
-        input, textarea { width: 100%; background: rgba(0,0,0,0.3); color: white; border: 1px solid #334155; padding: 12px; border-radius: 12px; margin-bottom: 10px; box-sizing: border-box; }
+        textarea { width: 100%; background: rgba(0,0,0,0.3); color: white; border: 1px solid #334155; padding: 12px; border-radius: 12px; margin-bottom: 10px; box-sizing: border-box; }
         .btn-action { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 12px; width: 100%; cursor: pointer; font-weight: bold; }
     </style>
 </head>
@@ -49,32 +48,24 @@
         <a href="about.html" class="sub-link">Tentang Saya & Visi AI Hub →</a>
     </div>
 
-    <div class="dashboard">
-        <a href="chatbot.html" class="tool-card"><div class="icon">💬</div><h3>Asisten</h3></a>
-        <a href="gambar.html" class="tool-card"><div class="icon">🎨</div><h3>Generator</h3></a>
-        <a href="chord.html" class="tool-card"><div class="icon">🎸</div><h3>Chord</h3></a>
-        <a href="konten.html" class="tool-card"><div class="icon">📱</div><h3>Konten</h3></a>
-        <a href="tiktok.html" class="tool-card"><div class="icon">🎵</div><h3>TikTok DL</h3></a>
-        <a href="suara.html" class="tool-card"><div class="icon">🔊</div><h3>Teks-Suara</h3></a>
-        <a href="tugas.html" class="tool-card"><div class="icon">📚</div><h3>Bantu Tugas</h3></a>
-        <a href="penghitung.html" class="tool-card"><div class="icon">🔢</div><h3>Hitung Kata</h3></a>
-        <a href="teks.html" class="tool-card"><div class="icon">📝</div><h3>Format Teks</h3></a>
-        <a href="qr.html" class="tool-card"><div class="icon">🔲</div><h3>QR Code</h3></a>
+    <div class="dashboard" id="dash">
+        <a href="chatbot.html" class="tool-card"><h3>💬 Asisten</h3></a>
+        <a href="gambar.html" class="tool-card"><h3>🎨 Generator</h3></a>
+        <a href="chord.html" class="tool-card"><h3>🎸 Chord</h3></a>
+        <a href="konten.html" class="tool-card"><h3>📱 Konten</h3></a>
+        <a href="tiktok.html" class="tool-card"><h3>🎵 TikTok DL</h3></a>
+        <a href="suara.html" class="tool-card"><h3>🔊 Teks-Suara</h3></a>
+        <a href="tugas.html" class="tool-card"><h3>📚 Tugas</h3></a>
+        <a href="penghitung.html" class="tool-card"><h3>🔢 Hitung</h3></a>
+        <a href="teks.html" class="tool-card"><h3>📝 Teks</h3></a>
+        <a href="qr.html" class="tool-card"><h3>🔲 QR Code</h3></a>
     </div>
 
-    <form class="interactive-box fade-in" id="requestForm" action="https://api.web3forms.com/submit" method="POST">
+    <div class="interactive-box fade-in" id="requestBox">
         <h3>💡 Request Fitur / Lapor Bug</h3>
-        <input type="hidden" name="access_key" value="d6f8fcdc-bba9-41bd-b2cc-24c991d44c36">
-        <textarea name="Request" placeholder="Tuliskan ide fitur atau bug yang ditemukan..." required></textarea>
-        <button type="submit" class="btn-action">Kirim Laporan</button>
-    </form>
-
-    <form class="interactive-box fade-in" id="ratingForm" action="https://api.web3forms.com/submit" method="POST">
-        <h3>⭐ Beri Rating</h3>
-        <input type="hidden" name="access_key" value="d6f8fcdc-bba9-41bd-b2cc-24c991d44c36">
-        <textarea name="Rating" placeholder="Berikan kesan untuk AI Hub ini..." required></textarea>
-        <button type="submit" class="btn-action">Kirim Rating</button>
-    </form>
+        <textarea id="pesanReq" placeholder="Tulis ide atau bug di sini..." required></textarea>
+        <button class="btn-action" id="btnKirimReq" onclick="kirimKeBot()">Kirim ke Telegram</button>
+    </div>
 
     <script>
         // Animasi muncul berurutan
@@ -82,16 +73,31 @@
             card.style.animation = `appear 0.8s ease forwards ${0.1 + (index * 0.05)}s`;
         });
 
-        // Submit form tanpa refresh
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const btn = this.querySelector('button');
-                btn.innerText = "Mengirim...";
-                fetch(this.action, { method: "POST", body: new FormData(this) })
-                .then(() => { this.innerHTML = "<h3>Terkirim! Terima kasih.</h3>"; });
+        // Logika Bot Telegram
+        function kirimKeBot() {
+            const pesan = document.getElementById('pesanReq').value.trim();
+            const btn = document.getElementById('btnKirimReq');
+            if (!pesan) return alert("Isi pesan dulu!");
+            
+            btn.disabled = true;
+            btn.innerText = "Mengirim...";
+
+            fetch("https://api.telegram.org/bot8675537430:AAFNdmH3-J0QCJOnQXh6nmUOFLc5Lhe_PBw/sendMessage", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: "7619879885", text: "💡 Request Baru: " + pesan })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    document.getElementById('requestBox').innerHTML = "<h3>Terkirim! 🎉</h3>";
+                } else {
+                    alert("Gagal: " + data.description);
+                    btn.disabled = false;
+                    btn.innerText = "Kirim ke Telegram";
+                }
             });
-        });
+        }
     </script>
 </body>
 </html>
