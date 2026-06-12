@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapi Dev | AI Hub Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --bg: #0f172a; --accent: #3b82f6; --glass: rgba(30, 41, 59, 0.5); --text: #f8fafc; }
         body { 
@@ -12,7 +13,6 @@
             display: flex; flex-direction: column; align-items: center; padding: 40px 20px;
         }
 
-        /* Animasi Muncul */
         @keyframes appear { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in { animation: appear 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
@@ -24,7 +24,6 @@
         h1 { font-size: 2.2rem; margin: 0; }
         .sub-link { color: #94a3b8; text-decoration: none; border-bottom: 1px solid #475569; }
 
-        /* Dashboard */
         .dashboard { width: 100%; max-width: 500px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 40px; }
         .tool-card { 
             background: var(--glass); backdrop-filter: blur(12px); padding: 20px; border-radius: 20px;
@@ -33,7 +32,6 @@
         }
         .tool-card:hover { transform: translateY(-5px); background: rgba(59, 130, 246, 0.3); border-color: var(--accent); }
 
-        /* Tombol Glow */
         .glow-container { display: flex; gap: 15px; justify-content: center; margin-bottom: 50px; }
         .glow-btn {
             background: #1e293b; color: white; padding: 15px 25px; border-radius: 50px;
@@ -42,7 +40,7 @@
         }
         .glow-btn:hover { box-shadow: 0 0 20px var(--accent); border-color: var(--accent); transform: scale(1.05); }
 
-        /* Testimoni Otomatis */
+        /* Wall of Fame */
         .testimonial-section { width: 100%; max-width: 500px; margin-bottom: 50px; }
         .testimonial-wall { display: flex; flex-direction: column; gap: 15px; }
         .testimonial-card { 
@@ -85,19 +83,24 @@
     </div>
 
     <script>
-        // Animasi muncul berurutan
+        // Animasi muncul
         document.querySelectorAll('.tool-card').forEach((card, index) => {
             card.style.animation = `appear 0.8s ease forwards ${0.1 + (index * 0.05)}s`;
         });
 
-        // Fetch Testimoni Otomatis
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwXtZ5VnQQgUsfKMtFa_x1SLzYmCiBc8Rl-KysxVrXYF6f7YXqV1pq6JjH7lii9JeJb2w/exec';
-        
-        fetch(API_URL)
-        .then(res => res.json())
-        .then(data => {
-            const wall = document.getElementById('testimonialWall');
-            if(data.length > 0) {
+        // Setup Supabase
+        const supabaseUrl = 'https://tvhhtkkwbxoyztmnkjnh.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2aGh0a2t3YnhveXp0bW5ram5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNzYxMzAsImV4cCI6MjA5Njg1MjEzMH0.ABm1xdmmHnQl9sLW5Xn09OR7hXV38nau7yFSUIgVbTo';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function loadTestimoni() {
+            const { data, error } = await supabase
+                .from('testimoni')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (data) {
+                const wall = document.getElementById('testimonialWall');
                 wall.innerHTML = data.map(t => `
                     <div class="testimonial-card">
                         <small>${"⭐".repeat(t.rating || 0)}</small>
@@ -105,14 +108,9 @@
                         <strong>- ${t.nama}</strong>
                     </div>
                 `).join('');
-            } else {
-                wall.innerHTML = "<p style='text-align:center;'>Belum ada testimoni.</p>";
             }
-        })
-        .catch(err => {
-            console.log(err);
-            document.getElementById('testimonialWall').innerHTML = "<p style='text-align:center;'>Gagal memuat data.</p>";
-        });
+        }
+        loadTestimoni();
     </script>
 </body>
 </html>
