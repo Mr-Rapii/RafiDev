@@ -7,29 +7,19 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100vh; display: flex; flex-direction: column; }
-        
         .header { background: #1e293b; padding: 15px 20px; text-align: center; border-bottom: 1px solid #334155; }
         .header h2 { font-size: 1.2rem; font-weight: 600; }
-        
-        /* Menu Navigasi */
         .nav-bar { display: flex; background: #1e293b; border-bottom: 1px solid #334155; }
         .nav-link { flex: 1; text-align: center; padding: 12px; color: #94a3b8; text-decoration: none; font-size: 0.95rem; }
         .nav-link.active { color: #3b82f6; border-bottom: 2px solid #3b82f6; background: #0f172a; font-weight: bold; }
-        
         .main-content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .input-group { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        
         textarea { width: 100%; height: 80px; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 8px; padding: 12px; font-size: 0.95rem; resize: none; outline: none; }
-        textarea:focus { border-color: #3b82f6; }
-        
-        button { background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.3s; }
-        button:hover { background: #2563eb; }
+        button { background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; }
         button:disabled { background: #475569; cursor: not-allowed; }
-        
         .result-area { width: 100%; max-width: 500px; min-height: 300px; background: #1e293b; border: 1px dashed #334155; border-radius: 8px; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; text-align: center; color: #94a3b8; padding: 10px; }
         .result-area img { width: 100%; height: auto; border-radius: 4px; display: none; }
-        .download-btn { margin-top: 15px; width: 100%; max-width: 500px; background: #10b981; padding: 12px; color: white; border-radius: 8px; display: none; text-align: center; text-decoration: none; font-weight: bold; transition: background 0.3s; }
-        .download-btn:hover { background: #059669; }
+        .download-btn { margin-top: 15px; width: 100%; max-width: 500px; background: #10b981; padding: 12px; color: white; border-radius: 8px; display: none; text-align: center; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -45,7 +35,7 @@
 
     <div class="main-content">
         <div class="input-group">
-            <textarea id="prompt" placeholder="Wajib gunakan Bahasa Inggris. (Contoh: A cute cat wearing sunglasses, highly detailed)"></textarea>
+            <textarea id="prompt" placeholder="Wajib Bahasa Inggris. (Contoh: A cinematic 3D render of a futuristic robot)"></textarea>
             <button id="generateBtn" onclick="buatGambar()">Buat Gambar</button>
         </div>
 
@@ -58,55 +48,45 @@
     </div>
 
     <script>
-        async function buatGambar() {
+        function buatGambar() {
             const promptInput = document.getElementById('prompt').value.trim();
+            if (!promptInput) return;
+
             const generateBtn = document.getElementById('generateBtn');
             const statusText = document.getElementById('statusText');
             const outputImage = document.getElementById('outputImage');
             const downloadBtn = document.getElementById('downloadBtn');
 
-            if (!promptInput) {
-                alert("Deskripsi gambar tidak boleh kosong.");
-                return;
-            }
-
+            // Reset UI
             generateBtn.disabled = true;
-            generateBtn.innerText = "Memproses (Bisa sampai 30 detik)...";
+            generateBtn.innerText = "Memproses (Tunggu sebentar)...";
             outputImage.style.display = 'none';
             downloadBtn.style.display = 'none';
             statusText.style.display = 'block';
-            statusText.innerText = "Menghubungkan ke server AI...";
+            statusText.innerText = "Menerima data dari server...";
 
-            // Menambahkan seed acak agar browser tidak memuat gambar lama dari cache
             const randomSeed = Math.floor(Math.random() * 1000000);
-            const apiUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptInput)}?seed=${randomSeed}`;
+            const apiUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptInput)}?seed=${randomSeed}&nologo=true`;
 
-            try {
-                // Menggunakan Fetch API untuk mengambil data gambar secara langsung
-                const response = await fetch(apiUrl);
-                
-                if (!response.ok) {
-                    throw new Error(`Server sibuk (Status ${response.status})`);
-                }
-
-                // Mengubah respons server menjadi objek URL gambar lokal yang stabil
-                const imageBlob = await response.blob();
-                const imageObjectURL = URL.createObjectURL(imageBlob);
-
+            // Logika baru: Jika gambar berhasil dimuat
+            outputImage.onload = function() {
                 statusText.style.display = 'none';
-                outputImage.src = imageObjectURL;
                 outputImage.style.display = 'block';
-                
-                downloadBtn.href = imageObjectURL;
-                downloadBtn.download = `AI_Image_${randomSeed}.jpg`;
+                downloadBtn.href = apiUrl;
                 downloadBtn.style.display = 'block';
-
-            } catch (error) {
-                statusText.innerText = `Gagal memuat: ${error.message}. Silakan klik tombol 'Buat Gambar' lagi.`;
-            } finally {
                 generateBtn.disabled = false;
                 generateBtn.innerText = "Buat Gambar";
-            }
+            };
+
+            // Logika baru: Jika gambar gagal dimuat (Internet/Server down)
+            outputImage.onerror = function() {
+                statusText.innerText = "Sistem Error: Koneksi diblokir oleh provider internetmu atau server AI sedang down. Coba ganti koneksi Wi-Fi/Data.";
+                generateBtn.disabled = false;
+                generateBtn.innerText = "Buat Gambar";
+            };
+
+            // Memaksa browser untuk memuat gambar langsung dari URL
+            outputImage.src = apiUrl;
         }
     </script>
 </body>
