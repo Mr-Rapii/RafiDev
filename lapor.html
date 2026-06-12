@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Lapor Fitur / Bug | Rapi Dev</title>
+    <style>
+        :root { --bg: #0f172a; --accent: #3b82f6; --glass: rgba(30, 41, 59, 0.6); --text: #f8fafc; }
+        body { background: radial-gradient(circle at top, #1e3a8a, #0f172a); color: white; font-family: 'Inter', sans-serif; display: flex; justify-content: center; padding: 40px 20px; min-height: 100vh; }
+        .container { background: var(--glass); backdrop-filter: blur(15px); padding: 30px; border-radius: 25px; width: 100%; max-width: 450px; border: 1px solid rgba(255,255,255,0.1); }
+        input, textarea { width: 100%; background: rgba(0,0,0,0.3); color: white; border: 1px solid #334155; padding: 12px; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; }
+        .btn { background: var(--accent); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; cursor: pointer; font-weight: bold; }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #94a3b8; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>💡 Laporkan Masalah / Ide</h3>
+        <input type="text" id="username" placeholder="Username Telegram kamu (Contoh: @raffi)" required>
+        <textarea id="pesan" rows="5" placeholder="Tulis laporan atau saran fitur baru di sini..." required></textarea>
+        <button class="btn" id="btnKirim" onclick="kirimTelegram()">Kirim ke Rapi-Dev</button>
+        <a href="index.html" class="back-link">← Kembali ke Dashboard</a>
+    </div>
+
+    <script>
+        function kirimTelegram() {
+            const user = document.getElementById('username').value.trim();
+            const pesan = document.getElementById('pesan').value.trim();
+            const btn = document.getElementById('btnKirim');
+
+            if (!user || !pesan) return alert("Harap isi semua kolom!");
+
+            btn.disabled = true;
+            btn.innerText = "Mengirim...";
+
+            const botToken = "8675537430:AAFNdmH3-J0QCJOnQXh6nmUOFLc5Lhe_PBw";
+            const chatId = "7619879885";
+            const teks = `🚨 *Laporan Baru*\n\n👤 *User:* ${user}\n💬 *Pesan:* ${pesan}`;
+
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: chatId, text: teks, parse_mode: "Markdown" })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    document.querySelector('.container').innerHTML = "<h3>Terima Kasih! 🎉</h3><p>Laporanmu sudah sampai ke Rapi Dev.</p><a href='index.html' class='back-link'>Kembali</a>";
+                } else {
+                    alert("Gagal: " + data.description);
+                    btn.disabled = false;
+                    btn.innerText = "Kirim ke Rapi-Dev";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
