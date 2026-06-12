@@ -1,39 +1,85 @@
-// Kita tidak hardcode API Key di sini
-async function fetchMatch() {
-    // Mengambil key dari kotak input (Nanti kita buat kotak inputnya)
-    const API_KEY = document.getElementById('apiKeyInput').value;
-    const TEAM_ID = '1432'; 
-    const container = document.getElementById('match-container');
-    const loader = document.getElementById('loader');
-    
-    if(!API_KEY) { alert("Masukkan API Key dulu!"); return; }
-
-    container.innerHTML = '';
-    loader.style.display = 'block';
-
-    try {
-        const response = await fetch(`https://v3.football.api-sports.io/fixtures?team=${TEAM_ID}&next=3`, {
-            headers: { 'x-apisports-key': API_KEY }
-        });
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raffi | AI Hub & Portfolio</title>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #3b82f6; --text: #f8fafc; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; transition: 0.3s; }
         
-        const data = await response.json();
-        loader.style.display = 'none';
+        /* Navigation */
+        .nav { padding: 20px; background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Pages */
+        .page { display: none; padding: 20px; max-width: 600px; margin: auto; animation: fadeIn 0.4s; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+        
+        /* Home Grid */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; border: 1px solid #334155; transition: 0.3s; }
+        .card:hover { border-color: var(--accent); transform: translateY(-5px); }
+        
+        /* UI Elements */
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .back-btn { background: #475569; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
 
-        if (data.response && data.response.length > 0) {
-            data.response.forEach(match => {
-                const date = new Date(match.fixture.date).toLocaleDateString('id-ID');
-                container.innerHTML += `
-                    <div class="card">
-                        <h3>${match.teams.home.name} vs ${match.teams.away.name}</h3>
-                        <p>📅 ${date}</p>
-                    </div>
-                `;
-            });
-        } else {
-            container.innerHTML = "<p>Data tidak ditemukan/Key salah.</p>";
+    <nav><strong>RAF<span>FI</span> HUB</strong></nav>
+
+    <div id="home" class="page active">
+        <h1>Halo, Saya Raffi 👋</h1>
+        <p>Web Developer & AI Enthusiast</p>
+        <div class="grid">
+            <div class="card" onclick="showPage('tiktok')">🎵 TikTok DL</div>
+            <div class="card" onclick="showPage('football')">⚽ Info Bola</div>
+            <div class="card" onclick="showPage('penghitung')">📝 Penghitung</div>
+            <div class="card" onclick="showPage('password')">🔑 Password Gen</div>
+            </div>
+    </div>
+
+    <div id="tiktok" class="page">
+        <button class="back-btn" onclick="showPage('home')">← Kembali</button>
+        <h2>TikTok Downloader</h2>
+        <input type="text" id="urlInput" placeholder="Tempel link TikTok...">
+        <button onclick="cariVideo()">Download</button>
+        <div id="tiktok-result"></div>
+    </div>
+
+    <div id="football" class="page">
+        <button class="back-btn" onclick="showPage('home')">← Kembali</button>
+        <h2>Info Pertandingan Persib</h2>
+        <input type="password" id="apiFootballKey" placeholder="Masukkan API Key...">
+        <button onclick="cekBola()">Cek Jadwal</button>
+        <div id="bola-result"></div>
+    </div>
+
+    <script>
+        // Navigasi
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
         }
-    } catch (error) {
-        loader.style.display = 'none';
-        container.innerHTML = "<p>Gagal memuat data.</p>";
-    }
-}
+
+        // Tool 1: TikTok
+        function cariVideo() {
+            const url = document.getElementById('urlInput').value;
+            if(!url) return alert("Masukkan link!");
+            document.getElementById('tiktok-result').innerHTML = "Memproses...";
+            // Masukkan logika fetch TikWM di sini...
+        }
+
+        // Tool 2: Football
+        async function cekBola() {
+            const key = document.getElementById('apiFootballKey').value;
+            if(!key) return alert("Masukkan API Key!");
+            document.getElementById('bola-result').innerHTML = "Mengambil data...";
+            // Masukkan logika fetch API Football di sini...
+        }
+    </script>
+</body>
+</html>
