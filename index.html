@@ -3,28 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rapii Followers AI</title>
+  <title>Rapii AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-zinc-950 text-white min-h-screen">
+<body class="bg-zinc-950 text-white min-h-screen p-6">
 
-  <nav class="bg-black p-4">
-    <div class="max-w-6xl mx-auto flex justify-between">
-      <h1 class="text-3xl font-bold text-emerald-400">RAPIIAI</h1>
-      <button onclick="loginGoogle()" id="login-btn" 
-        class="bg-white text-black px-6 py-2 rounded-full font-medium">
-        <i class="fab fa-google"></i> Login Gmail
-      </button>
+  <div class="max-w-md mx-auto">
+    <h1 class="text-5xl font-bold text-emerald-400 text-center mb-10">RAPII AI</h1>
+    
+    <div id="status" class="text-center p-8 bg-zinc-900 rounded-3xl">
+      <p class="text-xl">Silakan Login</p>
     </div>
-  </nav>
 
-  <div class="max-w-6xl mx-auto p-6" id="main-content">
-    <!-- Konten akan muncul setelah login -->
-    <p class="text-center text-zinc-400">Login dulu untuk menggunakan fitur</p>
+    <button onclick="loginGoogle()" 
+      class="w-full mt-8 bg-white text-black py-6 rounded-3xl text-xl font-medium flex items-center justify-center gap-3 shadow-lg">
+      <i class="fab fa-google text-xl"></i> 
+      Login dengan Gmail
+    </button>
   </div>
 
   <script>
@@ -39,68 +36,40 @@
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    let currentUser = null;
 
     function loginGoogle() {
+      document.getElementById('status').innerHTML = `<p class="text-yellow-400">Mengarahkan ke Google...</p>`;
+      
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithRedirect(provider);
     }
 
-    // Handle Redirect Result
+    // Handle hasil redirect
     auth.getRedirectResult()
       .then((result) => {
         if (result.user) {
-          handleUser(result.user);
+          document.getElementById('status').innerHTML = `
+            <p class="text-green-400 text-2xl">✅ Login Berhasil!</p>
+            <p class="mt-4">${result.user.email}</p>
+            <p class="text-emerald-400 mt-6">Selamat datang di Rapii AI</p>
+          `;
         }
       })
       .catch((error) => {
-        console.error(error);
-        alert("Login error: " + error.message);
+        document.getElementById('status').innerHTML = `
+          <p class="text-red-400">Error: \( {error.code}<br> \){error.message}</p>
+        `;
       });
 
     // Cek status login
     auth.onAuthStateChanged((user) => {
       if (user) {
-        handleUser(user);
-      } else {
-        document.getElementById('main-content').innerHTML = `
-          <div class="text-center mt-20">
-            <p class="text-2xl mb-6">Selamat datang di Rapii AI</p>
-            <button onclick="loginGoogle()" class="bg-white text-black px-8 py-4 rounded-2xl text-lg font-medium">
-              Login dengan Gmail
-            </button>
-          </div>`;
+        document.getElementById('status').innerHTML = `
+          <p class="text-green-400 text-2xl">✅ Sudah Login</p>
+          <p>${user.email}</p>
+        `;
       }
     });
-
-    function handleUser(user) {
-      currentUser = user;
-      document.getElementById('main-content').innerHTML = `
-        <div class="text-center">
-          <img src="${user.photoURL}" class="w-24 h-24 rounded-full mx-auto border-4 border-emerald-500">
-          <h2 class="text-2xl mt-4">${user.displayName}</h2>
-          <p class="text-emerald-400">${user.email}</p>
-          <div class="mt-10 bg-zinc-900 rounded-3xl p-8">
-            <p class="text-emerald-400">Saldo Koin</p>
-            <div id="coin" class="text-8xl font-bold text-emerald-400">0</div>
-          </div>
-          <button onclick="claimTask()" class="mt-8 w-full bg-pink-600 py-5 rounded-2xl text-lg">
-            Klaim 1 Koin (Follow @rapii_wehhh)
-          </button>
-        </div>`;
-    }
-
-    function claimTask() {
-      alert("✅ +1 Koin berhasil ditambahkan! (Simulasi)");
-      // Nanti bisa ditambah simpan ke Firestore
-    }
-
-    // Auto check saat halaman load
-    window.onload = () => {
-      console.log("Halaman dimuat");
-    };
   </script>
 </body>
 </html>
