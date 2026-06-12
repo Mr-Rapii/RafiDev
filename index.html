@@ -68,7 +68,7 @@
         .tool-card:nth-child(9) { animation-delay: 0.5s; }
         .tool-card:nth-child(10) { animation-delay: 0.55s; }
 
-        /* AREA RATING WEB3FORMS */
+        /* AREA RATING WEB3FORMS (Struktur Form Asli) */
         .rating-container {
             background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(10px);
             padding: 25px; border-radius: 20px; border: 1px dashed rgba(255,255,255,0.2);
@@ -122,75 +122,66 @@
         <a href="qr.html" class="tool-card"><div class="icon">🔲</div><div class="info"><h3>QR Code</h3><p>Buat barcode cepat</p></div></a>
     </div>
 
-    <div class="rating-container" id="ratingBox">
+    <form class="rating-container" id="ratingForm" action="https://api.web3forms.com/submit" method="POST">
         <h3 style="margin: 0;">Beri Rating AI Hub</h3>
         <p style="color:#94a3b8; font-size: 0.85rem; margin-top: 5px;">Bantu Rapi Dev jadi lebih baik!</p>
         
+        <input type="hidden" name="access_key" value="d6f8fcdc-bba9-41bd-b2cc-24c991d44c36">
+        <input type="hidden" name="subject" value="Ada Rating Baru di AI Hub Rapi Dev">
+        <input type="hidden" name="from_name" value="Sistem Rating AI Hub">
+        
+        <input type="hidden" name="name" value="Pengunjung Anonim">
+        <input type="hidden" name="email" value="no-reply@rapi-aihub.com">
+
         <div class="stars">
-            <input type="radio" name="rating" id="star5" value="5"><label for="star5">★</label>
-            <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
-            <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
-            <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
-            <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
+            <input type="radio" name="Jumlah Bintang" id="star5" value="5 Bintang" required><label for="star5">★</label>
+            <input type="radio" name="Jumlah Bintang" id="star4" value="4 Bintang"><label for="star4">★</label>
+            <input type="radio" name="Jumlah Bintang" id="star3" value="3 Bintang"><label for="star3">★</label>
+            <input type="radio" name="Jumlah Bintang" id="star2" value="2 Bintang"><label for="star2">★</label>
+            <input type="radio" name="Jumlah Bintang" id="star1" value="1 Bintang"><label for="star1">★</label>
         </div>
         
-        <textarea id="pesanRating" placeholder="Tulis masukan, saran, atau pujian di sini..."></textarea>
-        <button class="btn-submit-rating" id="btnKirimRating" onclick="kirimKeDatabase()">Kirim Penilaian</button>
-    </div>
+        <textarea name="message" id="pesanRating" placeholder="Tulis masukan, saran, atau pujian di sini..." required></textarea>
+        
+        <button type="submit" class="btn-submit-rating" id="btnKirimRating">Kirim Penilaian</button>
+    </form>
 
     <script>
-        function kirimKeDatabase() {
-            const rating = document.querySelector('input[name="rating"]:checked');
-            const pesan = document.getElementById('pesanRating').value.trim();
-            const btn = document.getElementById('btnKirimRating');
+        // Mengubah perilaku form agar tidak berpindah halaman saat dikirim
+        const form = document.getElementById('ratingForm');
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Mencegah browser melakukan reload halaman
             
-            if (!rating) {
-                alert("Pilih jumlah bintangnya dulu ya!");
-                return;
-            }
-
+            const btn = document.getElementById('btnKirimRating');
             btn.disabled = true;
             btn.innerText = "Menyimpan data...";
 
-            // Menggunakan huruf kecil agar aman dan tidak memicu error sistem database
-            const accessKey = "d6f8fcdc-bba9-41bd-b2cc-24c991d44c36";
+            // Mengambil semua data dari form (Sesuai dengan metode di contohmu)
+            const formData = new FormData(form);
 
-            fetch("https://api.web3forms.com/submit", {
+            fetch(form.action, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify({
-                    access_key: accessKey,
-                    subject: "Ting! Ada Rating Baru di AI Hub Rapi Dev",
-                    from_name: "Notifikasi AI Hub",
-                    email: "rating@rapi-aihub.com", // Meloloskan form dari deteksi bot anti-spam
-                    rating: rating.value + " Bintang",
-                    pesan: pesan || "Pengguna hanya memberikan bintang tanpa pesan tambahan."
-                })
+                body: formData // Mengirim data secara mentah tanpa konversi JSON
             })
             .then(async (response) => {
-                const dataRespon = await response.json();
-                
                 if (response.status === 200) {
-                    document.getElementById('ratingBox').innerHTML = `
+                    form.innerHTML = `
                         <h3 style="color: #10b981; margin:0;">Tersimpan! 🎉</h3>
                         <p style="color:#94a3b8; font-size: 0.9rem; margin-top:10px;">Terima kasih banyak atas rating dan masukanmu.</p>
                     `;
                 } else {
-                    // Jika ditolak, pop-up akan memunculkan alasan detail dari server
-                    alert("Gagal menyimpan. Alasan dari server: " + dataRespon.message);
+                    alert("Gagal mengirim data. Silakan coba lagi nanti.");
                     btn.disabled = false;
                     btn.innerText = "Kirim Penilaian";
                 }
             })
             .catch(error => {
-                alert("Terjadi kesalahan jaringan atau koneksi terputus.");
+                alert("Terjadi masalah jaringan.");
                 btn.disabled = false;
                 btn.innerText = "Kirim Penilaian";
             });
-        }
+        });
     </script>
 </body>
 </html>
