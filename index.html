@@ -12,7 +12,7 @@
             display: flex; flex-direction: column; align-items: center; padding: 40px 20px;
         }
 
-        /* Animasi */
+        /* Animasi Muncul */
         @keyframes appear { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in { animation: appear 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
@@ -30,14 +30,22 @@
             border: 1px solid rgba(255,255,255,0.1); text-decoration: none; color: white;
             display: flex; flex-direction: column; align-items: center; gap: 8px;
         }
-        .tool-card:hover { transform: translateY(-5px); background: rgba(59, 130, 246, 0.3); }
+        .tool-card:hover { transform: translateY(-5px); background: rgba(59, 130, 246, 0.3); border-color: var(--accent); }
 
-        .interactive-box {
-            background: var(--glass); backdrop-filter: blur(12px); padding: 25px; border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 500px; margin-bottom: 20px; text-align: center;
+        /* Tombol Lapor dengan Efek Glow */
+        .glow-btn {
+            position: relative;
+            background: #1e293b; color: white; padding: 18px 30px; border-radius: 50px;
+            text-decoration: none; font-weight: bold; border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.4s; overflow: hidden; display: inline-block;
         }
-        textarea { width: 100%; background: rgba(0,0,0,0.3); color: white; border: 1px solid #334155; padding: 12px; border-radius: 12px; margin-bottom: 10px; box-sizing: border-box; }
-        .btn-action { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 12px; width: 100%; cursor: pointer; font-weight: bold; }
+        .glow-btn:hover {
+            box-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent);
+            border-color: var(--accent); transform: scale(1.05);
+        }
+        .glow-btn::before {
+            content: "✨"; margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -61,43 +69,14 @@
         <a href="qr.html" class="tool-card"><h3>🔲 QR Code</h3></a>
     </div>
 
-    <div class="interactive-box fade-in" id="requestBox">
-        <h3>💡 Request Fitur / Lapor Bug</h3>
-        <textarea id="pesanReq" placeholder="Tulis ide atau bug di sini..." required></textarea>
-        <button class="btn-action" id="btnKirimReq" onclick="kirimKeBot()">Kirim ke Telegram</button>
+    <div class="fade-in" style="text-align: center; margin-bottom: 50px;">
+        <a href="lapor.html" class="glow-btn">Lapor Bug / Request Fitur</a>
     </div>
 
     <script>
-        // Animasi muncul berurutan
         document.querySelectorAll('.tool-card').forEach((card, index) => {
             card.style.animation = `appear 0.8s ease forwards ${0.1 + (index * 0.05)}s`;
         });
-
-        // Logika Bot Telegram
-        function kirimKeBot() {
-            const pesan = document.getElementById('pesanReq').value.trim();
-            const btn = document.getElementById('btnKirimReq');
-            if (!pesan) return alert("Isi pesan dulu!");
-            
-            btn.disabled = true;
-            btn.innerText = "Mengirim...";
-
-            fetch("https://api.telegram.org/bot8675537430:AAFNdmH3-J0QCJOnQXh6nmUOFLc5Lhe_PBw/sendMessage", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: "7619879885", text: "💡 Request Baru: " + pesan })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.ok) {
-                    document.getElementById('requestBox').innerHTML = "<h3>Terkirim! 🎉</h3>";
-                } else {
-                    alert("Gagal: " + data.description);
-                    btn.disabled = false;
-                    btn.innerText = "Kirim ke Telegram";
-                }
-            });
-        }
     </script>
 </body>
 </html>
