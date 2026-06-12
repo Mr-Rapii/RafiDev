@@ -6,72 +6,131 @@
     <title>Rapi Dev | AI Hub Dashboard</title>
     <style>
         :root { 
-            --bg: #0f172a; --accent: #3b82f6; --glass: rgba(30, 41, 59, 0.5); --text: #f8fafc; 
+            --bg: #0f172a; --accent: #3b82f6; --glass: rgba(30, 41, 59, 0.6); --text: #f8fafc; 
         }
 
         body { 
             margin: 0; min-height: 100vh; font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at top, #1e293b, #0f172a); color: var(--text);
-            display: flex; flex-direction: column; align-items: center; padding: 20px;
+            background: radial-gradient(circle at top, #1e3a8a, #0f172a); color: var(--text);
+            display: flex; flex-direction: column; align-items: center; padding: 30px 20px;
+            overflow-x: hidden;
         }
 
         /* Header Profil */
-        .profile { text-align: center; margin-bottom: 30px; animation: fadeIn 1s; }
+        .profile { text-align: center; margin-bottom: 30px; animation: fadeInDown 0.8s ease-out; }
         .profile img { 
-            width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent);
-            animation: pulse 3s infinite; margin-bottom: 10px;
+            width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--accent);
+            animation: pulseGlow 3s infinite; margin-bottom: 10px; object-fit: cover;
         }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(59, 130, 246, 0); } }
+        @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(59, 130, 246, 0); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Dashboard Grid */
+        .profile h1 { margin: 5px 0; font-size: 1.8rem; letter-spacing: 1px; }
+        .profile p { color: #94a3b8; font-size: 0.9rem; margin: 0; }
+
+        /* Dashboard Grid 2 Kolom */
         .dashboard { 
-            width: 100%; max-width: 400px; display: grid; gap: 15px; 
+            width: 100%; max-width: 500px; 
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; 
+            padding-bottom: 40px;
         }
 
+        /* Kartu Menu */
         .tool-card { 
             background: var(--glass); backdrop-filter: blur(10px);
-            padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
-            text-decoration: none; color: white; display: flex; align-items: center; gap: 15px;
-            transition: 0.3s; animation: slideUp 0.5s forwards; opacity: 0;
+            padding: 20px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+            text-decoration: none; color: white; display: flex; flex-direction: column; 
+            align-items: center; text-align: center; gap: 10px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            opacity: 0; animation: scaleUp 0.5s forwards;
         }
-        .tool-card:hover { transform: scale(1.02); background: rgba(59, 130, 246, 0.2); border-color: var(--accent); }
         
-        .icon { font-size: 1.5rem; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px; }
-        .info h3 { margin: 0; font-size: 1rem; }
-        .info p { margin: 0; font-size: 0.75rem; color: #94a3b8; }
+        .tool-card:hover { 
+            transform: translateY(-5px) scale(1.03); 
+            background: rgba(59, 130, 246, 0.2); border-color: var(--accent); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        
+        .icon { font-size: 2rem; background: rgba(0,0,0,0.2); width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 15px; }
+        .info h3 { margin: 0; font-size: 0.95rem; font-weight: 600; }
+        .info p { margin: 5px 0 0; font-size: 0.7rem; color: #94a3b8; line-height: 1.3; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleUp { from { opacity: 0; transform: scale(0.8) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        /* Mengatur delay animasi agar muncul berurutan (Staggered) */
+        .tool-card:nth-child(1) { animation-delay: 0.1s; }
+        .tool-card:nth-child(2) { animation-delay: 0.15s; }
+        .tool-card:nth-child(3) { animation-delay: 0.2s; }
+        .tool-card:nth-child(4) { animation-delay: 0.25s; }
+        .tool-card:nth-child(5) { animation-delay: 0.3s; }
+        .tool-card:nth-child(6) { animation-delay: 0.35s; }
+        .tool-card:nth-child(7) { animation-delay: 0.4s; }
+        .tool-card:nth-child(8) { animation-delay: 0.45s; }
+        .tool-card:nth-child(9) { animation-delay: 0.5s; }
+        .tool-card:nth-child(10) { animation-delay: 0.55s; }
+
     </style>
 </head>
 <body>
 
     <div class="profile">
-        <img src="https://ui-avatars.com/api/?name=Rapi+Dev&background=3b82f6&color=fff&size=100" alt="Rapi">
+        <img src="https://ui-avatars.com/api/?name=Rapi+Dev&background=3b82f6&color=fff&size=150" alt="Rapi Dev">
         <h1>AI Hub Rapi</h1>
-        <p style="color:#94a3b8">Pilih asisten yang kamu butuhkan:</p>
+        <p>Pilih alat yang ingin kamu gunakan</p>
     </div>
 
     <div class="dashboard">
-        <a href="chatbot.html" class="tool-card" style="animation-delay: 0.1s;">
+        
+        <a href="chatbot.html" class="tool-card">
             <div class="icon">💬</div>
-            <div class="info"><h3>Asisten AI</h3><p>Chat interaktif & personal</p></div>
+            <div class="info"><h3>Asisten AI</h3><p>Teman ngobrol & diskusi</p></div>
         </a>
 
-        <a href="gambar.html" class="tool-card" style="animation-delay: 0.2s;">
+        <a href="gambar.html" class="tool-card">
             <div class="icon">🎨</div>
-            <div class="info"><h3>Generator Gambar</h3><p>Ubah teks menjadi visual</p></div>
+            <div class="info"><h3>Generator</h3><p>Teks jadi gambar</p></div>
         </a>
 
-        <a href="chord.html" class="tool-card" style="animation-delay: 0.3s;">
+        <a href="chord.html" class="tool-card">
             <div class="icon">🎸</div>
-            <div class="info"><h3>Chord Gitar</h3><p>Lirik & kunci lagu instan</p></div>
+            <div class="info"><h3>Chord Lagu</h3><p>Kunci gitar instan</p></div>
         </a>
 
-        <a href="konten.html" class="tool-card" style="animation-delay: 0.4s;">
+        <a href="konten.html" class="tool-card">
             <div class="icon">📱</div>
-            <div class="info"><h3>Konten Kreator</h3><p>Strategi & ide konten</p></div>
+            <div class="info"><h3>Konten Kreator</h3><p>Ide YouTube/TikTok</p></div>
         </a>
+
+        <a href="tiktok.html" class="tool-card">
+            <div class="icon">🎵</div>
+            <div class="info"><h3>TikTok DL</h3><p>Download video/audio</p></div>
+        </a>
+
+        <a href="suara.html" class="tool-card">
+            <div class="icon">🔊</div>
+            <div class="info"><h3>Teks ke Suara</h3><p>Ubah teks jadi audio</p></div>
+        </a>
+
+        <a href="tugas.html" class="tool-card">
+            <div class="icon">📚</div>
+            <div class="info"><h3>Bantu Tugas</h3><p>Asisten belajar sekolah</p></div>
+        </a>
+
+        <a href="penghitung.html" class="tool-card">
+            <div class="icon">🔢</div>
+            <div class="info"><h3>Penghitung</h3><p>Hitung kata & karakter</p></div>
+        </a>
+
+        <a href="teks.html" class="tool-card">
+            <div class="icon">📝</div>
+            <div class="info"><h3>Format Teks</h3><p>Base64 & Manipulasi</p></div>
+        </a>
+
+        <a href="qr.html" class="tool-card">
+            <div class="icon">🔲</div>
+            <div class="info"><h3>QR Code</h3><p>Buat barcode cepat</p></div>
+        </a>
+
     </div>
 
 </body>
