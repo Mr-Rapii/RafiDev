@@ -1,46 +1,989 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tentang Saya | Rapi Dev</title>
-    <style>
-        :root { --bg: #0f172a; --accent: #3b82f6; --glass: rgba(30, 41, 59, 0.6); --text: #f8fafc; }
-        body { 
-            margin: 0; min-height: 100vh; font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at bottom right, #1e3a8a, #0f172a); color: var(--text);
-            display: flex; justify-content: center; align-items: center; padding: 20px;
-        }
-        .about-card {
-            background: var(--glass); backdrop-filter: blur(15px);
-            padding: 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
-            max-width: 500px; text-align: center; animation: fadeIn 1s ease-out;
-        }
-        .profile-img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--accent); margin-bottom: 20px; object-fit: cover; }
-        h1 { margin: 0; font-size: 2rem; color: var(--accent); }
-        p { color: #cbd5e1; line-height: 1.6; font-size: 1rem; margin: 20px 0; }
-        .tech-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-        .tag { background: rgba(59, 130, 246, 0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; border: 1px solid var(--accent); }
-        .back-btn { display: inline-block; margin-top: 30px; color: white; text-decoration: none; border-bottom: 1px solid white; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tentang Saya | Rapi Dev</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── TOKENS ─────────────────────────────────────────────── */
+    :root {
+      --bg:        #060b18;
+      --surface:   #0d1528;
+      --glass:     rgba(13, 21, 40, 0.72);
+      --blue:      #3b82f6;
+      --cyan:      #22d3ee;
+      --violet:    #818cf8;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --border:    rgba(99, 132, 246, 0.18);
+      --ff-display: 'Space Grotesk', sans-serif;
+      --ff-mono:    'Space Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--ff-display);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── CANVAS BACKGROUND ──────────────────────────────────── */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ─── NOISE OVERLAY ──────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ─── GRID LINES ─────────────────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── LAYOUT ─────────────────────────────────────────────── */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 60px 24px 100px;
+    }
+
+    /* ─── HERO ───────────────────────────────────────────────── */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding-bottom: 80px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 80px;
+    }
+
+    /* Avatar ring */
+    .avatar-wrap {
+      position: relative;
+      width: 148px;
+      height: 148px;
+      margin-bottom: 36px;
+      opacity: 0;
+      animation: fadeUp 0.9s cubic-bezier(.16,1,.3,1) 0.2s forwards;
+    }
+    .avatar-ring {
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      background: linear-gradient(135deg, var(--blue), var(--cyan), var(--violet)) border-box;
+      -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: destination-out;
+      mask-composite: exclude;
+      animation: spin 8s linear infinite;
+    }
+    .avatar-ring-2 {
+      position: absolute;
+      inset: -16px;
+      border-radius: 50%;
+      border: 1px solid rgba(59,130,246,0.25);
+      animation: spin 14s linear infinite reverse;
+    }
+    .avatar-glow {
+      position: absolute;
+      inset: -30px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,130,246,0.2) 0%, transparent 70%);
+      animation: pulse 3s ease-in-out infinite;
+    }
+    .avatar-img {
+      width: 148px;
+      height: 148px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.3);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 0.75rem;
+      font-family: var(--ff-mono);
+      color: #4ade80;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeUp 0.9s cubic-bezier(.16,1,.3,1) 0.4s forwards;
+    }
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: blink 1.4s ease-in-out infinite;
+    }
+
+    /* Name */
+    .hero-name {
+      font-size: clamp(2.8rem, 8vw, 5rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      margin-bottom: 8px;
+      opacity: 0;
+      animation: fadeUp 0.9s cubic-bezier(.16,1,.3,1) 0.5s forwards;
+    }
+    .hero-name .word-blue { color: var(--blue); }
+    .hero-name .word-cyan { color: var(--cyan); }
+
+    /* Tagline typewriter */
+    .tagline {
+      font-family: var(--ff-mono);
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 28px;
+      height: 24px;
+      opacity: 0;
+      animation: fadeUp 0.9s cubic-bezier(.16,1,.3,1) 0.7s forwards;
+    }
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      background: var(--cyan);
+      margin-left: 3px;
+      vertical-align: middle;
+      animation: blink 0.8s step-end infinite;
+    }
+
+    /* Hero bio */
+    .hero-bio {
+      max-width: 560px;
+      color: #94a3b8;
+      line-height: 1.8;
+      font-size: 1.05rem;
+      margin-bottom: 36px;
+      opacity: 0;
+      animation: fadeUp 0.9s cubic-bezier(.16,1,.3,1) 0.85s forwards;
+    }
+
+    /* CTA buttons */
+    .hero-cta {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      animation: fadeUp 0.9s cubic-bezier(.16,1,.3,1) 1s forwards;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      border-radius: 40px;
+      font-family: var(--ff-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue), var(--violet));
+      color: #fff;
+      box-shadow: 0 0 24px rgba(59,130,246,0.4);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(59,130,246,0.6); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: rgba(59,130,246,0.08); transform: translateY(-2px); }
+
+    /* ─── SECTION LABEL ──────────────────────────────────────── */
+    .section-label {
+      font-family: var(--ff-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 40px;
+    }
+
+    /* ─── STATS ROW ──────────────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 80px;
+    }
+    .stat-card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 20px;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .stat-card.visible {
+      animation: fadeUp 0.7s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(59,130,246,0.15);
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    }
+    .stat-num {
+      font-size: 2.6rem;
+      font-weight: 700;
+      font-family: var(--ff-mono);
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label { color: var(--muted); font-size: 0.85rem; margin-top: 6px; }
+
+    /* ─── SKILLS SECTION ─────────────────────────────────────── */
+    .skills-section { margin-bottom: 80px; }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .skill-card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      backdrop-filter: blur(12px);
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .skill-card.visible {
+      animation: slideRight 0.6s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    .skill-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(59,130,246,0.12);
+      border-color: rgba(59,130,246,0.35);
+    }
+    .skill-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .skill-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .skill-name { font-weight: 600; font-size: 0.95rem; }
+    .skill-level-wrap {
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      height: 5px;
+      overflow: hidden;
+    }
+    .skill-level-bar {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--blue), var(--cyan));
+      width: 0;
+      transition: width 1.2s cubic-bezier(.16,1,.3,1);
+    }
+    .skill-level-label {
+      display: flex; justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    /* ─── TECH TAGS ──────────────────────────────────────────── */
+    .tags-section { margin-bottom: 80px; }
+    .tags-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .tech-tag {
+      padding: 8px 18px;
+      border-radius: 30px;
+      font-size: 0.82rem;
+      font-family: var(--ff-mono);
+      border: 1px solid var(--border);
+      background: rgba(59,130,246,0.06);
+      color: var(--text);
+      cursor: default;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+      opacity: 0;
+      animation: popIn 0.5s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    .tech-tag:hover {
+      background: rgba(59,130,246,0.18);
+      border-color: var(--blue);
+      transform: translateY(-2px);
+    }
+
+    /* ─── TIMELINE ───────────────────────────────────────────── */
+    .timeline-section { margin-bottom: 80px; }
+    .timeline { position: relative; padding-left: 36px; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 7px; top: 0; bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--blue), transparent);
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 36px;
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    .timeline-item.visible {
+      animation: slideLeft 0.6s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    .timeline-dot {
+      position: absolute;
+      left: -29px;
+      top: 4px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--blue);
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 12px rgba(59,130,246,0.6);
+    }
+    .timeline-year {
+      font-family: var(--ff-mono);
+      font-size: 0.75rem;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+    .timeline-title {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+    .timeline-desc {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    /* ─── CONTACT ────────────────────────────────────────────── */
+    .contact-section {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 52px 40px;
+      text-align: center;
+      backdrop-filter: blur(16px);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 60px;
+      opacity: 0;
+    }
+    .contact-section.visible {
+      animation: fadeUp 0.9s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    .contact-section::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%; transform: translateX(-50%);
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(59,130,246,0.12), transparent 70%);
+      pointer-events: none;
+    }
+    .contact-title {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .contact-sub {
+      color: var(--muted);
+      margin-bottom: 32px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.7;
+    }
+    .social-row {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .social-btn:hover {
+      background: rgba(59,130,246,0.14);
+      border-color: var(--blue);
+      transform: translateY(-2px);
+    }
+
+    /* ─── BACK LINK ──────────────────────────────────────────── */
+    .back-row {
+      text-align: center;
+    }
+    .back-link {
+      font-family: var(--ff-mono);
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--blue); }
+
+    /* ─── FLOATING PARTICLES ─────────────────────────────────── */
+    .particle {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      animation: drift linear infinite;
+    }
+
+    /* ─── SCROLL PROGRESS ────────────────────────────────────── */
+    .scroll-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--blue), var(--cyan));
+      z-index: 100;
+      width: 0%;
+      transition: width 0.1s;
+      box-shadow: 0 0 8px rgba(34,211,238,0.6);
+    }
+
+    /* ─── KEYFRAMES ──────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideRight {
+      from { opacity: 0; transform: translateX(-24px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideLeft {
+      from { opacity: 0; transform: translateX(24px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50%       { opacity: 1;   transform: scale(1.08); }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+    @keyframes drift {
+      from { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 0.5; }
+      to   { transform: translateY(-10vh) translateX(60px) rotate(360deg); opacity: 0; }
+    }
+
+    /* ─── RESPONSIVE ─────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      .stat-num   { font-size: 1.8rem; }
+      .contact-section { padding: 36px 20px; }
+      .hero-name  { font-size: 2.6rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
 </head>
 <body>
-    <div class="about-card">
-        <img src="https://ui-avatars.com/api/?name=Rapi+Dev&background=3b82f6&color=fff&size=200" alt="Rapi Dev" class="profile-img">
-        <h1>Raffi</h1>
-        <p>
-            Halo! Saya Raffi, seorang pelajar asal Bandung yang memiliki ketertarikan mendalam pada teknologi AI dan pengembangan web. 
-            AI Hub ini saya bangun sebagai proyek personal untuk mempermudah akses ke berbagai alat berbasis AI. 
-            Saya percaya bahwa teknologi harus bisa digunakan oleh siapa saja dengan cara yang sederhana dan elegan.
-        </p>
-        <div class="tech-tags">
-            <span class="tag">Python</span>
-            <span class="tag">Web Development</span>
-            <span class="tag">AI Enthusiast</span>
-            <span class="tag">Bandung Tech</span>
-        </div>
-        <a href="portofolio.html" class="back-btn">← Kembali ke Dashboard</a>
+
+  <!-- Scroll progress bar -->
+  <div class="scroll-bar" id="scrollBar"></div>
+
+  <!-- Animated star/particle canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="wrapper">
+
+    <!-- ── HERO ───────────────────────────────────────────────── -->
+    <section class="hero">
+
+      <div class="avatar-wrap">
+        <div class="avatar-glow"></div>
+        <div class="avatar-ring-2"></div>
+        <div class="avatar-ring"></div>
+        <img
+          class="avatar-img"
+          src="https://ui-avatars.com/api/?name=Raffi&background=3b82f6&color=fff&size=200&bold=true"
+          alt="Raffi"
+        />
+      </div>
+
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        Tersedia untuk proyek baru
+      </div>
+
+      <h1 class="hero-name">
+        Halo, saya <span class="word-blue">Raffi</span><span class="word-cyan">.</span>
+      </h1>
+
+      <p class="tagline" id="tagline"><span id="typed"></span><span class="cursor"></span></p>
+
+      <p class="hero-bio">
+        Pelajar asal Bandung yang jatuh cinta pada persimpangan antara AI dan pengembangan web.
+        AI Hub ini lahir dari keyakinan sederhana: teknologi canggih seharusnya bisa dijangkau semua orang,
+        bukan hanya mereka yang membaca dokumentasi ratusan halaman.
+      </p>
+
+      <div class="hero-cta">
+        <a href="mailto:raffi@rapidev.id" class="btn btn-primary">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+          Hubungi Saya
+        </a>
+        <a href="portofolio.html" class="btn btn-ghost">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+          </svg>
+          Lihat Proyek
+        </a>
+      </div>
+    </section>
+
+    <!-- ── STATS ──────────────────────────────────────────────── -->
+    <div class="stats-grid">
+      <div class="stat-card" data-delay="0">
+        <div class="stat-num" data-target="12">0</div>
+        <div class="stat-label">Proyek Selesai</div>
+      </div>
+      <div class="stat-card" data-delay="150">
+        <div class="stat-num" data-target="3">0</div>
+        <div class="stat-label">Tahun Belajar</div>
+      </div>
+      <div class="stat-card" data-delay="300">
+        <div class="stat-num" data-target="5">0</div>
+        <div class="stat-label">Tech Stack Aktif</div>
+      </div>
     </div>
+
+    <!-- ── SKILLS ─────────────────────────────────────────────── -->
+    <section class="skills-section" id="skills">
+      <p class="section-label">// keahlian</p>
+      <h2 class="section-title">Yang Saya Kuasai</h2>
+      <div class="skills-grid" id="skillsGrid"></div>
+    </section>
+
+    <!-- ── TECH TAGS ──────────────────────────────────────────── -->
+    <section class="tags-section">
+      <p class="section-label">// teknologi</p>
+      <h2 class="section-title">Stack &amp; Tools</h2>
+      <div class="tags-wrap" id="tagsWrap"></div>
+    </section>
+
+    <!-- ── TIMELINE ───────────────────────────────────────────── -->
+    <section class="timeline-section">
+      <p class="section-label">// perjalanan</p>
+      <h2 class="section-title">Perjalanan Saya</h2>
+      <div class="timeline" id="timeline"></div>
+    </section>
+
+    <!-- ── CONTACT ────────────────────────────────────────────── -->
+    <section class="contact-section" id="contact">
+      <h2 class="contact-title">Mari Berkolaborasi 🚀</h2>
+      <p class="contact-sub">
+        Punya ide proyek atau sekadar ingin ngobrol soal AI dan teknologi?
+        Pintu saya selalu terbuka.
+      </p>
+      <div class="social-row">
+        <a href="#" class="social-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+          GitHub
+        </a>
+        <a href="#" class="social-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          LinkedIn
+        </a>
+        <a href="#" class="social-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          Telegram
+        </a>
+      </div>
+    </section>
+
+    <!-- ── BACK ────────────────────────────────────────────────── -->
+    <div class="back-row">
+      <a href="portofolio.html" class="back-link">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Kembali ke Dashboard
+      </a>
+    </div>
+
+  </div><!-- /wrapper -->
+
+  <script>
+  /* ───────────────────────────────────────────────────────────── *
+   *  CANVAS BACKGROUND — star field + nebula blobs              *
+   * ───────────────────────────────────────────────────────────── */
+  (function() {
+    const canvas = document.getElementById('bg-canvas');
+    const ctx    = canvas.getContext('2d');
+    let W, H, stars = [], blobs = [];
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    function mkStars() {
+      stars = [];
+      for (let i = 0; i < 180; i++) {
+        stars.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: Math.random() * 1.4 + 0.3,
+          a: Math.random(),
+          da: (Math.random() - 0.5) * 0.006,
+          vx: (Math.random() - 0.5) * 0.12,
+          vy: (Math.random() - 0.5) * 0.12,
+        });
+      }
+    }
+
+    function mkBlobs() {
+      blobs = [
+        { x: W * 0.15, y: H * 0.2,  r: 260, c: 'rgba(59,130,246,', a: 0.07, da: 0.0004 },
+        { x: W * 0.85, y: H * 0.75, r: 200, c: 'rgba(129,140,248,', a: 0.06, da: -0.0003 },
+        { x: W * 0.5,  y: H * 0.5,  r: 180, c: 'rgba(34,211,238,',  a: 0.04, da: 0.0005 },
+      ];
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      // blobs
+      blobs.forEach(b => {
+        b.a = Math.max(0.02, Math.min(0.12, b.a + b.da));
+        const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+        g.addColorStop(0, b.c + b.a + ')');
+        g.addColorStop(1, b.c + '0)');
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fillStyle = g;
+        ctx.fill();
+      });
+
+      // stars
+      stars.forEach(s => {
+        s.x = (s.x + s.vx + W) % W;
+        s.y = (s.y + s.vy + H) % H;
+        s.a = Math.max(0.1, Math.min(1, s.a + s.da));
+        if (Math.random() < 0.002) s.da *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(148,163,184,${s.a})`;
+        ctx.fill();
+      });
+
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', () => { resize(); mkStars(); mkBlobs(); });
+    resize(); mkStars(); mkBlobs(); draw();
+  })();
+
+
+  /* ───────────────────────────────────────────────────────────── *
+   *  TYPEWRITER                                                  *
+   * ───────────────────────────────────────────────────────────── */
+  (function() {
+    const lines = [
+      'Web Developer & AI Enthusiast',
+      'Pelajar dari Bandung 🌆',
+      'Builder of AI Tools',
+      'Open Source Contributor',
+      'Lifelong Learner ✨',
+    ];
+    const el   = document.getElementById('typed');
+    let li = 0, ci = 0, deleting = false, wait = 0;
+
+    function tick() {
+      const line = lines[li];
+      if (!deleting) {
+        el.textContent = line.slice(0, ++ci);
+        if (ci === line.length) { deleting = true; wait = 60; }
+      } else {
+        if (--wait > 0) { setTimeout(tick, 28); return; }
+        el.textContent = line.slice(0, --ci);
+        if (ci === 0) { deleting = false; li = (li + 1) % lines.length; }
+      }
+      setTimeout(tick, deleting ? 38 : 68);
+    }
+    setTimeout(tick, 1400);
+  })();
+
+
+  /* ───────────────────────────────────────────────────────────── *
+   *  SCROLL PROGRESS BAR                                        *
+   * ───────────────────────────────────────────────────────────── */
+  const scrollBar = document.getElementById('scrollBar');
+  window.addEventListener('scroll', () => {
+    const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+    scrollBar.style.width = pct + '%';
+  });
+
+
+  /* ───────────────────────────────────────────────────────────── *
+   *  SKILLS DATA & RENDER                                       *
+   * ───────────────────────────────────────────────────────────── */
+  const skills = [
+    { name: 'Python',           pct: 78, icon: '🐍', bg: '#1e3a2f' },
+    { name: 'HTML & CSS',       pct: 90, icon: '🎨', bg: '#2d1e3a' },
+    { name: 'JavaScript',       pct: 72, icon: '⚡', bg: '#2d2d1a' },
+    { name: 'AI / ML Tools',    pct: 65, icon: '🤖', bg: '#1a2a3a' },
+    { name: 'Prompt Engineering',pct:80, icon: '✍️', bg: '#1e2a2a' },
+    { name: 'Git & GitHub',     pct: 68, icon: '🔧', bg: '#2a1e2a' },
+  ];
+
+  const grid = document.getElementById('skillsGrid');
+  skills.forEach((s, i) => {
+    const card = document.createElement('div');
+    card.className = 'skill-card';
+    card.dataset.delay = i * 80;
+    card.innerHTML = `
+      <div class="skill-header">
+        <div class="skill-icon" style="background:${s.bg}">${s.icon}</div>
+        <span class="skill-name">${s.name}</span>
+      </div>
+      <div class="skill-level-wrap">
+        <div class="skill-level-bar" data-pct="${s.pct}"></div>
+      </div>
+      <div class="skill-level-label">
+        <span>Pemula</span><span>${s.pct}%</span>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+
+  /* ───────────────────────────────────────────────────────────── *
+   *  TECH TAGS RENDER                                           *
+   * ───────────────────────────────────────────────────────────── */
+  const tags = [
+    'Python','FastAPI','Flask','HTML5','CSS3','JavaScript','TailwindCSS',
+    'React (Belajar)','Node.js','Git','GitHub','VS Code','Linux',
+    'OpenAI API','HuggingFace','Jupyter','Docker (Belajar)','REST API',
+    'Prompt Engineering','Figma','Vercel','Netlify','Bandung Tech',
+  ];
+  const wrap = document.getElementById('tagsWrap');
+  tags.forEach((t, i) => {
+    const span = document.createElement('span');
+    span.className = 'tech-tag';
+    span.textContent = t;
+    span.style.animationDelay = (i * 40) + 'ms';
+    span.style.animationPlayState = 'paused';
+    wrap.appendChild(span);
+  });
+
+
+  /* ───────────────────────────────────────────────────────────── *
+   *  TIMELINE RENDER                                            *
+   * ───────────────────────────────────────────────────────────── */
+  const events = [
+    { year: '2022', title: 'Mulai Belajar Programming', desc: 'Berkenalan dengan HTML & CSS lewat tutorial YouTube. Mulai memahami bahwa halaman web bisa dibuat sendiri.' },
+    { year: '2023', title: 'Eksplorasi Python & AI', desc: 'Mendalami Python dan menemukan dunia machine learning. Pertama kali bereksperimen dengan model NLP sederhana.' },
+    { year: '2024', title: 'Membangun AI Hub', desc: 'Meluncurkan proyek AI Hub sebagai platform personal untuk mengumpulkan dan berbagi alat berbasis AI yang berguna.' },
+    { year: '2025', title: 'Full-stack & API Integration', desc: 'Mulai mengintegrasikan berbagai API AI (OpenAI, HuggingFace) ke dalam proyek web nyata dengan antarmuka yang lebih matang.' },
+    { year: '2026 →', title: 'Terus Berkembang', desc: 'Fokus pada pengembangan produk AI yang benar-benar bermanfaat untuk komunitas lokal Bandung dan sekitarnya.' },
+  ];
+
+  const tl = document.getElementById('timeline');
+  events.forEach((ev, i) => {
+    const item = document.createElement('div');
+    item.className = 'timeline-item';
+    item.dataset.delay = i * 100;
+    item.innerHTML = `
+      <div class="timeline-dot"></div>
+      <div class="timeline-year">${ev.year}</div>
+      <div class="timeline-title">${ev.title}</div>
+      <div class="timeline-desc">${ev.desc}</div>`;
+    tl.appendChild(item);
+  });
+
+
+  /* ───────────────────────────────────────────────────────────── *
+   *  COUNTER ANIMATION                                          *
+   * ───────────────────────────────────────────────────────────── */
+  function animateCounter(el, target, duration = 1200) {
+    let start = null;
+    function step(ts) {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(ease * target);
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = target + '+';
+    }
+    requestAnimationFrame(step);
+  }
+
+
+  /* ───────────────────────────────────────────────────────────── *
+   *  INTERSECTION OBSERVER — trigger all scroll animations      *
+   * ───────────────────────────────────────────────────────────── */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      const delay = parseInt(el.dataset.delay || 0);
+
+      // stat cards
+      if (el.classList.contains('stat-card')) {
+        setTimeout(() => {
+          el.classList.add('visible');
+          const num = el.querySelector('.stat-num');
+          animateCounter(num, parseInt(num.dataset.target), 1000);
+        }, delay);
+      }
+      // skill cards
+      else if (el.classList.contains('skill-card')) {
+        setTimeout(() => {
+          el.classList.add('visible');
+          const bar = el.querySelector('.skill-level-bar');
+          setTimeout(() => { bar.style.width = bar.dataset.pct + '%'; }, 200);
+        }, delay);
+      }
+      // timeline items
+      else if (el.classList.contains('timeline-item')) {
+        setTimeout(() => el.classList.add('visible'), delay);
+      }
+      // contact section
+      else if (el.classList.contains('contact-section')) {
+        el.classList.add('visible');
+      }
+      // tech tags
+      else if (el.classList.contains('tech-tag')) {
+        el.style.animationPlayState = 'running';
+      }
+
+      io.unobserve(el);
+    });
+  }, { threshold: 0.15 });
+
+  // observe everything
+  document.querySelectorAll(
+    '.stat-card, .skill-card, .timeline-item, .contact-section, .tech-tag'
+  ).forEach(el => io.observe(el));
+
+
+  /* ───────────────────────────────────────────────────────────── *
+   *  FLOATING PARTICLES                                         *
+   * ───────────────────────────────────────────────────────────── */
+  const colors = ['#3b82f6','#22d3ee','#818cf8','#60a5fa'];
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 4 + 2;
+    const dur  = Math.random() * 18 + 12;
+    const del  = Math.random() * 20;
+    const left = Math.random() * 100;
+    const col  = colors[Math.floor(Math.random() * colors.length)];
+    Object.assign(p.style, {
+      width: size + 'px',
+      height: size + 'px',
+      left: left + 'vw',
+      bottom: '-20px',
+      background: col,
+      opacity: Math.random() * 0.5 + 0.1,
+      animationDuration: dur + 's',
+      animationDelay: del + 's',
+    });
+    document.body.appendChild(p);
+  }
+
+  </script>
 </body>
 </html>
