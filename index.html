@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   
-  <!-- Firebase SDK Compat (Paling mudah untuk single HTML) -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -41,7 +40,6 @@
 
   <div class="max-w-6xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-    <!-- Main Content -->
     <div class="lg:col-span-7 space-y-6">
       <div class="bg-gradient-to-r from-zinc-900 to-zinc-800 rounded-3xl p-8 text-center">
         <p class="text-emerald-400 text-sm">Saldo Koin</p>
@@ -85,7 +83,6 @@
       </div>
     </div>
 
-    <!-- AI Assistant -->
     <div class="lg:col-span-5">
       <div class="bg-zinc-900 rounded-3xl p-6 h-full flex flex-col">
         <h2 class="text-2xl font-semibold mb-4 flex items-center gap-3">
@@ -105,15 +102,13 @@
   </div>
 
   <script>
-    // === CONFIG FIREBASE KAMU ===
     const firebaseConfig = {
       apiKey: "AIzaSyBJJjcICAkbVWjrw5-zYMzcKqPGhS0nS0I",
       authDomain: "piwstore.firebaseapp.com",
       projectId: "piwstore",
       storageBucket: "piwstore.firebasestorage.app",
       messagingSenderId: "419258630997",
-      appId: "1:419258630997:web:aefc0e34cc4b7ca16d25dc",
-      measurementId: "G-M6NHQMHQV4"
+      appId: "1:419258630997:web:aefc0e34cc4b7ca16d25dc"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -123,34 +118,44 @@
     let currentUser = null;
     let coins = 0;
 
+    // GANTI KE REDIRECT (lebih stabil di HP)
     function loginGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then((result) => {
-          currentUser = result.user;
-          document.getElementById('login-btn').classList.add('hidden');
-          document.getElementById('user-info').classList.remove('hidden');
-          document.getElementById('avatar').src = currentUser.photoURL;
-          document.getElementById('username').textContent = currentUser.displayName || currentUser.email;
-          loadUserData();
-        })
-        .catch((error) => {
-          console.error(error);
-          alert("Login gagal: " + error.message);
-        });
+      auth.signInWithRedirect(provider);
     }
+
+    // Cek apakah ada hasil redirect
+    auth.getRedirectResult().then((result) => {
+      if (result.user) {
+        currentUser = result.user;
+        document.getElementById('login-btn').classList.add('hidden');
+        document.getElementById('user-info').classList.remove('hidden');
+        document.getElementById('avatar').src = currentUser.photoURL;
+        document.getElementById('username').textContent = currentUser.displayName || currentUser.email;
+        loadUserData();
+      }
+    }).catch((error) => {
+      console.error(error);
+    });
+
+    // Cek user saat halaman dimuat
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('login-btn').classList.add('hidden');
+        document.getElementById('user-info').classList.remove('hidden');
+        document.getElementById('avatar').src = user.photoURL;
+        document.getElementById('username').textContent = user.displayName || user.email;
+        loadUserData();
+      }
+    });
 
     function loadUserData() {
       db.collection("users").doc(currentUser.uid).get().then((doc) => {
         if (doc.exists) {
           coins = doc.data().coins || 0;
         } else {
-          db.collection("users").doc(currentUser.uid).set({
-            coins: 0,
-            email: currentUser.email,
-            name: currentUser.displayName,
-            createdAt: new Date()
-          });
+          db.collection("users").doc(currentUser.uid).set({ coins: 0, email: currentUser.email });
           coins = 0;
         }
         updateCoinDisplay();
@@ -163,8 +168,8 @@
     }
 
     function claimTask() {
-      if (!currentUser) return alert("Login Gmail dulu!");
-
+      if (!currentUser) return alert("Login dulu!");
+      // ... (sama seperti sebelumnya)
       const btn = document.getElementById('claim-btn');
       btn.innerHTML = "🤖 AI Verifikasi...";
       btn.disabled = true;
@@ -173,24 +178,22 @@
         coins += 1;
         db.collection("users").doc(currentUser.uid).update({ coins: coins });
         updateCoinDisplay();
-        alert("✅ Verifikasi Berhasil! +1 Koin");
+        alert("✅ +1 Koin Berhasil!");
         btn.innerHTML = "✅ Sudah Diklaim";
-      }, 1800);
+      }, 1500);
     }
 
     function requestFollow(platform) {
       if (!currentUser) return alert("Login dulu!");
-      
-      const cost = { tiktok: 10, instagram: 8, youtube: 15 }[platform];
+      const cost = { tiktok: 10, instagram: 8, youtube: 15 }[platform] || 10;
       if (coins < cost) return alert("Koin tidak cukup!");
 
       coins -= cost;
       db.collection("users").doc(currentUser.uid).update({ coins: coins });
       updateCoinDisplay();
-      alert(`✅ Permintaan ${platform.toUpperCase()} Followers berhasil dikirim!`);
+      alert(`✅ Permintaan ${platform.toUpperCase()} berhasil!`);
     }
 
-    // AI Chat
     function sendToAI() {
       const input = document.getElementById('chat-input');
       const message = input.value.trim();
@@ -198,20 +201,17 @@
 
       const chatBox = document.getElementById('chat-box');
       chatBox.innerHTML += `<div class="flex justify-end"><div class="chat-bubble bg-emerald-600 px-5 py-3 rounded-3xl rounded-br-none">${message}</div></div>`;
-
       input.value = "";
 
       setTimeout(() => {
-        let reply = "Saya bisa bantu soal followers, koin, atau strategi sosial media. Tanya apa saja!";
+        let reply = "Saya Rapii AI. Tanya apa saja tentang followers atau koin.";
         const msg = message.toLowerCase();
-
-        if (msg.includes("follow") || msg.includes("followers")) reply = "Kerjakan misi follow @rapii_wehhh dulu untuk dapat koin.";
-        else if (msg.includes("koin") || msg.includes("coin")) reply = `Kamu punya ${coins} koin sekarang.`;
-        else if (msg.includes("tips") || msg.includes("cara")) reply = "Buat konten bagus, konsisten, dan gunakan sistem ini untuk boost awal.";
-
+        if (msg.includes("follow")) reply = "Follow @rapii_wehhh dulu untuk dapat 1 koin.";
+        else if (msg.includes("koin")) reply = `Kamu punya ${coins} koin.`;
+        
         chatBox.innerHTML += `<div class="flex"><div class="chat-bubble bg-zinc-800 px-5 py-3 rounded-3xl rounded-bl-none">${reply}</div></div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
-      }, 800);
+      }, 700);
     }
 
     document.getElementById('chat-input').addEventListener('keypress', (e) => {
@@ -219,9 +219,8 @@
     });
 
     window.onload = () => {
-      document.getElementById('chat-box').innerHTML = `<div class="text-emerald-400">Halo! Saya Rapii AI. Ada yang bisa dibantu?</div>`;
+      document.getElementById('chat-box').innerHTML = `<div class="text-emerald-400">Halo! Login dulu ya biar bisa pakai fitur.</div>`;
     };
   </script>
 </body>
-  </html>
-  
+</html>
