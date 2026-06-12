@@ -68,37 +68,46 @@
         .tool-card:nth-child(9) { animation-delay: 0.5s; }
         .tool-card:nth-child(10) { animation-delay: 0.55s; }
 
-        /* AREA RATING WEB3FORMS */
-        .rating-container {
+        /* STYLE RATING & REQUEST FITUR */
+        .interactive-box {
             background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(10px);
             padding: 25px; border-radius: 20px; border: 1px dashed rgba(255,255,255,0.2);
-            text-align: center; width: 100%; max-width: 500px; margin: 40px auto 20px auto;
-            opacity: 0; animation: slideUpRating 0.8s forwards; animation-delay: 0.8s;
+            text-align: center; width: 100%; max-width: 500px; margin-top: 25px;
+            opacity: 0; animation: slideUpBox 0.8s forwards;
         }
+        #requestBox { animation-delay: 0.7s; }
+        #ratingForm { animation-delay: 0.9s; margin-bottom: 40px; }
         
-        @keyframes slideUpRating { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUpBox { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        .stars { display: flex; justify-content: center; gap: 10px; margin: 15px 0; flex-direction: row-reverse; }
-        .stars input { display: none; }
-        .stars label { font-size: 2.2rem; color: rgba(255,255,255,0.1); cursor: pointer; transition: 0.3s; }
+        /* Form Input Umum */
+        .interactive-box input[type="text"], .interactive-box textarea {
+            width: 100%; background: rgba(15, 23, 42, 0.6); color: white;
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px;
+            font-size: 0.9rem; outline: none; margin-bottom: 15px; transition: 0.3s;
+        }
+        .interactive-box textarea { height: 80px; resize: none; }
+        .interactive-box input:focus, .interactive-box textarea:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+
+        /* Tombol */
+        .btn-action {
+            background: var(--accent); color: white; border: none; border-radius: 12px;
+            padding: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; 
+            font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn-action:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4); }
+        .btn-action:disabled { background: #475569; cursor: not-allowed; transform: none; box-shadow: none; }
         
+        .btn-telegram { background: #0ea5e9; }
+        .btn-telegram:hover { background: #0284c7; box-shadow: 0 5px 15px rgba(14, 165, 233, 0.4); }
+
+        /* Bintang Rating */
+        .stars { display: flex; justify-content: center; gap: 10px; margin: 15px 0 10px 0; flex-direction: row-reverse; }
+        .stars input { display: none; }
+        .stars label { font-size: 2.2rem; color: rgba(255,255,255,0.1); cursor: pointer; transition: 0.3s; line-height: 1; }
         .stars label:hover, .stars label:hover ~ label, .stars input:checked ~ label { 
             color: #f59e0b; text-shadow: 0 0 15px rgba(245, 158, 11, 0.5); 
         }
-        
-        .rating-container textarea {
-            width: 100%; height: 80px; background: rgba(15, 23, 42, 0.6); color: white;
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px;
-            font-size: 0.9rem; resize: none; outline: none; margin-bottom: 15px; transition: 0.3s;
-        }
-        .rating-container textarea:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
-        
-        .btn-submit-rating {
-            background: var(--accent); color: white; border: none; border-radius: 12px;
-            padding: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; font-size: 1rem;
-        }
-        .btn-submit-rating:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4); }
-        .btn-submit-rating:disabled { background: #475569; cursor: not-allowed; transform: none; box-shadow: none; }
     </style>
 </head>
 <body>
@@ -122,14 +131,28 @@
         <a href="qr.html" class="tool-card"><div class="icon">🔲</div><div class="info"><h3>QR Code</h3><p>Buat barcode cepat</p></div></a>
     </div>
 
-    <form class="rating-container" id="ratingForm" action="https://api.web3forms.com/submit" method="POST">
+    <div class="interactive-box" id="requestBox">
+        <h3 style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            💡 Request Fitur Baru
+        </h3>
+        <p style="color:#94a3b8; font-size: 0.85rem; margin: 5px 0 15px 0;">Pengen ada alat AI apa lagi di sini? Kasih tahu Rapi!</p>
+        
+        <input type="text" id="namaReq" placeholder="Nama Kamu (Opsional)">
+        <textarea id="pesanReq" placeholder="Contoh: Bang, tambahin fitur kalkulator dong..." required></textarea>
+        
+        <button class="btn-action btn-telegram" id="btnKirimReq" onclick="kirimKeTelegram()">
+            <svg style="width:20px; height:20px;" viewBox="0 0 24 24" fill="white"><path d="M2.046 11.232l19.55-7.55c.915-.353 1.77.202 1.542 1.144l-3.323 15.655c-.172.812-.663 1.015-1.336.636l-3.693-2.72-1.782 1.716c-.197.197-.363.363-.744.363l.265-3.76 6.845-6.182c.298-.265-.065-.412-.462-.148L8.45 15.706l-3.645-1.14c-.792-.246-.807-.792.165-1.173z"/></svg>
+            Kirim Request
+        </button>
+    </div>
+
+    <form class="interactive-box" id="ratingForm" action="https://api.web3forms.com/submit" method="POST">
         <h3 style="margin: 0;">Beri Rating AI Hub</h3>
         <p style="color:#94a3b8; font-size: 0.85rem; margin-top: 5px;">Bantu Rapi Dev jadi lebih baik!</p>
         
         <input type="hidden" name="access_key" value="d6f8fcdc-bba9-41bd-b2cc-24c991d44c36">
         <input type="hidden" name="subject" value="Ada Rating Baru di AI Hub Rapi Dev">
         <input type="hidden" name="from_name" value="Sistem Rating AI Hub">
-        
         <input type="hidden" name="name" value="Pengunjung Anonim">
         <input type="hidden" name="email" value="no-reply@rapi-aihub.com">
 
@@ -143,21 +166,64 @@
         
         <textarea name="Pesan Pengunjung" id="pesanRating" placeholder="Tulis masukan, saran, atau pujian di sini..." required></textarea>
         
-        <button type="submit" class="btn-submit-rating" id="btnKirimRating">Kirim Penilaian</button>
+        <button type="submit" class="btn-action" id="btnKirimRating">Kirim Penilaian</button>
     </form>
 
     <script>
+        // SCRIPT 1: LOGIKA REQUEST FITUR (TELEGRAM)
+        function kirimKeTelegram() {
+            const nama = document.getElementById('namaReq').value.trim() || "Pengunjung Anonim";
+            const pesan = document.getElementById('pesanReq').value.trim();
+            const btn = document.getElementById('btnKirimReq');
+
+            if (!pesan) {
+                alert("Tulis dulu request fiturnya ya!");
+                return;
+            }
+
+            // Data Bot Telegram Kamu
+            const botToken = "8675537430:AAFNdmH3-J0QCJOnQXh6nmUOFLc5Lhe_PBw"; 
+            const chatId = "7619879885"; 
+            
+            btn.disabled = true;
+            btn.innerText = "Mengirim...";
+
+            const teksTelegram = `💡 *REQUEST FITUR BARU*\n\n👤 *Dari:* ${nama}\n💬 *Pesan:* ${pesan}`;
+            const urlAPI = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+            fetch(urlAPI, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: chatId, text: teksTelegram, parse_mode: "Markdown" })
+            })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('requestBox').innerHTML = `
+                        <h3 style="color: #0ea5e9; margin:0;">Terkirim! 🚀</h3>
+                        <p style="color:#94a3b8; font-size: 0.9rem; margin-top:10px;">Ide kamu sudah meluncur langsung ke HP Rapi Dev.</p>
+                    `;
+                } else {
+                    alert("Gagal mengirim pesan. Pastikan kamu sudah klik START di bot Telegram kamu.");
+                    btn.disabled = false;
+                    btn.innerHTML = "Kirim Request";
+                }
+            })
+            .catch(error => {
+                alert("Gangguan jaringan.");
+                btn.disabled = false;
+                btn.innerHTML = "Kirim Request";
+            });
+        }
+
+        // SCRIPT 2: LOGIKA RATING (WEB3FORMS + ANTI SPAM LOCALSTORAGE)
         const form = document.getElementById('ratingForm');
         
-        // 1. Pengecekan saat halaman pertama kali dibuka
-        // Jika memori browser mencatat pengunjung sudah pernah rating, form dihilangkan
         if (localStorage.getItem('aiHub_sudah_rating') === 'true') {
             form.innerHTML = `
                 <h3 style="color: #3b82f6; margin:0;">Terima Kasih! 🌟</h3>
                 <p style="color:#94a3b8; font-size: 0.9rem; margin-top:10px;">Kamu sudah memberikan rating untuk AI Hub ini sebelumnya.</p>
             `;
         } else {
-            // 2. Jika belum pernah rating, jalankan proses pengiriman normal
             form.addEventListener('submit', function(e) {
                 e.preventDefault(); 
                 
@@ -167,16 +233,10 @@
 
                 const formData = new FormData(form);
 
-                fetch(form.action, {
-                    method: "POST",
-                    body: formData 
-                })
-                .then(async (response) => {
+                fetch(form.action, { method: "POST", body: formData })
+                .then(response => {
                     if (response.status === 200) {
-                        
-                        // 3. Simpan jejak ke dalam memori browser pengunjung agar tidak bisa spam
                         localStorage.setItem('aiHub_sudah_rating', 'true');
-                        
                         form.innerHTML = `
                             <h3 style="color: #10b981; margin:0;">Tersimpan! 🎉</h3>
                             <p style="color:#94a3b8; font-size: 0.9rem; margin-top:10px;">Terima kasih banyak atas rating dan masukanmu.</p>
