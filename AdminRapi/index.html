@@ -16,7 +16,6 @@
             flex-direction: column; 
         }
         
-        /* Bagian Header / Judul Atas */
         .header { 
             background: #1e293b; 
             padding: 15px 20px; 
@@ -26,7 +25,6 @@
         }
         .header h2 { font-size: 1.2rem; font-weight: 600; letter-spacing: 0.5px; }
 
-        /* Area Percakapan Utama */
         .chat-container { 
             flex: 1; 
             overflow-y: auto; 
@@ -36,7 +34,6 @@
             gap: 15px; 
         }
         
-        /* Desain Gelembung Teks (Chat Bubbles) */
         .message { 
             max-width: 85%; 
             padding: 12px 16px; 
@@ -44,6 +41,7 @@
             font-size: 0.95rem; 
             line-height: 1.5; 
             word-wrap: break-word; 
+            position: relative;
         }
         .user-msg { 
             background: #3b82f6; 
@@ -59,7 +57,19 @@
             white-space: pre-wrap; 
         }
         
-        /* Indikator Animasi "Berpikir" */
+        /* Desain Khusus Tombol Suara (TTS) */
+        .tts-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 8px;
+            display: inline-block;
+            transition: color 0.3s;
+        }
+        .tts-btn:hover { color: #3b82f6; }
+
         .typing { 
             align-self: flex-start; 
             color: #94a3b8; 
@@ -69,7 +79,6 @@
             padding: 0 20px;
         }
 
-        /* Area Input Teks di Bawah */
         .input-area { 
             background: #1e293b; 
             padding: 15px; 
@@ -90,8 +99,7 @@
         }
         input[type="text"]:focus { border-color: #3b82f6; }
         
-        /* Tombol Kirim Melingkar */
-        button { 
+        .btn-kirim { 
             background: #3b82f6; 
             color: white; 
             border: none; 
@@ -104,8 +112,8 @@
             cursor: pointer; 
             transition: background 0.3s; 
         }
-        button:hover { background: #2563eb; }
-        button svg { width: 20px; height: 20px; fill: white; }
+        .btn-kirim:hover { background: #2563eb; }
+        .btn-kirim svg { width: 20px; height: 20px; fill: white; }
     </style>
 </head>
 <body>
@@ -115,13 +123,12 @@
     </div>
 
     <div class="chat-container" id="chatBox">
-        <div class="message ai-msg">Halo! Saya siap membantu. Apa yang ingin kamu diskusikan hari ini?</div>
-    </div>
+        </div>
     <div class="typing" id="typingIndicator">AI sedang berpikir...</div>
 
     <div class="input-area">
         <input type="text" id="prompt" placeholder="Ketik pesan di sini..." onkeypress="handleEnter(event)">
-        <button onclick="askAI()">
+        <button class="btn-kirim" onclick="askAI()">
             <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         </button>
     </div>
@@ -131,17 +138,51 @@
         const typingIndicator = document.getElementById('typingIndicator');
         const promptInput = document.getElementById('prompt');
 
-        // Fungsi untuk menambahkan chat bubble ke layar
+        // Fungsi Membacakan Teks (Text-to-Speech)
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                // Hentikan suara sebelumnya jika tombol ditekan berulang kali
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID'; // Setel logat ke Bahasa Indonesia
+                utterance.rate = 1.0; // Kecepatan bicara (normal)
+                
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Browser HP kamu tidak mendukung fitur Text-to-Speech.");
+            }
+        }
+
+        // Fungsi menampilkan pesan ke layar
         function appendMessage(text, sender) {
             const msgDiv = document.createElement('div');
             msgDiv.classList.add('message');
             msgDiv.classList.add(sender === 'user' ? 'user-msg' : 'ai-msg');
-            msgDiv.innerText = text;
+            
+            if (sender === 'ai') {
+                // Teks AI
+                const textSpan = document.createElement('span');
+                textSpan.innerText = text;
+                msgDiv.appendChild(textSpan);
+                
+                // Tambahkan enter / baris baru
+                msgDiv.appendChild(document.createElement('br'));
+
+                // Tombol Suara
+                const speakBtn = document.createElement('button');
+                speakBtn.innerText = '🔊 Dengarkan';
+                speakBtn.classList.add('tts-btn');
+                speakBtn.onclick = () => speakText(text);
+                msgDiv.appendChild(speakBtn);
+            } else {
+                msgDiv.innerText = text;
+            }
+
             chatBox.appendChild(msgDiv);
-            chatBox.scrollTop = chatBox.scrollHeight; // Otomatis scroll ke bawah
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // Fitur mengirim pesan dengan menekan tombol Enter di keyboard
         function handleEnter(event) {
             if (event.key === 'Enter') askAI();
         }
@@ -150,15 +191,12 @@
             const prompt = promptInput.value.trim();
             if (!prompt) return;
 
-            // Memunculkan pesan yang kamu ketik ke layar
             appendMessage(prompt, 'user');
             promptInput.value = ''; 
             
-            // Memunculkan tulisan "AI sedang berpikir..."
             typingIndicator.style.display = 'block';
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // API Key yang sudah dipecah (menggunakan kuncimu)
             const bagian1 = "AQ.Ab8RN6I17XNIEcT7Mx2C"; 
             const bagian2 = "mRe7UxYMdK9xqGAfsImM-nLsqCNr1g";
             const API_KEY = bagian1 + bagian2;
@@ -171,14 +209,13 @@
                 });
                 
                 const data = await response.json();
-                typingIndicator.style.display = 'none'; // Sembunyikan indikator berpikir
+                typingIndicator.style.display = 'none'; 
                 
                 if (!response.ok) {
                     appendMessage("Pesan Error: " + (data.error?.message || "Akses ditolak."), 'ai');
                     return;
                 }
                 
-                // Menampilkan balasan AI
                 appendMessage(data.candidates[0].content.parts[0].text, 'ai');
                 
             } catch (error) {
