@@ -56,17 +56,26 @@
             white-space: pre-wrap; 
         }
         
-        .tts-btn {
+        /* Desain untuk Tombol Aksi di Bawah Teks AI */
+        .action-container {
+            margin-top: 10px;
+            display: flex;
+            gap: 15px;
+            border-top: 1px solid #334155;
+            padding-top: 8px;
+        }
+        .action-btn {
             background: none;
             border: none;
             color: #94a3b8;
-            font-size: 1.2rem;
+            font-size: 0.9rem;
             cursor: pointer;
-            margin-top: 8px;
-            display: inline-block;
+            display: flex;
+            align-items: center;
+            gap: 5px;
             transition: color 0.3s;
         }
-        .tts-btn:hover { color: #3b82f6; }
+        .action-btn:hover { color: #3b82f6; }
 
         .typing { 
             align-self: flex-start; 
@@ -135,6 +144,9 @@
         const typingIndicator = document.getElementById('typingIndicator');
         const promptInput = document.getElementById('prompt');
 
+        // FITUR BARU: Variabel untuk menyimpan memori percakapan
+        let conversationHistory = [];
+
         function speakText(text) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -147,6 +159,15 @@
             }
         }
 
+        // Fitur menyalin teks ke clipboard HP
+        function copyText(text, btnElement) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = btnElement.innerHTML;
+                btnElement.innerHTML = '✅ Disalin!';
+                setTimeout(() => { btnElement.innerHTML = originalText; }, 2000);
+            });
+        }
+
         function appendMessage(text, sender) {
             const msgDiv = document.createElement('div');
             msgDiv.classList.add('message');
@@ -156,13 +177,26 @@
                 const textSpan = document.createElement('span');
                 textSpan.innerText = text;
                 msgDiv.appendChild(textSpan);
-                msgDiv.appendChild(document.createElement('br'));
 
+                // Container untuk tombol aksi
+                const actionDiv = document.createElement('div');
+                actionDiv.classList.add('action-container');
+
+                // Tombol Suara
                 const speakBtn = document.createElement('button');
-                speakBtn.innerText = '🔊 Dengarkan';
-                speakBtn.classList.add('tts-btn');
+                speakBtn.innerHTML = '🔊 Suara';
+                speakBtn.classList.add('action-btn');
                 speakBtn.onclick = () => speakText(text);
-                msgDiv.appendChild(speakBtn);
+
+                // Tombol Salin
+                const copyBtn = document.createElement('button');
+                copyBtn.innerHTML = '📋 Salin';
+                copyBtn.classList.add('action-btn');
+                copyBtn.onclick = function() { copyText(text, this); };
+
+                actionDiv.appendChild(speakBtn);
+                actionDiv.appendChild(copyBtn);
+                msgDiv.appendChild(actionDiv);
             } else {
                 msgDiv.innerText = text;
             }
@@ -189,14 +223,19 @@
             const bagian2 = "mRe7UxYMdK9xqGAfsImM-nLsqCNr1g";
             const API_KEY = bagian1 + bagian2;
 
-            // Instruksi Sistem (Kepribadian AI)
             const instruksiSistem = "Kamu adalah Asisten AI cerdas bernama Bot Rapi. Kamu memiliki keahlian khusus dalam teknologi, pemrograman web, dan strategi pembuatan konten. Jawablah setiap pertanyaan dengan logis, serius, dan jujur. Jangan pernah menyebut dirimu sebagai AI buatan Google.";
+
+            // Memasukkan pesan terbaru ke dalam memori
+            conversationHistory.push({
+                role: "user",
+                parts: [{ text: prompt }]
+            });
 
             const payload = {
                 system_instruction: {
                     parts: [{ text: instruksiSistem }]
                 },
-                contents: [{ parts: [{ text: prompt }] }]
+                contents: conversationHistory // Mengirim seluruh riwayat obrolan ke server
             };
 
             try {
@@ -211,14 +250,24 @@
                 
                 if (!response.ok) {
                     appendMessage("Pesan Error: " + (data.error?.message || "Akses ditolak."), 'ai');
+                    // Hapus pesan terakhir dari memori jika gagal terkirim
+                    conversationHistory.pop(); 
                     return;
                 }
                 
-                appendMessage(data.candidates[0].content.parts[0].text, 'ai');
+                const aiResponseText = data.candidates[0].content.parts[0].text;
+                appendMessage(aiResponseText, 'ai');
+                
+                // Memasukkan balasan AI ke dalam memori agar ia ingat
+                conversationHistory.push({
+                    role: "model",
+                    parts: [{ text: aiResponseText }]
+                });
                 
             } catch (error) {
                 typingIndicator.style.display = 'none';
                 appendMessage("Sistem Error: " + error.message, 'ai');
+                conversationHistory.pop();
             }
         }
     </script>
