@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raffi | Portofolio Personal</title>
+    <style>
+        /* CSS Variabel & Reset Dasar */
+        :root { 
+            --bg: #0f172a; 
+            --text: #f8fafc; 
+            --accent: #3b82f6; 
+            --accent-glow: rgba(59, 130, 246, 0.5); 
+            --gradient: linear-gradient(90deg, #3b82f6, #10b981);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); overflow-x: hidden; }
+
+        /* --- Kumpulan Animasi CSS --- */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
+            100% { transform: translateY(0px) scale(1); }
+        }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 10px var(--accent-glow); }
+            50% { box-shadow: 0 0 25px var(--accent-glow), 0 0 10px #10b981; }
+            100% { box-shadow: 0 0 10px var(--accent-glow); }
+        }
+        @keyframes blink { 
+            0%, 100% { opacity: 1; } 
+            50% { opacity: 0; } 
+        }
+
+        /* Navigasi Atas */
+        nav { 
+            padding: 20px 50px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: rgba(15, 23, 42, 0.85); 
+            backdrop-filter: blur(10px); 
+            position: fixed; 
+            width: 100%; 
+            top: 0; 
+            z-index: 100; 
+            border-bottom: 1px solid #1e293b; 
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; color: var(--text); text-decoration: none; letter-spacing: 2px;}
+        .logo span { color: var(--accent); }
+
+        /* Area Utama (Hero Section) */
+        .hero { 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            text-align: center; 
+            padding: 0 20px; 
+            position: relative; 
+        }
+        
+        /* Bola Cahaya Mengambang di Belakang */
+        .hero::before { 
+            content: ''; 
+            position: absolute; 
+            width: 400px; 
+            height: 400px; 
+            background: var(--accent); 
+            filter: blur(150px); 
+            opacity: 0.15; 
+            z-index: -1; 
+            animation: float 8s infinite ease-in-out; 
+        }
+        
+        .greeting { font-size: 1.2rem; color: #94a3b8; margin-bottom: 10px; opacity: 0; animation: fadeInUp 1s ease forwards; }
+        .name { font-size: 4rem; font-weight: 800; margin-bottom: 10px; opacity: 0; animation: fadeInUp 1s ease 0.2s forwards; }
+        .name span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* Wadah Teks Animasi Mengetik */
+        .typing-container { font-size: 1.5rem; color: #cbd5e1; height: 40px; margin-bottom: 30px; opacity: 0; animation: fadeInUp 1s ease 0.4s forwards; }
+        .cursor { display: inline-block; width: 3px; height: 1.2rem; background-color: var(--accent); margin-left: 5px; animation: blink 0.8s infinite; vertical-align: middle; }
+
+        /* Tombol Aksi */
+        .btn-group { display: flex; gap: 15px; opacity: 0; animation: fadeInUp 1s ease 0.6s forwards; }
+        .btn { padding: 12px 30px; border-radius: 30px; font-weight: bold; text-decoration: none; transition: all 0.3s; font-size: 1rem; }
+        .btn-primary { background: var(--accent); color: white; border: 2px solid var(--accent); animation: pulseGlow 3s infinite; }
+        .btn-primary:hover { background: transparent; color: var(--accent); box-shadow: none; transform: translateY(-3px); }
+        .btn-outline { background: transparent; color: var(--text); border: 2px solid #334155; }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-3px); }
+
+        /* Label Keahlian */
+        .tech-stack { margin-top: 50px; display: flex; gap: 15px; opacity: 0; animation: fadeInUp 1s ease 0.8s forwards; flex-wrap: wrap; justify-content: center; }
+        .tech-badge { background: #1e293b; padding: 10px 20px; border-radius: 8px; border: 1px solid #334155; font-size: 0.9rem; color: #94a3b8; transition: border 0.3s, color 0.3s; cursor: default; }
+        .tech-badge:hover { border-color: var(--accent); color: white; }
+
+        /* Mode Layar HP */
+        @media (max-width: 768px) {
+            .name { font-size: 2.8rem; }
+            .typing-container { font-size: 1.2rem; }
+            nav { padding: 15px 20px; }
+            .btn-group { flex-direction: column; width: 100%; max-width: 250px; }
+            .btn { text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#" class="logo">RAF<span>FI</span>.</a>
+    </nav>
+
+    <section class="hero">
+        <div class="greeting">Halo, selamat datang di ruang digital saya.</div>
+        <h1 class="name">Saya <span>Raffi</span></h1>
+        
+        <div class="typing-container">
+            <span id="typed-text"></span><span class="cursor"></span>
+        </div>
+
+        <div class="btn-group">
+            <a href="#projects" class="btn btn-primary">Lihat Karya</a>
+            <a href="#contact" class="btn btn-outline">Hubungi Saya</a>
+        </div>
+
+        <div class="tech-stack">
+            <div class="tech-badge">🌐 Web Developer</div>
+            <div class="tech-badge">🎬 Content Creator</div>
+            <div class="tech-badge">🤖 AI Enthusiast</div>
+            <div class="tech-badge">🎮 Gamer & Rusher</div>
+        </div>
+    </section>
+
+    <script>
+        // Logika JavaScript untuk Animasi Mengetik Teks
+        const textArray = [
+            "Pengembang Web & AI", 
+            "Pembuat Konten Tutorial", 
+            "E-Sports Enthusiast", 
+            "Creative Thinker"
+        ];
+        
+        let textIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        const typedTextElement = document.getElementById("typed-text");
+
+        function typeEffect() {
+            const currentText = textArray[textIndex];
+            
+            if (isDeleting) {
+                // Menghapus huruf satu per satu
+                typedTextElement.textContent = currentText.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                // Mengetik huruf satu per satu
+                typedTextElement.textContent = currentText.substring(0, charIndex + 1);
+                charIndex++;
+            }
+
+            // Kecepatan ketik dan hapus
+            let typeSpeed = isDeleting ? 40 : 100;
+
+            if (!isDeleting && charIndex === currentText.length) {
+                // Jeda setelah kalimat selesai diketik
+                typeSpeed = 2000; 
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                // Pindah ke kalimat selanjutnya setelah dihapus
+                isDeleting = false;
+                textIndex = (textIndex + 1) % textArray.length;
+                typeSpeed = 500; 
+            }
+
+            setTimeout(typeEffect, typeSpeed);
+        }
+
+        // Jalankan animasi 1 detik setelah halaman dibuka agar selaras dengan animasi CSS
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(typeEffect, 1000);
+        });
+    </script>
+</body>
+</html>
