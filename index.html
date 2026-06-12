@@ -24,6 +24,7 @@
         h1 { font-size: 2.2rem; margin: 0; }
         .sub-link { color: #94a3b8; text-decoration: none; border-bottom: 1px solid #475569; }
 
+        /* Dashboard */
         .dashboard { width: 100%; max-width: 500px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 40px; }
         .tool-card { 
             background: var(--glass); backdrop-filter: blur(12px); padding: 20px; border-radius: 20px;
@@ -32,6 +33,7 @@
         }
         .tool-card:hover { transform: translateY(-5px); background: rgba(59, 130, 246, 0.3); border-color: var(--accent); }
 
+        /* Tombol Glow */
         .glow-container { display: flex; gap: 15px; justify-content: center; margin-bottom: 50px; }
         .glow-btn {
             background: #1e293b; color: white; padding: 15px 25px; border-radius: 50px;
@@ -40,7 +42,7 @@
         }
         .glow-btn:hover { box-shadow: 0 0 20px var(--accent); border-color: var(--accent); transform: scale(1.05); }
 
-        /* Testimoni */
+        /* Testimoni Otomatis */
         .testimonial-section { width: 100%; max-width: 500px; margin-bottom: 50px; }
         .testimonial-wall { display: flex; flex-direction: column; gap: 15px; }
         .testimonial-card { 
@@ -77,7 +79,9 @@
 
     <div class="testimonial-section fade-in">
         <h2 style="text-align: center;">Wall of Fame</h2>
-        <div class="testimonial-wall" id="testimonialWall"></div>
+        <div class="testimonial-wall" id="testimonialWall">
+            <p style="text-align:center;">Memuat testimoni...</p>
+        </div>
     </div>
 
     <script>
@@ -88,17 +92,26 @@
 
         // Fetch Testimoni Otomatis
         const API_URL = 'https://script.google.com/macros/s/AKfycbwXtZ5VnQQgUsfKMtFa_x1SLzYmCiBc8Rl-KysxVrXYF6f7YXqV1pq6JjH7lii9JeJb2w/exec';
+        
         fetch(API_URL)
         .then(res => res.json())
         .then(data => {
             const wall = document.getElementById('testimonialWall');
-            wall.innerHTML = data.map(t => `
-                <div class="testimonial-card">
-                    <small>${"⭐".repeat(t.rating)}</small>
-                    <p style="margin: 5px 0;">"${t.pesan}"</p>
-                    <strong>- ${t.nama}</strong>
-                </div>
-            `).join('');
+            if(data.length > 0) {
+                wall.innerHTML = data.map(t => `
+                    <div class="testimonial-card">
+                        <small>${"⭐".repeat(t.rating || 0)}</small>
+                        <p style="margin: 5px 0;">"${t.pesan}"</p>
+                        <strong>- ${t.nama}</strong>
+                    </div>
+                `).join('');
+            } else {
+                wall.innerHTML = "<p style='text-align:center;'>Belum ada testimoni.</p>";
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            document.getElementById('testimonialWall').innerHTML = "<p style='text-align:center;'>Gagal memuat data.</p>";
         });
     </script>
 </body>
