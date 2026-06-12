@@ -2,14 +2,16 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beri Rating - Rapi-Dev</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Tambahkan CSS estetik sesuai desain dashboard utama */
-        body { background: #0f172a; color: white; display: flex; justify-content: center; padding: 50px; font-family: sans-serif; }
-        .form-container { background: rgba(30, 41, 59, 0.8); padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; }
-        input, textarea, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 10px; border: none; }
-        button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 10px; cursor: pointer; }
+        body { background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Inter', sans-serif; margin: 0; }
+        .form-container { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.1); }
+        h2 { text-align: center; margin-bottom: 20px; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #3b82f6; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        button:hover { background: #2563eb; }
     </style>
 </head>
 <body>
@@ -21,29 +23,52 @@
         <option value="5">⭐⭐⭐⭐⭐ (5)</option>
         <option value="4">⭐⭐⭐⭐ (4)</option>
         <option value="3">⭐⭐⭐ (3)</option>
+        <option value="2">⭐⭐ (2)</option>
+        <option value="1">⭐ (1)</option>
     </select>
-    <textarea id="pesan" placeholder="Ceritakan pengalamanmu..."></textarea>
-    <button onclick="kirimKeSupabase()">Kirim Rating</button>
+    <textarea id="pesan" rows="4" placeholder="Apa pendapatmu tentang Rapi-Dev?"></textarea>
+    <button id="btnKirim" onclick="kirimData()">Kirim Rating</button>
 </div>
 
 <script>
-    // MASUKKAN KEMBALI URL & KEY SUPABASE KAMU DI SINI (Gunakan Public Key)
-    const supabase = supabase.createClient('https://tvhhtkkwbxoyztmnkjnh.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2aGh0a2t3YnhveXp0bW5ram5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNzYxMzAsImV4cCI6MjA5Njg1MjEzMH0.ABm1xdmmHnQl9sLW5Xn09OR7hXV38nau7yFSUIgVbTo');
+    // GANTI BAGIAN INI DENGAN DATA ASLIMU
+    const supabaseUrl = 'https://tvhhtkkwbxoyztmnkjnh.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2aGh0a2t3YnhveXp0bW5ram5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNzYxMzAsImV4cCI6MjA5Njg1MjEzMH0.ABm1xdmmHnQl9sLW5Xn09OR7hXV38nau7yFSUIgVbTo';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    async function kirimKeSupabase() {
+    async function kirimData() {
+        const btn = document.getElementById('btnKirim');
         const nama = document.getElementById('username').value;
         const rating = document.getElementById('ratingBintang').value;
         const pesan = document.getElementById('pesan').value;
 
-        const { data, error } = await supabase
-            .from('testimoni')
-            .insert([{ nama: nama, rating: parseInt(rating), pesan: pesan }]);
+        if (!nama || !pesan) {
+            alert("Mohon isi nama dan pesan!");
+            return;
+        }
 
-        if (error) {
-            alert("Gagal kirim: " + error.message);
-        } else {
-            alert("Terima kasih! Rating berhasil dikirim.");
-            window.location.href = "index.html"; // Balik ke dashboard otomatis
+        btn.disabled = true;
+        btn.innerText = "Mengirim...";
+
+        try {
+            const { data, error } = await supabase
+                .from('testimoni')
+                .insert([{ 
+                    nama: nama, 
+                    rating: parseInt(rating), 
+                    pesan: pesan 
+                }]);
+
+            if (error) throw error;
+
+            alert("Berhasil! Terima kasih.");
+            window.location.href = "index.html";
+        } catch (err) {
+            console.error("Error Detail:", err);
+            alert("Gagal kirim: " + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Kirim Rating";
         }
     }
 </script>
