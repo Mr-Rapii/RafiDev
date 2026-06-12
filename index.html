@@ -3,30 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <title>Login - Rapi-Dev</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: sans-serif; }
-        .container { background: #1e293b; padding: 30px; border-radius: 20px; text-align: center; }
-        button { padding: 12px 25px; background: #3b82f6; border: none; border-radius: 10px; color: white; cursor: pointer; font-weight: bold; }
+        body { background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
+        .login-card { background: #1e293b; padding: 40px; border-radius: 20px; text-align: center; }
+        button { padding: 15px 30px; background: #db4437; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Selamat Datang</h2>
-        <p>Login untuk mengakses portofolio saya</p>
-        <button id="loginBtn" onclick="login()">Login dengan Google</button>
-    </div>
 
-    <script>
-        const supabase = supabase.createClient('https://tvhhtkkwbxoyztmnkjnh.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2aGh0a2t3YnhveXp0bW5ram5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNzYxMzAsImV4cCI6MjA5Njg1MjEzMH0.ABm1xdmmHnQl9sLW5Xn09OR7hXV38nau7yFSUIgVbTo');
+<div class="login-card">
+    <h2>Login Akun</h2>
+    <button id="loginBtn">Login dengan Google</button>
+</div>
 
-        async function login() {
-            const { error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: 'URL_WEBSITE_MU/portofolio.html' }
-            });
-            if (error) alert("Error: " + error.message);
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBJJjcICAkbVWjrw5-zYMzcKqPGhS0nS0I",
+      authDomain: "piwstore.firebaseapp.com",
+      projectId: "piwstore",
+      storageBucket: "piwstore.firebasestorage.app",
+      messagingSenderId: "419258630997",
+      appId: "1:419258630997:web:44dc66ee3840a14a6d25dc",
+      measurementId: "G-V9WR4ZWPT1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    document.getElementById("loginBtn").onclick = async () => {
+        try {
+            await signInWithPopup(auth, provider);
+            alert("Login Berhasil!");
+            window.location.href = "portofolio.html";
+        } catch (error) {
+            alert("Login gagal: " + error.message);
         }
-    </script>
+    };
+</script>
 </body>
 </html>
