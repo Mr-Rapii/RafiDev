@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Hub - Penghitung Teks</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100vh; display: flex; flex-direction: column; }
+        
+        .header { background: #1e293b; padding: 15px 20px; text-align: center; border-bottom: 1px solid #334155; }
+        .header h2 { font-size: 1.2rem; font-weight: 600; }
+        
+        /* Menu Navigasi (9 Menu, Scroll ke Samping) */
+        .nav-bar { display: flex; background: #1e293b; border-bottom: 1px solid #334155; overflow-x: auto; white-space: nowrap; padding-bottom: 2px;}
+        .nav-link { flex: 1; text-align: center; padding: 12px; color: #94a3b8; text-decoration: none; font-size: 0.9rem; min-width: 80px; }
+        .nav-link.active { color: #3b82f6; border-bottom: 2px solid #3b82f6; background: #0f172a; font-weight: bold; }
+        
+        .main-content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .tool-container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; }
+        
+        textarea { width: 100%; height: 200px; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 8px; padding: 15px; font-size: 0.95rem; resize: none; outline: none; line-height: 1.5; }
+        textarea:focus { border-color: #3b82f6; }
+        
+        /* Grid Statistik */
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
+        .stat-card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 15px; text-align: center; }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: #3b82f6; margin-bottom: 5px; }
+        .stat-label { font-size: 0.85rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .btn-clear { background: #ef4444; color: white; border: none; border-radius: 8px; padding: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.3s; width: 100%; }
+        .btn-clear:hover { background: #dc2626; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>🤖 AI Hub Personal</h2>
+    </div>
+    
+    <div class="nav-bar">
+        <a href="index.html" class="nav-link">💬 Asisten</a>
+        <a href="gambar.html" class="nav-link">🎨 Gambar</a>
+        <a href="konten.html" class="nav-link">📱 Konten</a>
+        <a href="chord.html" class="nav-link">🎸 Chord</a>
+        <a href="tiktok.html" class="nav-link">🎵 TikTok</a>
+        <a href="teks.html" class="nav-link">✨ Teks</a>
+        <a href="suara.html" class="nav-link">🎙️ Suara</a>
+        <a href="qr.html" class="nav-link">🔳 QR Code</a>
+        <a href="penghitung.html" class="nav-link active">📝 Penghitung</a>
+    </div>
+
+    <div class="main-content">
+        <div class="tool-container">
+            <textarea id="textInput" placeholder="Ketik atau tempel naskah/deskripsi kontenmu di sini..." oninput="hitungTeks()"></textarea>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="charCount">0</div>
+                    <div class="stat-label">Karakter</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="wordCount">0</div>
+                    <div class="stat-label">Kata</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="sentenceCount">0</div>
+                    <div class="stat-label">Kalimat</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="paragraphCount">0</div>
+                    <div class="stat-label">Paragraf</div>
+                </div>
+            </div>
+
+            <button class="btn-clear" onclick="hapusTeks()">🗑️ Hapus Teks</button>
+        </div>
+    </div>
+
+    <script>
+        function hitungTeks() {
+            const text = document.getElementById('textInput').value;
+            
+            // Hitung Karakter (termasuk spasi)
+            const charCount = text.length;
+            
+            // Hitung Kata (menggunakan regex untuk mengabaikan spasi ganda/enter)
+            const words = text.trim().split(/\s+/);
+            const wordCount = text.trim() === '' ? 0 : words.length;
+            
+            // Hitung Kalimat (berdasarkan titik, tanda seru, atau tanda tanya)
+            const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
+            const sentenceCount = text.trim() === '' ? 0 : sentences.length;
+            
+            // Hitung Paragraf (berdasarkan pemisahan baris kosong)
+            const paragraphs = text.split(/\n+/).filter(paragraph => paragraph.trim().length > 0);
+            const paragraphCount = text.trim() === '' ? 0 : paragraphs.length;
+
+            // Perbarui UI
+            document.getElementById('charCount').innerText = charCount;
+            document.getElementById('wordCount').innerText = wordCount;
+            document.getElementById('sentenceCount').innerText = sentenceCount;
+            document.getElementById('paragraphCount').innerText = paragraphCount;
+        }
+
+        function hapusTeks() {
+            document.getElementById('textInput').value = '';
+            hitungTeks(); // Panggil fungsi hitung ulang untuk mereset angka ke 0
+        }
+    </script>
+</body>
+</html>
