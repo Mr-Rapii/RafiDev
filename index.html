@@ -3,29 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rapii AI Followers</title>
+  <title>Rapii AI - Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-zinc-950 text-white min-h-screen">
-
-  <nav class="bg-black p-4">
-    <div class="max-w-6xl mx-auto flex justify-between items-center">
-      <h1 class="text-3xl font-bold text-emerald-400">RAPII AI</h1>
-      <div id="user-info" class="hidden items-center gap-2">
-        <img id="avatar" class="w-8 h-8 rounded-full" src="">
-        <span id="username" class="text-sm"></span>
-      </div>
+<body class="bg-zinc-950 text-white min-h-screen flex items-center justify-center">
+  <div class="max-w-md w-full px-6">
+    <div class="text-center mb-12">
+      <h1 class="text-6xl font-bold text-emerald-400 mb-2">RAPII</h1>
+      <p class="text-2xl text-zinc-400">AI Followers Exchange</p>
     </div>
-  </nav>
 
-  <div class="p-6" id="main-content">
-    <p class="text-center text-zinc-400">Loading...</p>
+    <div class="bg-zinc-900 rounded-3xl p-10 text-center">
+      <i class="fas fa-user-circle text-7xl text-emerald-500 mb-6"></i>
+      <h2 class="text-2xl font-semibold mb-8">Login untuk Melanjutkan</h2>
+      
+      <button onclick="loginWithGoogle()" 
+        class="w-full bg-white text-black py-5 rounded-2xl text-lg font-medium flex items-center justify-center gap-3 hover:bg-gray-100">
+        <i class="fab fa-google text-xl"></i>
+        Login dengan Gmail
+      </button>
+
+      <p class="text-xs text-zinc-500 mt-8">
+        Dengan login, kamu setuju dengan Syarat & Ketentuan
+      </p>
+    </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBJJjcICAkbVWjrw5-zYMzcKqPGhS0nS0I",
@@ -38,108 +44,18 @@
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.firestore();
 
-    let currentUser = null;
-    let coins = 0;
-
-    // Cek login
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        currentUser = user;
-        document.getElementById('user-info').classList.remove('hidden');
-        document.getElementById('avatar').src = user.photoURL || '';
-        document.getElementById('username').textContent = user.displayName || 'User';
-
-        loadCoins();
-      } else {
-        document.getElementById('main-content').innerHTML = `
-          <div class="text-center mt-20">
-            <button onclick="login()" class="bg-white text-black px-8 py-4 rounded-2xl text-lg">
-              Login dengan Gmail
-            </button>
-          </div>`;
-      }
-    });
-
-    function login() {
+    function loginWithGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithRedirect(provider);
     }
 
-    function loadCoins() {
-      db.collection("users").doc(currentUser.uid).get().then((doc) => {
-        if (doc.exists) {
-          coins = doc.data().coins || 0;
-        } else {
-          coins = 0;
-          db.collection("users").doc(currentUser.uid).set({coins: 0});
-        }
-        showDashboard();
-      });
-    }
-
-    function showDashboard() {
-      document.getElementById('main-content').innerHTML = `
-        <div class="space-y-8">
-
-          <!-- Saldo Koin -->
-          <div class="bg-zinc-900 rounded-3xl p-8 text-center">
-            <p class="text-emerald-400 text-sm">Saldo Koin</p>
-            <div id="coin-balance" class="text-7xl font-bold text-emerald-400 mt-2">${coins}</div>
-            <p class="text-zinc-400">1 Koin = 1 Follower</p>
-          </div>
-
-          <!-- Misi Follow -->
-          <div class="bg-zinc-900 rounded-3xl p-8">
-            <h2 class="text-xl font-semibold mb-4">Misi Pertama</h2>
-            <p class="text-lg">Follow Instagram <span class="text-pink-500 font-bold">@rapii_wehhh</span></p>
-            <button onclick="claimTask()" class="mt-6 w-full bg-pink-600 hover:bg-pink-700 py-5 rounded-2xl text-lg font-medium">
-              Klaim +1 Koin
-            </button>
-          </div>
-
-          <!-- Marketplace -->
-          <div class="bg-zinc-900 rounded-3xl p-8">
-            <h2 class="text-xl font-semibold mb-4">Tukar Koin untuk Followers</h2>
-            <div class="grid grid-cols-3 gap-4">
-              <div onclick="buy('tiktok')" class="bg-zinc-800 p-5 rounded-2xl text-center cursor-pointer">
-                <i class="fab fa-tiktok text-4xl text-red-500"></i>
-                <p class="mt-2 text-sm">TikTok</p>
-                <p class="text-emerald-400 font-bold">10 Koin</p>
-              </div>
-              <div onclick="buy('instagram')" class="bg-zinc-800 p-5 rounded-2xl text-center cursor-pointer">
-                <i class="fab fa-instagram text-4xl text-pink-500"></i>
-                <p class="mt-2 text-sm">Instagram</p>
-                <p class="text-emerald-400 font-bold">8 Koin</p>
-              </div>
-              <div onclick="buy('youtube')" class="bg-zinc-800 p-5 rounded-2xl text-center cursor-pointer">
-                <i class="fab fa-youtube text-4xl text-red-500"></i>
-                <p class="mt-2 text-sm">YouTube</p>
-                <p class="text-emerald-400 font-bold">15 Koin</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function claimTask() {
-      coins += 1;
-      db.collection("users").doc(currentUser.uid).update({ coins: coins });
-      alert("✅ +1 Koin berhasil ditambahkan!");
-      document.getElementById('coin-balance').textContent = coins;
-    }
-
-    function buy(platform) {
-      const price = {tiktok:10, instagram:8, youtube:15}[platform];
-      if (coins < price) return alert("Koin tidak cukup!");
-      
-      coins -= price;
-      db.collection("users").doc(currentUser.uid).update({ coins: coins });
-      alert(`✅ Berhasil request ${platform.toUpperCase()} Followers!`);
-      document.getElementById('coin-balance').textContent = coins;
-    }
+    // Redirect ke dashboard setelah login
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        window.location.href = "dashboard.html";
+      }
+    });
   </script>
 </body>
 </html>
