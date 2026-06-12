@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asisten Rapi | 🎸 Chord Gitar</title>
+    <style>
+        :root { --bg: #0f172a; --glass: rgba(30, 41, 59, 0.7); --accent: #3b82f6; --text: #f8fafc; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: radial-gradient(circle at top, #1e293b, #0f172a); color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Header & Nav */
+        header { 
+            padding: 20px; display: flex; align-items: center; justify-content: space-between;
+            background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .back-btn { 
+            color: var(--accent); text-decoration: none; font-size: 0.9rem; 
+            padding: 8px 15px; border-radius: 20px; border: 1px solid var(--accent); transition: 0.3s;
+        }
+        .back-btn:hover { background: var(--accent); color: white; }
+        
+        .nav-bar { display: flex; background: rgba(0,0,0,0.2); padding: 5px; margin: 15px; border-radius: 12px; gap: 5px; }
+        .nav-link { flex: 1; text-align: center; padding: 10px; color: #94a3b8; text-decoration: none; font-size: 0.85rem; border-radius: 8px; transition: 0.3s; }
+        .nav-link.active { background: var(--accent); color: white; font-weight: bold; }
+        
+        .main-content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        .input-group { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 10px; }
+        input { width: 100%; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 12px; padding: 15px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+        
+        button { background: var(--accent); color: white; border: none; border-radius: 12px; padding: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4); }
+
+        /* Status & Result */
+        .status { color: var(--accent); margin: 20px 0; font-style: italic; display: none; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        
+        .result-area { 
+            width: 100%; max-width: 500px; background: rgba(30, 41, 59, 0.6); 
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 15px; padding: 20px; font-size: 0.9rem; line-height: 1.8; 
+            display: none; font-family: 'Courier New', Courier, monospace; overflow-x: auto;
+            animation: fadeIn 0.6s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="back-btn">← Portofolio</a>
+        <h3 style="margin: 0;">🎸 Chord Gitar</h3>
+        <div style="width: 80px;"></div> </header>
+    
+    <div class="nav-bar">
+        <a href="chatbot.html" class="nav-link">💬 Chat</a>
+        <a href="gambar.html" class="nav-link">🎨 Gambar</a>
+        <a href="konten.html" class="nav-link">📱 Konten</a>
+        <a href="chord.html" class="nav-link active">🎸 Chord</a>
+    </div>
+
+    <div class="main-content">
+        <div class="input-group">
+            <input type="text" id="judulLagu" placeholder="Contoh: Diary Depresiku - Last Child" onkeypress="handleEnter(event)">
+            <button id="generateBtn" onclick="cariChord()">Cari Chord Gitar</button>
+        </div>
+
+        <div id="statusText" class="status">Sedang mengulik chord...</div>
+        <pre class="result-area" id="resultArea"></pre>
+    </div>
+
+    <script>
+        function handleEnter(e) { if (e.key === 'Enter') cariChord(); }
+
+        async function cariChord() {
+            const lagu = document.getElementById('judulLagu').value.trim();
+            const btn = document.getElementById('generateBtn');
+            const status = document.getElementById('statusText');
+            const res = document.getElementById('resultArea');
+
+            if (!lagu) return alert("Masukkan judul lagu!");
+
+            btn.disabled = true;
+            status.style.display = 'block';
+            res.style.display = 'none';
+
+            const b1 = "AQ.Ab8RN6I17XNIEcT7Mx2C"; 
+            const b2 = "mRe7UxYMdK9xqGAfsImM-nLsqCNr1g";
+            const KEY = b1 + b2;
+
+            const prompt = `Berikan chord gitar dan lirik untuk lagu "${lagu}". Aturan: Posisikan chord tepat di atas kata yang dinyanyikan. Gunakan format monospace agar sejajar. Jangan ada basa-basi, langsung ke [Intro] dst.`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${KEY}`, {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                
+                const data = await response.json();
+                status.style.display = 'none';
+                
+                res.innerText = data.candidates[0].content.parts[0].text;
+                res.style.display = 'block';
+            } catch (error) {
+                status.style.display = 'none';
+                res.innerText = "Gagal memuat chord.";
+                res.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
