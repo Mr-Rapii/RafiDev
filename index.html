@@ -1,104 +1,30 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rapii Followers AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-  
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-
-  <style>
-    body { font-family: 'Segoe UI', sans-serif; }
-    .neon { text-shadow: 0 0 15px #22ff88; }
-    .chat-bubble { max-width: 80%; }
-  </style>
 </head>
 <body class="bg-zinc-950 text-white min-h-screen">
 
-  <nav class="bg-black border-b border-zinc-800 p-4 sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto flex justify-between items-center">
-      <h1 class="text-3xl font-bold neon text-emerald-400">RAPII<span class="text-white">AI</span></h1>
-      <div class="flex items-center gap-4">
-        <div id="user-info" class="hidden flex items-center gap-3">
-          <img id="avatar" src="" class="w-9 h-9 rounded-full border-2 border-emerald-500">
-          <div>
-            <p id="username" class="font-medium"></p>
-            <p id="coin-display" class="text-emerald-400 text-sm font-bold">0 Koin</p>
-          </div>
-        </div>
-        <button onclick="loginGoogle()" id="login-btn"
-          class="bg-white text-black px-6 py-2.5 rounded-full font-medium flex items-center gap-2 hover:bg-gray-200">
-          <i class="fab fa-google"></i> Login Gmail
-        </button>
-      </div>
+  <nav class="bg-black p-4">
+    <div class="max-w-6xl mx-auto flex justify-between">
+      <h1 class="text-3xl font-bold text-emerald-400">RAPIIAI</h1>
+      <button onclick="loginGoogle()" id="login-btn" 
+        class="bg-white text-black px-6 py-2 rounded-full font-medium">
+        <i class="fab fa-google"></i> Login Gmail
+      </button>
     </div>
   </nav>
 
-  <div class="max-w-6xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-    <div class="lg:col-span-7 space-y-6">
-      <div class="bg-gradient-to-r from-zinc-900 to-zinc-800 rounded-3xl p-8 text-center">
-        <p class="text-emerald-400 text-sm">Saldo Koin</p>
-        <div id="big-coin" class="text-7xl font-bold text-emerald-400 mt-2">0</div>
-        <p class="text-zinc-400">1 Koin = 1 Follower</p>
-      </div>
-
-      <div class="bg-zinc-900 rounded-3xl p-8">
-        <h2 class="text-2xl font-semibold mb-6">Misi Pertama</h2>
-        <div class="flex gap-6 items-center">
-          <div class="flex-1">
-            <p class="text-xl">Follow Instagram <span class="text-pink-500 font-bold">@rapii_wehhh</span></p>
-            <p class="text-zinc-400 mt-2">Dapatkan 1 Koin setelah follow</p>
-          </div>
-          <button onclick="claimTask()" id="claim-btn"
-            class="bg-pink-600 hover:bg-pink-700 px-10 py-4 rounded-2xl font-semibold text-lg">
-            Klaim 1 Koin
-          </button>
-        </div>
-      </div>
-
-      <div class="bg-zinc-900 rounded-3xl p-8">
-        <h2 class="text-2xl font-semibold mb-6">Tukar Koin → Followers</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div onclick="requestFollow('tiktok')" class="bg-zinc-800 hover:bg-zinc-700 p-6 rounded-2xl cursor-pointer text-center">
-            <i class="fab fa-tiktok text-5xl text-red-500"></i>
-            <p class="mt-4 font-medium">TikTok Followers</p>
-            <p class="text-emerald-400 text-2xl font-bold">10 Koin</p>
-          </div>
-          <div onclick="requestFollow('instagram')" class="bg-zinc-800 hover:bg-zinc-700 p-6 rounded-2xl cursor-pointer text-center">
-            <i class="fab fa-instagram text-5xl text-pink-500"></i>
-            <p class="mt-4 font-medium">Instagram Followers</p>
-            <p class="text-emerald-400 text-2xl font-bold">8 Koin</p>
-          </div>
-          <div onclick="requestFollow('youtube')" class="bg-zinc-800 hover:bg-zinc-700 p-6 rounded-2xl cursor-pointer text-center">
-            <i class="fab fa-youtube text-5xl text-red-500"></i>
-            <p class="mt-4 font-medium">YouTube Subscribers</p>
-            <p class="text-emerald-400 text-2xl font-bold">15 Koin</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="lg:col-span-5">
-      <div class="bg-zinc-900 rounded-3xl p-6 h-full flex flex-col">
-        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-3">
-          <i class="fas fa-robot text-emerald-400"></i> Rapii AI
-        </h2>
-        <div id="chat-box" class="flex-1 overflow-y-auto bg-zinc-950 rounded-2xl p-5 space-y-4 text-sm mb-4"></div>
-        
-        <div class="flex gap-2">
-          <input id="chat-input" type="text" placeholder="Tanya apa saja..." 
-                 class="bg-zinc-800 flex-1 px-5 py-4 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500">
-          <button onclick="sendToAI()" class="bg-emerald-500 px-8 rounded-2xl hover:bg-emerald-600">
-            <i class="fas fa-paper-plane"></i>
-          </button>
-        </div>
-      </div>
-    </div>
+  <div class="max-w-6xl mx-auto p-6" id="main-content">
+    <!-- Konten akan muncul setelah login -->
+    <p class="text-center text-zinc-400">Login dulu untuk menggunakan fitur</p>
   </div>
 
   <script>
@@ -116,110 +42,64 @@
     const db = firebase.firestore();
 
     let currentUser = null;
-    let coins = 0;
 
-    // GANTI KE REDIRECT (lebih stabil di HP)
     function loginGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithRedirect(provider);
     }
 
-    // Cek apakah ada hasil redirect
-    auth.getRedirectResult().then((result) => {
-      if (result.user) {
-        currentUser = result.user;
-        document.getElementById('login-btn').classList.add('hidden');
-        document.getElementById('user-info').classList.remove('hidden');
-        document.getElementById('avatar').src = currentUser.photoURL;
-        document.getElementById('username').textContent = currentUser.displayName || currentUser.email;
-        loadUserData();
-      }
-    }).catch((error) => {
-      console.error(error);
-    });
+    // Handle Redirect Result
+    auth.getRedirectResult()
+      .then((result) => {
+        if (result.user) {
+          handleUser(result.user);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        alert("Login error: " + error.message);
+      });
 
-    // Cek user saat halaman dimuat
+    // Cek status login
     auth.onAuthStateChanged((user) => {
       if (user) {
-        currentUser = user;
-        document.getElementById('login-btn').classList.add('hidden');
-        document.getElementById('user-info').classList.remove('hidden');
-        document.getElementById('avatar').src = user.photoURL;
-        document.getElementById('username').textContent = user.displayName || user.email;
-        loadUserData();
+        handleUser(user);
+      } else {
+        document.getElementById('main-content').innerHTML = `
+          <div class="text-center mt-20">
+            <p class="text-2xl mb-6">Selamat datang di Rapii AI</p>
+            <button onclick="loginGoogle()" class="bg-white text-black px-8 py-4 rounded-2xl text-lg font-medium">
+              Login dengan Gmail
+            </button>
+          </div>`;
       }
     });
 
-    function loadUserData() {
-      db.collection("users").doc(currentUser.uid).get().then((doc) => {
-        if (doc.exists) {
-          coins = doc.data().coins || 0;
-        } else {
-          db.collection("users").doc(currentUser.uid).set({ coins: 0, email: currentUser.email });
-          coins = 0;
-        }
-        updateCoinDisplay();
-      });
-    }
-
-    function updateCoinDisplay() {
-      document.getElementById('big-coin').textContent = coins;
-      document.getElementById('coin-display').textContent = coins + " Koin";
+    function handleUser(user) {
+      currentUser = user;
+      document.getElementById('main-content').innerHTML = `
+        <div class="text-center">
+          <img src="${user.photoURL}" class="w-24 h-24 rounded-full mx-auto border-4 border-emerald-500">
+          <h2 class="text-2xl mt-4">${user.displayName}</h2>
+          <p class="text-emerald-400">${user.email}</p>
+          <div class="mt-10 bg-zinc-900 rounded-3xl p-8">
+            <p class="text-emerald-400">Saldo Koin</p>
+            <div id="coin" class="text-8xl font-bold text-emerald-400">0</div>
+          </div>
+          <button onclick="claimTask()" class="mt-8 w-full bg-pink-600 py-5 rounded-2xl text-lg">
+            Klaim 1 Koin (Follow @rapii_wehhh)
+          </button>
+        </div>`;
     }
 
     function claimTask() {
-      if (!currentUser) return alert("Login dulu!");
-      // ... (sama seperti sebelumnya)
-      const btn = document.getElementById('claim-btn');
-      btn.innerHTML = "🤖 AI Verifikasi...";
-      btn.disabled = true;
-
-      setTimeout(() => {
-        coins += 1;
-        db.collection("users").doc(currentUser.uid).update({ coins: coins });
-        updateCoinDisplay();
-        alert("✅ +1 Koin Berhasil!");
-        btn.innerHTML = "✅ Sudah Diklaim";
-      }, 1500);
+      alert("✅ +1 Koin berhasil ditambahkan! (Simulasi)");
+      // Nanti bisa ditambah simpan ke Firestore
     }
 
-    function requestFollow(platform) {
-      if (!currentUser) return alert("Login dulu!");
-      const cost = { tiktok: 10, instagram: 8, youtube: 15 }[platform] || 10;
-      if (coins < cost) return alert("Koin tidak cukup!");
-
-      coins -= cost;
-      db.collection("users").doc(currentUser.uid).update({ coins: coins });
-      updateCoinDisplay();
-      alert(`✅ Permintaan ${platform.toUpperCase()} berhasil!`);
-    }
-
-    function sendToAI() {
-      const input = document.getElementById('chat-input');
-      const message = input.value.trim();
-      if (!message) return;
-
-      const chatBox = document.getElementById('chat-box');
-      chatBox.innerHTML += `<div class="flex justify-end"><div class="chat-bubble bg-emerald-600 px-5 py-3 rounded-3xl rounded-br-none">${message}</div></div>`;
-      input.value = "";
-
-      setTimeout(() => {
-        let reply = "Saya Rapii AI. Tanya apa saja tentang followers atau koin.";
-        const msg = message.toLowerCase();
-        if (msg.includes("follow")) reply = "Follow @rapii_wehhh dulu untuk dapat 1 koin.";
-        else if (msg.includes("koin")) reply = `Kamu punya ${coins} koin.`;
-        
-        chatBox.innerHTML += `<div class="flex"><div class="chat-bubble bg-zinc-800 px-5 py-3 rounded-3xl rounded-bl-none">${reply}</div></div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }, 700);
-    }
-
-    document.getElementById('chat-input').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendToAI();
-    });
-
+    // Auto check saat halaman load
     window.onload = () => {
-      document.getElementById('chat-box').innerHTML = `<div class="text-emerald-400">Halo! Login dulu ya biar bisa pakai fitur.</div>`;
+      console.log("Halaman dimuat");
     };
   </script>
 </body>
