@@ -2,47 +2,78 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Login - Rapi-Dev</title>
+    <title>Login | Rapi-Dev</title>
     <style>
-        body { background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
-        .login-card { background: #1e293b; padding: 40px; border-radius: 20px; text-align: center; }
-        button { padding: 15px 30px; background: #db4437; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; }
+        :root { --primary: #3b82f6; --bg: #0f172a; }
+        body { 
+            margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; 
+            background: radial-gradient(circle at bottom right, #1e3a8a, #0f172a); 
+            font-family: 'Segoe UI', sans-serif; overflow: hidden;
+        }
+        
+        /* Animasi muncul */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .login-card { 
+            background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(15px);
+            padding: 40px; border-radius: 25px; text-align: center; 
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            animation: fadeIn 1s ease-out; width: 320px;
+        }
+
+        h2 { color: white; margin-bottom: 10px; }
+        p { color: #94a3b8; margin-bottom: 30px; }
+
+        button { 
+            padding: 15px 30px; background: white; border: none; border-radius: 50px;
+            color: #1e293b; font-weight: bold; cursor: pointer; transition: 0.4s;
+            display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+        }
+        button:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255,255,255,0.3); }
+
+        /* Efek cahaya bergerak di latar belakang */
+        .blob { position: absolute; width: 300px; height: 300px; background: var(--primary); filter: blur(100px); opacity: 0.2; border-radius: 50%; z-index: -1; }
     </style>
 </head>
 <body>
+    <div class="blob" style="top: -100px; left: -100px;"></div>
+    <div class="blob" style="bottom: -100px; right: -100px; background: #8b5cf6;"></div>
 
-<div class="login-card">
-    <h2>Login Akun</h2>
-    <button id="loginBtn">Login dengan Google</button>
-</div>
+    <div class="login-card">
+        <h2>Halo, Raffi!</h2>
+        <p>Masuk ke dashboard portofolio</p>
+        <button id="loginBtn">
+            <img src="https://cdn-icons-png.flaticon.com/24/2991/2991148.png" width="20">
+            Masuk dengan Google
+        </button>
+    </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBJJjcICAkbVWjrw5-zYMzcKqPGhS0nS0I",
-      authDomain: "piwstore.firebaseapp.com",
-      projectId: "piwstore",
-      storageBucket: "piwstore.firebasestorage.app",
-      messagingSenderId: "419258630997",
-      appId: "1:419258630997:web:44dc66ee3840a14a6d25dc",
-      measurementId: "G-V9WR4ZWPT1"
-    };
+        const firebaseConfig = {
+          apiKey: "AIzaSyBJJjcICAkbVWjrw5-zYMzcKqPGhS0nS0I",
+          authDomain: "piwstore.firebaseapp.com",
+          projectId: "piwstore",
+          storageBucket: "piwstore.firebasestorage.app",
+          messagingSenderId: "419258630997",
+          appId: "1:419258630997:web:44dc66ee3840a14a6d25dc"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
-    document.getElementById("loginBtn").onclick = async () => {
-        try {
-            await signInWithPopup(auth, provider);
-            alert("Login Berhasil!");
-            window.location.href = "portofolio.html";
-        } catch (error) {
-            alert("Login gagal: " + error.message);
-        }
-    };
-</script>
+        document.getElementById("loginBtn").onclick = async () => {
+            try {
+                await signInWithPopup(auth, provider);
+                window.location.href = "portofolio.html";
+            } catch (error) {
+                alert("Login gagal: " + error.message);
+            }
+        };
+    </script>
 </body>
 </html>
