@@ -37,26 +37,32 @@
 
   <div class="max-w-6xl mx-auto p-6 space-y-8">
 
-    <!-- Saldo Koin Besar -->
+    <!-- Saldo Koin -->
     <div class="bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-3xl p-10 text-center border border-emerald-500/20">
       <p class="text-emerald-400 text-sm tracking-widest">SALDO KOIN</p>
       <div id="big-coin" class="text-8xl font-bold text-emerald-400 mt-4 mb-2">0</div>
       <p class="text-zinc-400">1 Koin = 1 Follower</p>
     </div>
 
-    <!-- Misi Utama -->
+    <!-- Misi Instagram -->
     <div class="bg-zinc-900 rounded-3xl p-8 border border-pink-500/30">
-      <div class="flex items-center gap-4">
-        <i class="fas fa-instagram text-4xl text-pink-500"></i>
-        <div class="flex-1">
-          <h2 class="text-xl font-semibold">Misi Pertama</h2>
-          <p class="text-zinc-300">Follow Instagram <span class="text-pink-400 font-bold">@rapii_wehhh</span></p>
+      <div class="flex items-center gap-4 mb-6">
+        <i class="fas fa-instagram text-5xl text-pink-500"></i>
+        <div>
+          <h2 class="text-2xl font-semibold">Misi Follow Instagram</h2>
+          <p class="text-zinc-300">Follow akun <span class="text-pink-400 font-bold">@rapii_wehhh</span></p>
         </div>
       </div>
-      <button onclick="claimTask()" 
-        class="mt-6 w-full bg-gradient-to-r from-pink-500 to-purple-600 py-5 rounded-2xl text-lg font-semibold hover:brightness-110">
-        ✅ Klaim 1 Koin
+      
+      <button onclick="openInstagramAndClaim()" 
+        class="w-full bg-gradient-to-r from-pink-500 to-rose-600 py-6 rounded-2xl text-lg font-semibold hover:brightness-110 flex items-center justify-center gap-3">
+        <i class="fab fa-instagram"></i>
+        Buka Instagram & Follow Sekarang
       </button>
+      
+      <p class="text-center text-xs text-zinc-500 mt-4">
+        Setelah follow, kembali ke sini dan klaim koin
+      </p>
     </div>
 
     <!-- Marketplace -->
@@ -65,7 +71,6 @@
         <i class="fas fa-store"></i> Tukar Koin
       </h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        
         <div onclick="buyFollowers('tiktok')" class="bg-zinc-900 rounded-3xl p-6 card-hover cursor-pointer border border-red-500/20">
           <div class="text-center">
             <i class="fab fa-tiktok text-6xl text-red-500"></i>
@@ -95,6 +100,7 @@
   </div>
 
   <script>
+    // === Firebase Config ===
     const firebaseConfig = {
       apiKey: "AIzaSyBJJjcICAkbVWjrw5-zYMzcKqPGhS0nS0I",
       authDomain: "piwstore.firebaseapp.com",
@@ -124,7 +130,6 @@
       document.getElementById('user-info').classList.remove('hidden');
       document.getElementById('avatar').src = currentUser.photoURL;
       document.getElementById('username').textContent = currentUser.displayName || "User";
-
       loadUserCoins();
     }
 
@@ -136,25 +141,37 @@
       });
     }
 
-    function claimTask() {
+    // Tombol baru: Buka Instagram lalu klaim
+    function openInstagramAndClaim() {
+      // Buka link Instagram
+      window.open("https://www.instagram.com/rapii_wehhh?igsh=cXN1OHh2OWNlNGg5", "_blank");
+      
+      // Tunggu sebentar lalu tanya apakah sudah follow
+      setTimeout(() => {
+        if (confirm("Apakah kamu sudah mengikuti (follow) @rapii_wehhh di Instagram?\n\nKlik OK untuk klaim 1 Koin")) {
+          claimCoin();
+        }
+      }, 1500);
+    }
+
+    function claimCoin() {
       coins += 1;
-      db.collection("users").doc(currentUser.uid).update({ coins: coins });
-      document.getElementById('big-coin').textContent = coins;
-      document.getElementById('coin-small').textContent = coins + " Koin";
-      alert("🎉 +1 Koin berhasil! Terima kasih sudah follow @rapii_wehhh");
+      db.collection("users").doc(currentUser.uid).update({ coins: coins }).then(() => {
+        document.getElementById('big-coin').textContent = coins;
+        document.getElementById('coin-small').textContent = coins + " Koin";
+        alert("🎉 Selamat! +1 Koin berhasil ditambahkan");
+      });
     }
 
     function buyFollowers(platform) {
       const price = { tiktok: 10, instagram: 8, youtube: 15 }[platform];
-      if (coins < price) {
-        alert("❌ Koin tidak cukup!");
-        return;
-      }
+      if (coins < price) return alert("❌ Koin tidak cukup!");
+      
       coins -= price;
       db.collection("users").doc(currentUser.uid).update({ coins: coins });
       document.getElementById('big-coin').textContent = coins;
       document.getElementById('coin-small').textContent = coins + " Koin";
-      alert(`✅ Permintaan ${platform.toUpperCase()} Followers berhasil dikirim!`);
+      alert(`✅ Permintaan ${platform.toUpperCase()} Followers berhasil!`);
     }
 
     function logout() {
