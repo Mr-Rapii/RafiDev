@@ -58,7 +58,7 @@
     </div>
 
     <script>
-        function buatGambar() {
+        async function buatGambar() {
             const promptInput = document.getElementById('prompt').value.trim();
             const generateBtn = document.getElementById('generateBtn');
             const statusText = document.getElementById('statusText');
@@ -71,35 +71,42 @@
             }
 
             generateBtn.disabled = true;
-            generateBtn.innerText = "Memproses (Tunggu 10-20 detik)...";
+            generateBtn.innerText = "Memproses (Bisa sampai 30 detik)...";
             outputImage.style.display = 'none';
             downloadBtn.style.display = 'none';
             statusText.style.display = 'block';
-            statusText.innerText = "Merender gambar dari server utama...";
+            statusText.innerText = "Menghubungkan ke server AI...";
 
+            // Menambahkan seed acak agar browser tidak memuat gambar lama dari cache
             const randomSeed = Math.floor(Math.random() * 1000000);
-            
-            // Server Endpoint yang sudah diperbarui ke versi lebih stabil
-            const apiUrl = `https://pollinations.ai/p/${encodeURIComponent(promptInput)}?width=512&height=512&nologo=true&seed=${randomSeed}`;
+            const apiUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptInput)}?seed=${randomSeed}`;
 
-            const img = new Image();
-            img.src = apiUrl;
-            
-            img.onload = function() {
+            try {
+                // Menggunakan Fetch API untuk mengambil data gambar secara langsung
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`Server sibuk (Status ${response.status})`);
+                }
+
+                // Mengubah respons server menjadi objek URL gambar lokal yang stabil
+                const imageBlob = await response.blob();
+                const imageObjectURL = URL.createObjectURL(imageBlob);
+
                 statusText.style.display = 'none';
-                outputImage.src = apiUrl;
+                outputImage.src = imageObjectURL;
                 outputImage.style.display = 'block';
-                downloadBtn.href = apiUrl;
+                
+                downloadBtn.href = imageObjectURL;
+                downloadBtn.download = `AI_Image_${randomSeed}.jpg`;
                 downloadBtn.style.display = 'block';
-                generateBtn.disabled = false;
-                generateBtn.innerText = "Buat Gambar";
-            };
 
-            img.onerror = function() {
-                statusText.innerText = "Gagal memuat gambar. Server sedang penuh, silakan coba beberapa saat lagi.";
+            } catch (error) {
+                statusText.innerText = `Gagal memuat: ${error.message}. Silakan klik tombol 'Buat Gambar' lagi.`;
+            } finally {
                 generateBtn.disabled = false;
                 generateBtn.innerText = "Buat Gambar";
-            };
+            }
         }
     </script>
 </body>
