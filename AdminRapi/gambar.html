@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #0f172a; 
+            color: #f8fafc; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 { text-align: center; margin-bottom: 20px; font-size: 1.5rem; }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            background: #0f172a;
+            color: white;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.95rem;
+            resize: none;
+            outline: none;
+            transition: border 0.3s;
+        }
+        textarea:focus { border-color: #3b82f6; }
+
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover { background: #2563eb; }
+        button:disabled { background: #475569; cursor: not-allowed; }
+
+        .result-area {
+            width: 100%;
+            min-height: 300px;
+            background: #0f172a;
+            border: 1px dashed #334155;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            text-align: center;
+            color: #94a3b8;
+            padding: 10px;
+        }
+
+        .result-area img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+            display: none;
+        }
+
+        /* Tombol Unduh */
+        .download-btn {
+            margin-top: 15px;
+            background: #10b981;
+            display: none;
+            text-align: center;
+            text-decoration: none;
+        }
+        .download-btn:hover { background: #059669; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🎨 AI Image Generator</h2>
+        
+        <div class="input-group">
+            <textarea id="prompt" placeholder="Deskripsikan gambar yang ingin dibuat (Contoh: Kucing memakai kacamata hitam di luar angkasa)"></textarea>
+            <button id="generateBtn" onclick="buatGambar()">Buat Gambar</button>
+        </div>
+
+        <div class="result-area" id="resultArea">
+            <span id="statusText">Gambar akan muncul di sini...</span>
+            <img id="outputImage" alt="Hasil AI">
+        </div>
+
+        <a id="downloadBtn" class="download-btn" href="#" download="AI-Image.jpg">⬇️ Unduh Gambar</a>
+    </div>
+
+    <script>
+        function buatGambar() {
+            const promptInput = document.getElementById('prompt').value.trim();
+            const generateBtn = document.getElementById('generateBtn');
+            const statusText = document.getElementById('statusText');
+            const outputImage = document.getElementById('outputImage');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            if (!promptInput) {
+                alert("Deskripsi gambar tidak boleh kosong.");
+                return;
+            }
+
+            // Menonaktifkan tombol saat proses berjalan
+            generateBtn.disabled = true;
+            generateBtn.innerText = "Memproses (Bisa memakan waktu 10-20 detik)...";
+            
+            // Mengatur tampilan area hasil
+            outputImage.style.display = 'none';
+            downloadBtn.style.display = 'none';
+            statusText.style.display = 'block';
+            statusText.innerText = "Merender gambar dari server...";
+
+            // Membuat angka acak (seed) agar gambar tidak di-cache oleh browser
+            const randomSeed = Math.floor(Math.random() * 1000000);
+            
+            // Menyusun URL API (menggunakan terjemahan teks sederhana ke dalam query)
+            const apiUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptInput)}?seed=${randomSeed}&width=512&height=512&nologo=true`;
+
+            // Proses pemanggilan gambar
+            const img = new Image();
+            img.src = apiUrl;
+            
+            img.onload = function() {
+                // Jika gambar sukses dimuat
+                statusText.style.display = 'none';
+                outputImage.src = apiUrl;
+                outputImage.style.display = 'block';
+                
+                // Menyiapkan tombol unduh
+                downloadBtn.href = apiUrl;
+                downloadBtn.style.display = 'block';
+
+                // Mengembalikan tombol seperti semula
+                generateBtn.disabled = false;
+                generateBtn.innerText = "Buat Gambar";
+            };
+
+            img.onerror = function() {
+                // Jika terjadi kegagalan server
+                statusText.innerText = "Gagal membuat gambar. Coba lagi.";
+                generateBtn.disabled = false;
+                generateBtn.innerText = "Buat Gambar";
+            };
+        }
+    </script>
+</body>
+</html>
