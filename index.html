@@ -152,8 +152,8 @@
             btn.disabled = true;
             btn.innerText = "Menyimpan data...";
 
-            // Access Key Resmi milik Rapi Dev
-            const accessKey = "D6f8fcdc-bba9-41bd-b2cc-24c991d44c36";
+            // Menggunakan huruf kecil agar aman dan tidak memicu error sistem database
+            const accessKey = "d6f8fcdc-bba9-41bd-b2cc-24c991d44c36";
 
             fetch("https://api.web3forms.com/submit", {
                 method: "POST",
@@ -165,24 +165,28 @@
                     access_key: accessKey,
                     subject: "Ting! Ada Rating Baru di AI Hub Rapi Dev",
                     from_name: "Notifikasi AI Hub",
+                    email: "rating@rapi-aihub.com", // Meloloskan form dari deteksi bot anti-spam
                     rating: rating.value + " Bintang",
                     pesan: pesan || "Pengguna hanya memberikan bintang tanpa pesan tambahan."
                 })
             })
             .then(async (response) => {
+                const dataRespon = await response.json();
+                
                 if (response.status === 200) {
                     document.getElementById('ratingBox').innerHTML = `
                         <h3 style="color: #10b981; margin:0;">Tersimpan! 🎉</h3>
                         <p style="color:#94a3b8; font-size: 0.9rem; margin-top:10px;">Terima kasih banyak atas rating dan masukanmu.</p>
                     `;
                 } else {
-                    alert("Gagal menyimpan ke database. Coba lagi.");
+                    // Jika ditolak, pop-up akan memunculkan alasan detail dari server
+                    alert("Gagal menyimpan. Alasan dari server: " + dataRespon.message);
                     btn.disabled = false;
                     btn.innerText = "Kirim Penilaian";
                 }
             })
             .catch(error => {
-                alert("Terjadi kesalahan jaringan.");
+                alert("Terjadi kesalahan jaringan atau koneksi terputus.");
                 btn.disabled = false;
                 btn.innerText = "Kirim Penilaian";
             });
