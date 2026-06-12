@@ -4,77 +4,580 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Login | Rapi-Dev</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Clash+Display:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #3b82f6; --bg: #0f172a; }
-        
-        body { 
-            margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; 
-            background: radial-gradient(circle at bottom right, #1e3a8a, #0f172a); 
-            font-family: 'Segoe UI', sans-serif;
-        }
-        
-        .login-card { 
-            background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(15px);
-            padding: 2.5rem; border-radius: 25px; text-align: center; 
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            /* Menggunakan max-width agar tidak terlalu lebar di PC, tapi fleksibel di HP */
-            width: 90%; max-width: 400px;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --lime:   #a3e635;
+            --lime2:  #84cc16;
+            --white:  #f8fafc;
+            --dim:    #94a3b8;
+            --ink:    #0f172a;
+            --glass:  rgba(255,255,255,0.06);
+            --border: rgba(255,255,255,0.1);
         }
 
-        h2 { color: white; font-size: 1.8rem; margin-bottom: 10px; }
-        p { color: #94a3b8; margin-bottom: 30px; font-size: 1rem; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
 
-        button { 
-            padding: 1rem; background: white; border: none; border-radius: 12px;
-            color: #1e293b; font-weight: 600; cursor: pointer; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #080d14;
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
-        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
 
-        /* Responsif untuk layar sangat kecil */
-        @media (max-width: 480px) {
-            .login-card { padding: 20px; }
-            h2 { font-size: 1.5rem; }
+        /* ── CANVAS BG ── */
+        #bg-canvas { position: fixed; inset: 0; z-index: 0; }
+
+        /* ── LIQUID BLOBS ── */
+        .blob {
+            position: fixed; border-radius: 50%; filter: blur(120px);
+            pointer-events: none; z-index: 0; mix-blend-mode: screen;
+        }
+        .blob-1 {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(163,230,53,0.18), transparent 70%);
+            top: -150px; left: -100px;
+            animation: blobDrift 18s ease-in-out infinite;
+        }
+        .blob-2 {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(6,182,212,0.14), transparent 70%);
+            bottom: -100px; right: -80px;
+            animation: blobDrift 14s ease-in-out infinite reverse;
+        }
+        .blob-3 {
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(163,230,53,0.1), transparent 70%);
+            top: 50%; left: 55%;
+            animation: blobDrift 22s ease-in-out infinite 5s;
+        }
+        @keyframes blobDrift {
+            0%,100% { transform: translate(0,0) scale(1); }
+            33%      { transform: translate(40px,-50px) scale(1.08); }
+            66%      { transform: translate(-30px,30px) scale(0.92); }
+        }
+
+        /* ── SCAN LINE ── */
+        .scanline {
+            position: fixed; inset: 0; z-index: 1; pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 3px,
+                rgba(0,0,0,0.06) 3px,
+                rgba(0,0,0,0.06) 4px
+            );
+        }
+
+        /* ── SPLIT LAYOUT ── */
+        .scene {
+            position: relative; z-index: 10;
+            width: 100%; max-width: 900px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 520px;
+            border-radius: 28px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
+            margin: 20px;
+            animation: sceneEntry 1s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        @keyframes sceneEntry {
+            from { opacity:0; transform: scale(0.88) translateY(40px); filter: blur(6px); }
+            to   { opacity:1; transform: scale(1) translateY(0); filter: blur(0); }
+        }
+
+        /* ── LEFT PANEL (Visual) ── */
+        .panel-left {
+            background: linear-gradient(145deg, #0a1628 0%, #0d1f12 60%, #071a0a 100%);
+            padding: 48px 40px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            position: relative; overflow: hidden;
+        }
+
+        /* animated hex grid */
+        .hex-grid {
+            position: absolute; inset: 0; opacity: 0.18;
+            background-image:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath d='M28 0 L56 16 L56 50 L28 66 L0 50 L0 16Z' fill='none' stroke='%23a3e635' stroke-width='0.6'/%3E%3Cpath d='M28 66 L56 82 L56 100' fill='none' stroke='%23a3e635' stroke-width='0.6'/%3E%3Cpath d='M28 66 L0 82 L0 100' fill='none' stroke='%23a3e635' stroke-width='0.6'/%3E%3C/svg%3E");
+            background-size: 56px 100px;
+            animation: hexScroll 20s linear infinite;
+        }
+        @keyframes hexScroll { to { background-position: 56px 100px; } }
+
+        /* glowing circle */
+        .glow-ring {
+            position: absolute;
+            width: 280px; height: 280px;
+            border-radius: 50%;
+            border: 1px solid rgba(163,230,53,0.2);
+            top: 50%; left: 50%; transform: translate(-50%,-50%);
+            box-shadow: 0 0 60px rgba(163,230,53,0.08), inset 0 0 60px rgba(163,230,53,0.04);
+            animation: ringPulse 4s ease-in-out infinite;
+        }
+        .glow-ring::before {
+            content:''; position:absolute; inset:20px; border-radius:50%;
+            border: 1px solid rgba(163,230,53,0.15);
+        }
+        .glow-ring::after {
+            content:''; position:absolute; inset:40px; border-radius:50%;
+            border: 1px solid rgba(163,230,53,0.1);
+        }
+        @keyframes ringPulse {
+            0%,100% { transform: translate(-50%,-50%) scale(1); box-shadow: 0 0 60px rgba(163,230,53,0.08), inset 0 0 60px rgba(163,230,53,0.04); }
+            50%      { transform: translate(-50%,-50%) scale(1.04); box-shadow: 0 0 100px rgba(163,230,53,0.18), inset 0 0 80px rgba(163,230,53,0.08); }
+        }
+
+        /* orbiting dot */
+        .orbit-wrapper {
+            position: absolute; width: 280px; height: 280px;
+            top: 50%; left: 50%; transform: translate(-50%,-50%);
+            animation: orbitSpin 8s linear infinite;
+        }
+        .orbit-dot {
+            position: absolute; top: -5px; left: 50%; margin-left: -5px;
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--lime);
+            box-shadow: 0 0 12px var(--lime), 0 0 24px var(--lime2);
+        }
+
+        .orbit-wrapper-2 {
+            position: absolute; width: 200px; height: 200px;
+            top: 50%; left: 50%; transform: translate(-50%,-50%);
+            animation: orbitSpin 5s linear infinite reverse;
+        }
+        .orbit-dot-2 {
+            position: absolute; top: -4px; left: 50%; margin-left: -4px;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #06b6d4;
+            box-shadow: 0 0 10px #06b6d4;
+        }
+        @keyframes orbitSpin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+        /* center logo */
+        .center-logo {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+            z-index: 2;
+        }
+        .center-logo img {
+            width: 72px; height: 72px; border-radius: 16px;
+            animation: logoPulse 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(163,230,53,0.4));
+        }
+        @keyframes logoPulse {
+            0%,100% { filter: drop-shadow(0 0 14px rgba(163,230,53,0.3)); }
+            50%      { filter: drop-shadow(0 0 32px rgba(163,230,53,0.65)); }
+        }
+
+        /* left panel text */
+        .panel-label {
+            position: relative; z-index: 3;
+            font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--lime); font-weight: 600;
+        }
+        .panel-tagline {
+            position: relative; z-index: 3;
+        }
+        .panel-tagline h2 {
+            font-size: 1.05rem; font-weight: 400; color: var(--dim); line-height: 1.6;
+        }
+        .panel-tagline h2 strong { color: var(--lime); }
+
+        /* status indicators */
+        .indicators {
+            position: relative; z-index: 3;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .indicator {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.75rem; color: var(--dim);
+        }
+        .ind-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: var(--lime);
+            box-shadow: 0 0 6px var(--lime);
+            animation: indPulse 2s infinite;
+        }
+        .ind-dot.cyan { background: #06b6d4; box-shadow: 0 0 6px #06b6d4; animation-delay: 0.4s; }
+        .ind-dot.violet { background: #a78bfa; box-shadow: 0 0 6px #a78bfa; animation-delay: 0.8s; }
+        @keyframes indPulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+        /* ── RIGHT PANEL (Login Form) ── */
+        .panel-right {
+            background: rgba(8,13,20,0.92);
+            backdrop-filter: blur(20px);
+            padding: 52px 44px;
+            display: flex; flex-direction: column; justify-content: center;
+            position: relative;
+        }
+
+        .right-eyebrow {
+            font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
+            color: var(--dim); margin-bottom: 12px;
+        }
+
+        .right-title {
+            font-size: 2rem; font-weight: 700; line-height: 1.15;
+            color: var(--white); margin-bottom: 6px;
+            /* NOT using gradient — deliberate restraint for contrast with dashboard */
+        }
+        .right-title span { color: var(--lime); }
+
+        .right-sub {
+            font-size: 0.88rem; color: var(--dim); margin-bottom: 36px; line-height: 1.6;
+        }
+
+        /* ── GOOGLE BTN ── */
+        .g-btn {
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--white);
+            border: none; border-radius: 14px;
+            color: var(--ink);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem; font-weight: 600;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s;
+            position: relative; overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .g-btn::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(163,230,53,0.15), transparent);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .g-btn:hover::after { opacity: 1; }
+        .g-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 36px rgba(163,230,53,0.25), 0 4px 16px rgba(0,0,0,0.3);
+        }
+        .g-btn:active { transform: translateY(-1px); }
+        .g-btn img { width: 20px; height: 20px; flex-shrink: 0; }
+        .g-btn .btn-text { position: relative; z-index: 1; }
+
+        /* loading state */
+        .g-btn.loading { pointer-events: none; background: #e2e8f0; }
+        .g-btn .spinner {
+            display: none; width: 20px; height: 20px;
+            border: 2.5px solid rgba(0,0,0,0.15);
+            border-top-color: var(--ink);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        .g-btn.loading .spinner { display: block; }
+        .g-btn.loading .btn-text,
+        .g-btn.loading .btn-icon { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* divider */
+        .or-row {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 16px; color: #334155; font-size: 0.75rem;
+        }
+        .or-row::before, .or-row::after {
+            content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.06);
+        }
+
+        /* feature chips */
+        .chips {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 28px;
+        }
+        .chip {
+            font-size: 0.7rem; font-weight: 500;
+            padding: 4px 10px; border-radius: 50px;
+            background: rgba(163,230,53,0.07);
+            border: 1px solid rgba(163,230,53,0.2);
+            color: var(--lime);
+        }
+
+        .right-note {
+            font-size: 0.72rem; color: #334155; line-height: 1.6; text-align: center;
+        }
+
+        /* ── PORTAL TRANSITION OVERLAY ── */
+        #portal-overlay {
+            position: fixed; inset: 0; z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none; opacity: 0;
+            background: #080d14;
+        }
+        #portal-overlay.active { pointer-events: all; }
+
+        .portal-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid var(--lime);
+            box-shadow: 0 0 30px var(--lime), inset 0 0 30px rgba(163,230,53,0.1);
+            transform: scale(0);
+            opacity: 0;
+        }
+        .pr-1 { width: 100px; height: 100px; }
+        .pr-2 { width: 200px; height: 200px; border-color: rgba(163,230,53,0.6); }
+        .pr-3 { width: 340px; height: 340px; border-color: rgba(163,230,53,0.35); }
+        .pr-4 { width: 520px; height: 520px; border-color: rgba(163,230,53,0.18); border-width: 1px; }
+        .pr-5 { width: 800px; height: 800px; border-color: rgba(163,230,53,0.08); border-width: 1px; }
+
+        .portal-text {
+            position: absolute; text-align: center; opacity: 0;
+        }
+        .portal-text .pt-main {
+            font-size: 1.1rem; font-weight: 600; color: var(--lime);
+            letter-spacing: 0.1em; text-transform: uppercase;
+        }
+        .portal-text .pt-sub {
+            font-size: 0.75rem; color: var(--dim); margin-top: 4px; letter-spacing: 0.05em;
+        }
+
+        .portal-flash {
+            position: absolute; inset: 0;
+            background: radial-gradient(circle at center, rgba(163,230,53,0.15), transparent 60%);
+            opacity: 0;
+        }
+
+        /* ── MOBILE ── */
+        @media (max-width: 640px) {
+            .scene {
+                grid-template-columns: 1fr;
+                max-height: 100svh;
+            }
+            .panel-left { display: none; }
+            .panel-right { padding: 48px 28px; }
+            .right-title { font-size: 1.7rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <h2>Selamat Datang</h2>
-        <p>Silakan masuk untuk melanjutkan ke dashboard portofolio</p>
-        <button id="loginBtn">
-            <img src="https://cdn-icons-png.flaticon.com/24/2991/2991148.png" width="20">
-            Masuk dengan Google
-        </button>
+<canvas id="bg-canvas"></canvas>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+<div class="scanline"></div>
+
+<!-- ── PORTAL OVERLAY ── -->
+<div id="portal-overlay">
+    <div class="portal-flash" id="pFlash"></div>
+    <div class="portal-ring pr-5" id="pr5"></div>
+    <div class="portal-ring pr-4" id="pr4"></div>
+    <div class="portal-ring pr-3" id="pr3"></div>
+    <div class="portal-ring pr-2" id="pr2"></div>
+    <div class="portal-ring pr-1" id="pr1"></div>
+    <div class="portal-text" id="pText">
+        <div class="pt-main">Membuka Portal</div>
+        <div class="pt-sub">Menyiapkan dashboard...</div>
+    </div>
+</div>
+
+<!-- ── SPLIT SCENE ── -->
+<div class="scene">
+
+    <!-- LEFT PANEL -->
+    <div class="panel-left">
+        <div class="hex-grid"></div>
+        <div class="glow-ring"></div>
+        <div class="orbit-wrapper"><div class="orbit-dot"></div></div>
+        <div class="orbit-wrapper-2"><div class="orbit-dot-2"></div></div>
+        <div class="center-logo">
+            <img src="https://i.postimg.cc/ctKx1m8x/file-000000009a3c7207a2ab2d81fdc90db8.png" alt="Rapi Dev">
+        </div>
+
+        <div class="panel-label">Rapi Dev · AI Hub</div>
+
+        <div class="panel-tagline">
+            <h2>10 tools AI dalam<br><strong>satu platform</strong></h2>
+        </div>
+
+        <div class="indicators">
+            <div class="indicator"><div class="ind-dot"></div> AI Asisten aktif</div>
+            <div class="indicator"><div class="ind-dot cyan"></div> Generator online</div>
+            <div class="indicator"><div class="ind-dot violet"></div> Semua layanan siap</div>
+        </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    <!-- RIGHT PANEL -->
+    <div class="panel-right">
+        <p class="right-eyebrow">Autentikasi · Aman · Cepat</p>
+        <h1 class="right-title">Masuk ke<br><span>dashboard</span></h1>
+        <p class="right-sub">Gunakan akun Google kamu untuk langsung mengakses semua tools AI.</p>
 
-        const firebaseConfig = {
-          apiKey: "AIzaSyBJJjcICAkbVWjrw5-zYMzcKqPGhS0nS0I",
-          authDomain: "piwstore.firebaseapp.com",
-          projectId: "piwstore",
-          storageBucket: "piwstore.firebasestorage.app",
-          messagingSenderId: "419258630997",
-          appId: "1:419258630997:web:44dc66ee3840a14a6d25dc"
-        };
+        <div class="chips">
+            <span class="chip">💬 Chat AI</span>
+            <span class="chip">🎨 Image Gen</span>
+            <span class="chip">🎵 TikTok</span>
+            <span class="chip">🔊 TTS</span>
+            <span class="chip">🎸 Chord</span>
+            <span class="chip">📚 Tugas</span>
+        </div>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
+        <button class="g-btn" id="loginBtn">
+            <img class="btn-icon" src="https://cdn-icons-png.flaticon.com/24/2991/2991148.png" alt="Google">
+            <span class="btn-text">Lanjutkan dengan Google</span>
+            <div class="spinner"></div>
+        </button>
 
-        document.getElementById("loginBtn").onclick = async () => {
-            try {
-                await signInWithPopup(auth, provider);
-                window.location.href = "portofolio.html";
-            } catch (error) {
-                alert("Login gagal: " + error.message);
-            }
-        };
-    </script>
+        <div class="or-row">Gratis · Tidak perlu daftar</div>
+
+        <p class="right-note">
+            Dengan masuk, kamu menyetujui syarat penggunaan layanan ini.<br>
+            Data kamu aman dan tidak dibagikan ke pihak ketiga.
+        </p>
+    </div>
+</div>
+
+<!-- ANIMATED PARTICLE BG -->
+<script>
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+
+function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', () => { resize(); spawnAll(); });
+
+function makeParticle() {
+    return {
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: -Math.random() * 0.4 - 0.1,
+        r: Math.random() * 1.2 + 0.3,
+        alpha: Math.random() * 0.5 + 0.1,
+        color: Math.random() > 0.6 ? '#a3e635' : '#06b6d4',
+    };
+}
+
+function spawnAll() {
+    const n = Math.floor(W * H / 6000);
+    particles = Array.from({ length: n }, makeParticle);
+}
+spawnAll();
+
+function drawParticles() {
+    ctx.clearRect(0, 0, W, H);
+    for (const p of particles) {
+        p.x += p.vx; p.y += p.vy;
+        if (p.y < -4) { p.y = H + 4; p.x = Math.random() * W; }
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.shadowBlur = 6; ctx.shadowColor = p.color;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+    }
+    requestAnimationFrame(drawParticles);
+}
+drawParticles();
+</script>
+
+<!-- PORTAL ANIMATION -->
+<script>
+function playPortal(onDone) {
+    const overlay = document.getElementById('portal-overlay');
+    const rings = [
+        document.getElementById('pr1'),
+        document.getElementById('pr2'),
+        document.getElementById('pr3'),
+        document.getElementById('pr4'),
+        document.getElementById('pr5'),
+    ];
+    const pText  = document.getElementById('pText');
+    const pFlash = document.getElementById('pFlash');
+
+    overlay.style.opacity = '1';
+    overlay.classList.add('active');
+
+    // Animate each ring expanding outward in sequence
+    const delays = [0, 120, 240, 360, 480];
+    rings.forEach((ring, i) => {
+        setTimeout(() => {
+            ring.style.transition = 'transform 0.9s cubic-bezier(0.16,1,0.3,1), opacity 0.9s';
+            ring.style.transform = 'scale(1)';
+            ring.style.opacity = '1';
+        }, delays[i]);
+    });
+
+    // Show portal text
+    setTimeout(() => {
+        pText.style.transition = 'opacity 0.5s';
+        pText.style.opacity = '1';
+    }, 400);
+
+    // Rings continue expanding to fill screen
+    setTimeout(() => {
+        rings.forEach((ring, i) => {
+            ring.style.transition = 'transform 0.7s ease-in, opacity 0.7s';
+            ring.style.transform = 'scale(6)';
+            ring.style.opacity = '0';
+        });
+    }, 1000);
+
+    // Flash + full white-out
+    setTimeout(() => {
+        pFlash.style.transition = 'opacity 0.3s';
+        pFlash.style.opacity = '1';
+        overlay.style.background = 'rgba(163,230,53,0.06)';
+    }, 1400);
+
+    // Fade to black then redirect
+    setTimeout(() => {
+        overlay.style.transition = 'opacity 0.4s';
+        overlay.style.background = '#080d14';
+        overlay.style.opacity = '1';
+        pText.innerHTML = '<div class="pt-main" style="color:#f8fafc;">✓ Berhasil</div><div class="pt-sub">Menuju dashboard...</div>';
+    }, 1700);
+
+    setTimeout(onDone, 2400);
+}
+</script>
+
+<!-- FIREBASE LOGIN -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBJJjcICAkbVWjrw5-zYMzcKqPGhS0nS0I",
+    authDomain: "piwstore.firebaseapp.com",
+    projectId: "piwstore",
+    storageBucket: "piwstore.firebasestorage.app",
+    messagingSenderId: "419258630997",
+    appId: "1:419258630997:web:44dc66ee3840a14a6d25dc"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+document.getElementById("loginBtn").onclick = async () => {
+    const btn = document.getElementById("loginBtn");
+    btn.classList.add('loading');
+    try {
+        await signInWithPopup(auth, provider);
+        // Play portal animation THEN redirect
+        playPortal(() => {
+            window.location.href = "portofolio.html";
+        });
+    } catch (error) {
+        btn.classList.remove('loading');
+        if (error.code !== 'auth/popup-closed-by-user') {
+            alert("Login gagal: " + error.message);
+        }
+    }
+};
+</script>
 </body>
 </html>
