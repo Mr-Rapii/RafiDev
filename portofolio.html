@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapi Dev | AI Hub Dashboard</title>
-    
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-
         const firebaseConfig = {
             apiKey: "AIzaSyBJJjcICAkbVWjrw5-zYMzcKqPGhS0nS0I",
             authDomain: "piwstore.firebaseapp.com",
@@ -17,95 +16,544 @@
             messagingSenderId: "419258630997",
             appId: "1:419258630997:web:44dc66ee3840a14a6d25dc"
         };
-
         initializeApp(firebaseConfig);
-        const auth = getAuth(initializeApp(firebaseConfig));
-
-        onAuthStateChanged(auth, (user) => {
-            if (!user) window.location.href = "index.html";
-        });
-
-        window.logout = () => {
-            signOut(auth).then(() => window.location.href = "index.html");
-        };
+        const auth = getAuth();
+        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "index.html"; });
+        window.logout = () => signOut(auth).then(() => window.location.href = "index.html");
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
     <style>
-        :root { --glow: 0 0 15px rgba(59, 130, 246, 0.5); }
-        body { margin: 0; min-height: 100vh; font-family: 'Inter', sans-serif; background: #020617; color: #f8fafc; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
-        
-        .header-section { text-align: center; margin-bottom: 40px; animation: fadeIn 1s; }
-        .logo-img { width: 100px; height: 100px; border-radius: 20px; border: 2px solid #3b82f6; box-shadow: var(--glow); transition: 0.5s; }
-        .logo-img:hover { transform: scale(1.1); box-shadow: 0 0 30px #3b82f6; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .dashboard { width: 100%; max-width: 600px; display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .tool-card { 
-            background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1); text-align: center; text-decoration: none; color: white;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        :root {
+            --bg: #03030a;
+            --surface: rgba(15, 15, 35, 0.7);
+            --blue: #3b82f6;
+            --violet: #7c3aed;
+            --cyan: #06b6d4;
+            --pink: #ec4899;
+            --text: #e2e8f0;
+            --muted: #64748b;
         }
-        .tool-card:hover { transform: translateY(-10px); border-color: #3b82f6; box-shadow: var(--glow); }
 
-        .glow-btn { 
-            background: #1e293b; color: white; padding: 12px 25px; border-radius: 50px; text-decoration: none;
-            border: 1px solid #334155; transition: 0.3s;
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-        .glow-btn:hover { background: #3b82f6; box-shadow: var(--glow); border-color: transparent; }
-        .logout-btn { background: #7f1d1d; color: white; padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; transition: 0.3s; }
-        .logout-btn:hover { background: #991b1b; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* ── CANVAS STARS ── */
+        #stars-canvas {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        }
+
+        /* ── AURORA BG ── */
+        .aurora {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 10%, rgba(124,58,237,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(6,182,212,0.14) 0%, transparent 60%),
+                radial-gradient(ellipse 70% 50% at 50% 50%, rgba(59,130,246,0.08) 0%, transparent 70%);
+            animation: auroraShift 12s ease-in-out infinite alternate;
+        }
+        @keyframes auroraShift {
+            0%   { transform: scale(1)   rotate(0deg); }
+            100% { transform: scale(1.1) rotate(3deg); }
+        }
+
+        /* ── GRID LINES ── */
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image:
+                linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        /* ── WRAPPER ── */
+        .wrapper {
+            position: relative; z-index: 1;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 40px 20px 60px;
+        }
+
+        /* ── FLOATING ORBS ── */
+        .orb {
+            position: fixed; border-radius: 50%; pointer-events: none; filter: blur(80px); z-index: 0;
+        }
+        .orb-1 { width: 350px; height: 350px; background: rgba(124,58,237,0.25); top: -100px; left: -100px; animation: floatOrb 14s ease-in-out infinite; }
+        .orb-2 { width: 250px; height: 250px; background: rgba(6,182,212,0.2); bottom: 100px; right: -80px; animation: floatOrb 10s ease-in-out infinite reverse; }
+        .orb-3 { width: 180px; height: 180px; background: rgba(236,72,153,0.18); top: 50%; left: 30%; animation: floatOrb 18s ease-in-out infinite 4s; }
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33%       { transform: translate(30px, -40px) scale(1.05); }
+            66%       { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        /* ── HEADER ── */
+        .header-section {
+            text-align: center; margin-bottom: 48px;
+            animation: slideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: translateY(0); } }
+
+        .logo-ring {
+            position: relative; display: inline-block; margin-bottom: 20px;
+        }
+        .logo-ring::before {
+            content: ''; position: absolute; inset: -6px; border-radius: 28px;
+            background: linear-gradient(135deg, var(--blue), var(--violet), var(--cyan));
+            animation: spinRing 6s linear infinite; z-index: -1;
+        }
+        .logo-ring::after {
+            content: ''; position: absolute; inset: -3px; border-radius: 25px;
+            background: var(--bg); z-index: -1;
+        }
+        @keyframes spinRing { to { transform: rotate(360deg); } }
+
+        .logo-img {
+            width: 100px; height: 100px; border-radius: 22px; display: block;
+            position: relative; z-index: 1;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s;
+        }
+        .logo-img:hover { transform: scale(1.12) rotate(-3deg); box-shadow: 0 0 40px rgba(59,130,246,0.6); }
+
+        .site-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2rem, 6vw, 3.2rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 20%, var(--cyan) 50%, var(--blue) 80%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        /* ── TYPEWRITER SUBTITLE ── */
+        .typewriter-wrap {
+            font-size: 0.95rem; color: var(--muted); margin-bottom: 14px; height: 1.5em;
+        }
+        #typewriter { color: var(--cyan); font-weight: 600; }
+        .cursor { display: inline-block; width: 2px; height: 1em; background: var(--cyan); animation: blink 0.8s step-end infinite; vertical-align: text-bottom; margin-left: 2px; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .about-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--blue); text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            padding: 6px 16px; border: 1px solid rgba(59,130,246,0.3); border-radius: 50px;
+            transition: 0.3s; backdrop-filter: blur(10px);
+        }
+        .about-link:hover { background: rgba(59,130,246,0.15); border-color: var(--blue); transform: translateY(-2px); }
+        .about-link span { transition: transform 0.3s; }
+        .about-link:hover span { transform: translateX(4px); }
+
+        /* ── STATUS BAR ── */
+        .status-bar {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.78rem; color: var(--muted);
+            margin-bottom: 36px; padding: 8px 18px;
+            background: var(--surface); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 50px; backdrop-filter: blur(12px);
+            animation: fadeUp 0.8s 0.3s both;
+        }
+        .dot-live { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px #22c55e; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+        /* ── SECTION LABEL ── */
+        .section-label {
+            font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em;
+            text-transform: uppercase; color: var(--muted);
+            margin-bottom: 16px; text-align: center;
+            animation: fadeUp 0.8s 0.4s both;
+        }
+
+        /* ── DASHBOARD GRID ── */
+        .dashboard {
+            width: 100%; max-width: 620px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 14px; margin-bottom: 32px;
+        }
+
+        .tool-card {
+            background: var(--surface); backdrop-filter: blur(14px);
+            padding: 22px 12px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.07);
+            text-align: center; text-decoration: none; color: var(--text);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s, box-shadow 0.3s;
+            animation: cardPop 0.6s both;
+            position: relative; overflow: hidden;
+        }
+        .tool-card::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(124,58,237,0.08));
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .tool-card:hover::before { opacity: 1; }
+        .tool-card:hover {
+            transform: translateY(-10px) scale(1.04);
+            border-color: rgba(59,130,246,0.5);
+            box-shadow: 0 8px 32px rgba(59,130,246,0.2), 0 0 0 1px rgba(59,130,246,0.2);
+        }
+        .tool-card .icon { font-size: 1.8rem; display: block; margin-bottom: 8px; transition: transform 0.3s; }
+        .tool-card:hover .icon { transform: scale(1.2) rotate(-5deg); }
+        .tool-card .label { font-size: 0.78rem; font-weight: 600; color: var(--muted); transition: color 0.3s; }
+        .tool-card:hover .label { color: #fff; }
+
+        /* Staggered card animation */
+        .tool-card:nth-child(1)  { animation-delay: 0.05s; }
+        .tool-card:nth-child(2)  { animation-delay: 0.10s; }
+        .tool-card:nth-child(3)  { animation-delay: 0.15s; }
+        .tool-card:nth-child(4)  { animation-delay: 0.20s; }
+        .tool-card:nth-child(5)  { animation-delay: 0.25s; }
+        .tool-card:nth-child(6)  { animation-delay: 0.30s; }
+        .tool-card:nth-child(7)  { animation-delay: 0.35s; }
+        .tool-card:nth-child(8)  { animation-delay: 0.40s; }
+        .tool-card:nth-child(9)  { animation-delay: 0.45s; }
+        .tool-card:nth-child(10) { animation-delay: 0.50s; }
+        @keyframes cardPop { from { opacity:0; transform: scale(0.8) translateY(20px); } to { opacity:1; transform: scale(1) translateY(0); } }
+
+        /* ── SCROLLING MARQUEE ── */
+        .marquee-wrap {
+            width: 100%; max-width: 620px; overflow: hidden;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 12px 0; margin-bottom: 32px;
+            mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+        }
+        .marquee-track {
+            display: flex; gap: 40px; width: max-content;
+            animation: marquee 18s linear infinite;
+        }
+        .marquee-item { font-size: 0.8rem; color: var(--muted); white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+        .marquee-item span { color: var(--cyan); }
+        @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        /* ── TECH BADGES ── */
+        .badges {
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+            max-width: 620px; margin-bottom: 32px;
+            animation: fadeUp 0.8s 0.6s both;
+        }
+        .badge {
+            padding: 5px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 600;
+            border: 1px solid; transition: 0.25s;
+        }
+        .badge:hover { transform: translateY(-3px); }
+        .badge-blue   { color: var(--blue);   border-color: rgba(59,130,246,0.4);   background: rgba(59,130,246,0.08); }
+        .badge-violet { color: #a78bfa;        border-color: rgba(124,58,237,0.4);   background: rgba(124,58,237,0.08); }
+        .badge-cyan   { color: var(--cyan);    border-color: rgba(6,182,212,0.4);    background: rgba(6,182,212,0.08); }
+        .badge-pink   { color: var(--pink);    border-color: rgba(236,72,153,0.4);   background: rgba(236,72,153,0.08); }
+        .badge-green  { color: #4ade80;        border-color: rgba(74,222,128,0.4);   background: rgba(74,222,128,0.08); }
+
+        /* ── ACTION BUTTONS ── */
+        .actions {
+            display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+            margin-bottom: 48px;
+            animation: fadeUp 0.8s 0.7s both;
+        }
+        .glow-btn {
+            display: flex; align-items: center; gap: 6px;
+            background: var(--surface); color: var(--text);
+            padding: 11px 22px; border-radius: 50px; text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem; font-weight: 600;
+            transition: 0.3s; backdrop-filter: blur(12px); cursor: pointer;
+        }
+        .glow-btn:hover { background: rgba(59,130,246,0.2); border-color: var(--blue); color: #fff; transform: translateY(-3px); box-shadow: 0 6px 20px rgba(59,130,246,0.25); }
+        .logout-btn { background: rgba(127,29,29,0.4); border-color: rgba(239,68,68,0.3); }
+        .logout-btn:hover { background: rgba(239,68,68,0.25); border-color: rgba(239,68,68,0.6); box-shadow: 0 6px 20px rgba(239,68,68,0.2); }
+
+        /* ── TESTIMONIALS ── */
+        .wall-title {
+            font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800;
+            text-align: center; margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--blue), var(--violet));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        #testimonialWall { width: 100%; max-width: 540px; }
+
+        .testi-card {
+            background: var(--surface); border: 1px solid rgba(255,255,255,0.07);
+            border-left: 3px solid var(--blue); padding: 18px 20px;
+            border-radius: 16px; margin-bottom: 12px;
+            backdrop-filter: blur(12px);
+            animation: fadeUp 0.5s both;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .testi-card:hover { transform: translateX(4px); border-left-color: var(--cyan); }
+        .testi-stars { color: #fbbf24; font-size: 0.9rem; margin-bottom: 6px; }
+        .testi-msg { font-size: 0.88rem; color: var(--text); line-height: 1.6; margin-bottom: 8px; }
+        .testi-author { font-size: 0.78rem; color: var(--blue); font-weight: 600; }
+
+        /* ── FOOTER ── */
+        .footer {
+            margin-top: 60px; text-align: center;
+            font-size: 0.75rem; color: var(--muted);
+            animation: fadeUp 0.8s 0.9s both;
+        }
+        .footer a { color: var(--blue); text-decoration: none; }
+
+        /* ── UTILITIES ── */
+        @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+
+        /* ── FLOATING CODE PARTICLES ── */
+        .code-particle {
+            position: fixed; font-family: monospace; font-size: 0.7rem;
+            color: rgba(59,130,246,0.25); pointer-events: none; z-index: 0;
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp { from { transform: translateY(100vh) rotate(0deg); opacity:0; } 10% { opacity:1; } 90% { opacity:0.4; } to { transform: translateY(-10vh) rotate(360deg); opacity:0; } }
+
+        /* ── MOUSE GLOW ── */
+        #mouse-glow {
+            position: fixed; width: 300px; height: 300px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(59,130,246,0.08), transparent 70%);
+            pointer-events: none; z-index: 0; transform: translate(-50%,-50%);
+            transition: left 0.12s, top 0.12s;
+        }
+
+        @media (max-width: 480px) {
+            .dashboard { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
     </style>
 </head>
 <body>
 
+<canvas id="stars-canvas"></canvas>
+<div class="aurora"></div>
+<div class="grid-overlay"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div id="mouse-glow"></div>
+
+<div class="wrapper">
+
+    <!-- HEADER -->
     <div class="header-section">
-        <img src="https://i.postimg.cc/ctKx1m8x/file-000000009a3c7207a2ab2d81fdc90db8.png" class="logo-img">
-        <h1>Rapi Dev</h1>
-        <a href="about.html" style="color:#3b82f6; text-decoration:none; font-weight:600;">Tentang Saya →</a>
+        <div class="logo-ring">
+            <img src="https://i.postimg.cc/ctKx1m8x/file-000000009a3c7207a2ab2d81fdc90db8.png" class="logo-img" alt="Rapi Dev Logo">
+        </div>
+        <h1 class="site-title">Rapi Dev</h1>
+        <div class="typewriter-wrap">
+            <span id="typewriter"></span><span class="cursor"></span>
+        </div>
+        <a href="about.html" class="about-link">Tentang Saya <span>→</span></a>
     </div>
 
+    <!-- STATUS -->
+    <div class="status-bar">
+        <div class="dot-live"></div>
+        Semua sistem aktif &nbsp;·&nbsp; 10 Tools tersedia &nbsp;·&nbsp; Versi 2.0
+    </div>
+
+    <!-- TECH BADGES -->
+    <div class="badges">
+        <span class="badge badge-blue">Firebase</span>
+        <span class="badge badge-violet">Supabase</span>
+        <span class="badge badge-cyan">Claude AI</span>
+        <span class="badge badge-pink">TTS Engine</span>
+        <span class="badge badge-green">QR Generator</span>
+        <span class="badge badge-blue">Image Gen</span>
+        <span class="badge badge-violet">Chord DB</span>
+        <span class="badge badge-cyan">Content AI</span>
+    </div>
+
+    <!-- SECTION LABEL -->
+    <p class="section-label">⚡ Pilih Tool</p>
+
+    <!-- DASHBOARD GRID -->
     <div class="dashboard">
-        <a href="chatbot.html" class="tool-card">💬<br>Asisten</a>
-        <a href="gambar.html" class="tool-card">🎨<br>Generator</a>
-        <a href="chord.html" class="tool-card">🎸<br>Chord</a>
-        <a href="konten.html" class="tool-card">📱<br>Konten</a>
-        <a href="tiktok.html" class="tool-card">🎵<br>TikTok</a>
-        <a href="suara.html" class="tool-card">🔊<br>Teks-Suara</a>
-        <a href="tugas.html" class="tool-card">📚<br>Tugas</a>
-        <a href="penghitung.html" class="tool-card">🔢<br>Hitung</a>
-        <a href="teks.html" class="tool-card">📝<br>Teks</a>
-        <a href="qr.html" class="tool-card">🔲<br>QR Code</a>
+        <a href="chatbot.html" class="tool-card"><span class="icon">💬</span><span class="label">Asisten</span></a>
+        <a href="gambar.html" class="tool-card"><span class="icon">🎨</span><span class="label">Generator</span></a>
+        <a href="chord.html"  class="tool-card"><span class="icon">🎸</span><span class="label">Chord</span></a>
+        <a href="konten.html" class="tool-card"><span class="icon">📱</span><span class="label">Konten</span></a>
+        <a href="tiktok.html" class="tool-card"><span class="icon">🎵</span><span class="label">TikTok</span></a>
+        <a href="suara.html"  class="tool-card"><span class="icon">🔊</span><span class="label">Teks-Suara</span></a>
+        <a href="tugas.html"  class="tool-card"><span class="icon">📚</span><span class="label">Tugas</span></a>
+        <a href="penghitung.html" class="tool-card"><span class="icon">🔢</span><span class="label">Hitung</span></a>
+        <a href="teks.html"   class="tool-card"><span class="icon">📝</span><span class="label">Teks</span></a>
+        <a href="qr.html"     class="tool-card"><span class="icon">🔲</span><span class="label">QR Code</span></a>
     </div>
 
-    <div style="display:flex; gap:10px; margin-bottom:40px;">
+    <!-- MARQUEE -->
+    <div class="marquee-wrap">
+        <div class="marquee-track">
+            <span class="marquee-item">🤖 <span>AI Powered</span> Tools</span>
+            <span class="marquee-item">🎨 <span>Generatif</span> Images</span>
+            <span class="marquee-item">💬 <span>Smart</span> Chatbot</span>
+            <span class="marquee-item">🎵 <span>TikTok</span> Scripts</span>
+            <span class="marquee-item">🔊 <span>Text to</span> Speech</span>
+            <span class="marquee-item">🎸 <span>Chord</span> Finder</span>
+            <span class="marquee-item">📚 <span>Homework</span> Helper</span>
+            <span class="marquee-item">🔲 <span>QR</span> Generator</span>
+            <!-- duplicate for seamless loop -->
+            <span class="marquee-item">🤖 <span>AI Powered</span> Tools</span>
+            <span class="marquee-item">🎨 <span>Generatif</span> Images</span>
+            <span class="marquee-item">💬 <span>Smart</span> Chatbot</span>
+            <span class="marquee-item">🎵 <span>TikTok</span> Scripts</span>
+            <span class="marquee-item">🔊 <span>Text to</span> Speech</span>
+            <span class="marquee-item">🎸 <span>Chord</span> Finder</span>
+            <span class="marquee-item">📚 <span>Homework</span> Helper</span>
+            <span class="marquee-item">🔲 <span>QR</span> Generator</span>
+        </div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="actions">
         <a href="lapor.html" class="glow-btn">🛠 Lapor Bug</a>
         <a href="rating.html" class="glow-btn">⭐ Rating</a>
-        <button class="logout-btn" onclick="logout()">Keluar</button>
+        <button class="glow-btn logout-btn" onclick="logout()">🚪 Keluar</button>
     </div>
 
-    <div id="testimonialWall" style="width: 100%; max-width: 500px;">
-        <h2 style="text-align:center;">Wall of Fame</h2>
+    <!-- TESTIMONIALS -->
+    <div id="testimonialWall">
+        <h2 class="wall-title">✦ Wall of Fame</h2>
     </div>
 
-    <script>
-        const supabase = supabase.createClient('https://tvhhtkkwbxoyztmnkjnh.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2aGh0a2t3YnhveXp0bW5ram5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNzYxMzAsImV4cCI6MjA5Njg1MjEzMH0.ABm1xdmmHnQl9sLW5Xn09OR7hXV38nau7yFSUIgVbTo');
+    <footer class="footer">
+        Made with ❤️ by <a href="about.html">Rapi Dev</a> &nbsp;·&nbsp; © 2025
+    </footer>
 
-        async function loadTestimoni() {
-            const { data } = await supabase.from('testimoni').select('*').order('created_at', { ascending: false });
-            if (data) {
-                document.getElementById('testimonialWall').innerHTML += data.map(t => `
-                    <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; margin-bottom:10px; border-left:4px solid #3b82f6;">
-                        <small>${"★".repeat(t.rating)}</small>
-                        <p style="margin:5px 0;">"${t.pesan}"</p>
-                        <small style="color:#3b82f6;">— ${t.nama}</small>
-                    </div>
-                `).join('');
-            }
+</div>
+
+<script>
+/* ── STARS CANVAS ── */
+const canvas = document.getElementById('stars-canvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function resizeCanvas() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', () => { resizeCanvas(); initStars(); });
+
+function initStars() {
+    stars = [];
+    const count = Math.floor((canvas.width * canvas.height) / 4000);
+    for (let i = 0; i < count; i++) {
+        stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.5 + 0.3,
+            alpha: Math.random(),
+            speed: Math.random() * 0.4 + 0.1,
+            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            twinkleDir: Math.random() > 0.5 ? 1 : -1,
+        });
+    }
+}
+initStars();
+
+function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const s of stars) {
+        s.alpha += s.twinkleSpeed * s.twinkleDir;
+        if (s.alpha >= 1) { s.alpha = 1; s.twinkleDir = -1; }
+        if (s.alpha <= 0.1) { s.alpha = 0.1; s.twinkleDir = 1; }
+        ctx.save();
+        ctx.globalAlpha = s.alpha;
+        ctx.fillStyle = '#e2e8f0';
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+    requestAnimationFrame(drawStars);
+}
+drawStars();
+
+/* ── MOUSE GLOW ── */
+const glow = document.getElementById('mouse-glow');
+document.addEventListener('mousemove', e => {
+    glow.style.left = e.clientX + 'px';
+    glow.style.top  = e.clientY + 'px';
+});
+
+/* ── TYPEWRITER ── */
+const phrases = [
+    'AI Hub untuk semua kebutuhanmu 🚀',
+    'Buat konten lebih cepat & cerdas ✨',
+    'Powered by kecerdasan buatan 🤖',
+    'Generator • Asisten • Creator 🎨',
+];
+let pi = 0, ci = 0, deleting = false;
+const tw = document.getElementById('typewriter');
+
+function typeLoop() {
+    const current = phrases[pi];
+    if (!deleting) {
+        tw.textContent = current.slice(0, ci + 1);
+        ci++;
+        if (ci === current.length) { deleting = true; setTimeout(typeLoop, 1800); return; }
+        setTimeout(typeLoop, 55);
+    } else {
+        tw.textContent = current.slice(0, ci - 1);
+        ci--;
+        if (ci === 0) {
+            deleting = false;
+            pi = (pi + 1) % phrases.length;
+            setTimeout(typeLoop, 400);
+            return;
         }
-        loadTestimoni();
-    </script>
+        setTimeout(typeLoop, 28);
+    }
+}
+typeLoop();
+
+/* ── FLOATING CODE PARTICLES ── */
+const snippets = ['<div>', '</>', 'AI()', 'const', '=>', '{  }', '✦', '01', '10', 'fn()', 'async', 'await'];
+function spawnParticle() {
+    const el = document.createElement('div');
+    el.className = 'code-particle';
+    el.textContent = snippets[Math.floor(Math.random() * snippets.length)];
+    el.style.left = Math.random() * 100 + 'vw';
+    const dur = 12 + Math.random() * 16;
+    el.style.animationDuration = dur + 's';
+    el.style.animationDelay = Math.random() * 4 + 's';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), (dur + 4) * 1000);
+}
+setInterval(spawnParticle, 1200);
+for (let i = 0; i < 8; i++) setTimeout(spawnParticle, i * 300);
+
+/* ── SUPABASE TESTIMONIALS ── */
+const { createClient } = supabase;
+const sb = createClient(
+    'https://tvhhtkkwbxoyztmnkjnh.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2aGh0a2t3YnhveXp0bW5ram5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNzYxMzAsImV4cCI6MjA5Njg1MjEzMH0.ABm1xdmmHnQl9sLW5Xn09OR7hXV38nau7yFSUIgVbTo'
+);
+
+async function loadTestimoni() {
+    const { data } = await sb.from('testimoni').select('*').order('created_at', { ascending: false });
+    const wall = document.getElementById('testimonialWall');
+    if (data && data.length) {
+        data.forEach((t, i) => {
+            const card = document.createElement('div');
+            card.className = 'testi-card';
+            card.style.animationDelay = (i * 0.1) + 's';
+            card.innerHTML = `
+                <div class="testi-stars">${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)}</div>
+                <p class="testi-msg">"${t.pesan}"</p>
+                <span class="testi-author">— ${t.nama}</span>
+            `;
+            wall.appendChild(card);
+        });
+    }
+}
+loadTestimoni();
+</script>
 </body>
 </html>
