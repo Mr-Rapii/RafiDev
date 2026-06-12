@@ -3,42 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raffi | Portofolio Personal</title>
+    <title>Raffi | Portofolio & AI Hub</title>
     <style>
         /* CSS Variabel & Reset Dasar */
         :root { 
             --bg: #0f172a; 
+            --bg-card: rgba(30, 41, 59, 0.7);
             --text: #f8fafc; 
             --accent: #3b82f6; 
-            --accent-glow: rgba(59, 130, 246, 0.5); 
+            --accent-glow: rgba(59, 130, 246, 0.4); 
             --gradient: linear-gradient(90deg, #3b82f6, #10b981);
+            --border: rgba(255, 255, 255, 0.08);
         }
+        
+        /* Mengaktifkan Fitur Gulir Halus */
+        html { scroll-behavior: smooth; }
+        
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg); color: var(--text); overflow-x: hidden; }
 
-        /* --- Kumpulan Animasi CSS --- */
+        /* --- Animasi Kunci (Keyframes) --- */
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
+            from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
         }
         @keyframes float {
-            0% { transform: translateY(0px) scale(1); }
+            0%, 100% { transform: translateY(0px) scale(1); }
             50% { transform: translateY(-20px) scale(1.05); }
-            100% { transform: translateY(0px) scale(1); }
         }
         @keyframes pulseGlow {
-            0% { box-shadow: 0 0 10px var(--accent-glow); }
-            50% { box-shadow: 0 0 25px var(--accent-glow), 0 0 10px #10b981; }
-            100% { box-shadow: 0 0 10px var(--accent-glow); }
+            0%, 100% { box-shadow: 0 0 15px var(--accent-glow); }
+            50% { box-shadow: 0 0 30px var(--accent-glow), 0 0 15px #10b981; }
         }
         @keyframes blink { 
-            0%, 100% { opacity: 1; } 
-            50% { opacity: 0; } 
+            0%, 100% { opacity: 1; } 50% { opacity: 0; } 
         }
 
-        /* Navigasi Atas */
+        /* Navigasi */
         nav { 
-            padding: 20px 50px; 
+            padding: 20px 30px; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
@@ -48,12 +51,12 @@
             width: 100%; 
             top: 0; 
             z-index: 100; 
-            border-bottom: 1px solid #1e293b; 
+            border-bottom: 1px solid var(--border); 
         }
-        .logo { font-size: 1.5rem; font-weight: bold; color: var(--text); text-decoration: none; letter-spacing: 2px;}
+        .logo { font-size: 1.3rem; font-weight: bold; color: var(--text); text-decoration: none; letter-spacing: 2px;}
         .logo span { color: var(--accent); }
 
-        /* Area Utama (Hero Section) */
+        /* Hero Section */
         .hero { 
             height: 100vh; 
             display: flex; 
@@ -64,48 +67,111 @@
             padding: 0 20px; 
             position: relative; 
         }
-        
-        /* Bola Cahaya Mengambang di Belakang */
         .hero::before { 
             content: ''; 
             position: absolute; 
-            width: 400px; 
-            height: 400px; 
+            width: 350px; 
+            height: 350px; 
             background: var(--accent); 
-            filter: blur(150px); 
+            filter: blur(130px); 
             opacity: 0.15; 
             z-index: -1; 
             animation: float 8s infinite ease-in-out; 
         }
         
-        .greeting { font-size: 1.2rem; color: #94a3b8; margin-bottom: 10px; opacity: 0; animation: fadeInUp 1s ease forwards; }
-        .name { font-size: 4rem; font-weight: 800; margin-bottom: 10px; opacity: 0; animation: fadeInUp 1s ease 0.2s forwards; }
+        .greeting { font-size: 1.1rem; color: #94a3b8; margin-bottom: 10px; opacity: 0; animation: fadeInUp 1s ease forwards; }
+        .name { font-size: 3.5rem; font-weight: 800; margin-bottom: 10px; opacity: 0; animation: fadeInUp 1s ease 0.2s forwards; }
         .name span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* Wadah Teks Animasi Mengetik */
-        .typing-container { font-size: 1.5rem; color: #cbd5e1; height: 40px; margin-bottom: 30px; opacity: 0; animation: fadeInUp 1s ease 0.4s forwards; }
+        .typing-container { font-size: 1.3rem; color: #cbd5e1; height: 35px; margin-bottom: 30px; opacity: 0; animation: fadeInUp 1s ease 0.4s forwards; }
         .cursor { display: inline-block; width: 3px; height: 1.2rem; background-color: var(--accent); margin-left: 5px; animation: blink 0.8s infinite; vertical-align: middle; }
 
-        /* Tombol Aksi */
         .btn-group { display: flex; gap: 15px; opacity: 0; animation: fadeInUp 1s ease 0.6s forwards; }
-        .btn { padding: 12px 30px; border-radius: 30px; font-weight: bold; text-decoration: none; transition: all 0.3s; font-size: 1rem; }
+        .btn { padding: 12px 30px; border-radius: 30px; font-weight: bold; text-decoration: none; transition: all 0.3s; font-size: 0.95rem; }
         .btn-primary { background: var(--accent); color: white; border: 2px solid var(--accent); animation: pulseGlow 3s infinite; }
         .btn-primary:hover { background: transparent; color: var(--accent); box-shadow: none; transform: translateY(-3px); }
-        .btn-outline { background: transparent; color: var(--text); border: 2px solid #334155; }
-        .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-3px); }
 
-        /* Label Keahlian */
-        .tech-stack { margin-top: 50px; display: flex; gap: 15px; opacity: 0; animation: fadeInUp 1s ease 0.8s forwards; flex-wrap: wrap; justify-content: center; }
-        .tech-badge { background: #1e293b; padding: 10px 20px; border-radius: 8px; border: 1px solid #334155; font-size: 0.9rem; color: #94a3b8; transition: border 0.3s, color 0.3s; cursor: default; }
-        .tech-badge:hover { border-color: var(--accent); color: white; }
+        /* --- Section Dashboard Tools --- */
+        .workspace {
+            padding: 100px 20px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+        .section-subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 50px;
+            font-size: 0.95rem;
+        }
 
-        /* Mode Layar HP */
+        /* Grid Layout Responsif */
+        .grid-tools {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        /* Desain Kartu Menu (Glassmorphism) */
+        .card-tool {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px 20px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            opacity: 0; /* Dikontrol via JS untuk animasi masuk berantai */
+            transform: translateY(30px);
+        }
+
+        /* Efek Hover Animasi Keren */
+        .card-tool:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--accent);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            transition: transform 0.3s;
+        }
+        .card-tool:hover .card-icon {
+            transform: rotate(10px) scale(1.1);
+        }
+
+        .card-title { font-size: 1.1rem; font-weight: 600; color: #f1f5f9; }
+        .card-desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.4; }
+
+        /* Klasifikasi Kelas Animasi Masuk */
+        .card-show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Optimasi Tampilan HP */
         @media (max-width: 768px) {
-            .name { font-size: 2.8rem; }
-            .typing-container { font-size: 1.2rem; }
-            nav { padding: 15px 20px; }
-            .btn-group { flex-direction: column; width: 100%; max-width: 250px; }
-            .btn { text-align: center; }
+            .name { font-size: 2.5rem; }
+            .grid-tools { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; }
+            .card-tool { padding: 20px 15px; }
+            .card-icon { font-size: 2rem; }
+            .card-title { font-size: 1rem; }
         }
     </style>
 </head>
@@ -116,7 +182,7 @@
     </nav>
 
     <section class="hero">
-        <div class="greeting">Halo, selamat datang di ruang digital saya.</div>
+        <div class="greeting">Selamat datang di ruang digital saya.</div>
         <h1 class="name">Saya <span>Raffi</span></h1>
         
         <div class="typing-container">
@@ -124,65 +190,130 @@
         </div>
 
         <div class="btn-group">
-            <a href="#projects" class="btn btn-primary">Lihat Karya</a>
-            <a href="#contact" class="btn btn-outline">Hubungi Saya</a>
+            <a href="#karya" class="btn btn-primary">Lihat Karya</a>
         </div>
+    </section>
 
-        <div class="tech-stack">
-            <div class="tech-badge">🌐 Web Developer</div>
-            <div class="tech-badge">🎬 Content Creator</div>
-            <div class="tech-badge">🤖 AI Enthusiast</div>
-            <div class="tech-badge">🎮 Gamer & Rusher</div>
+    <section class="workspace" id="karya">
+        <h2 class="section-title">Ekosistem Proyek</h2>
+        <p class="section-subtitle">Kumpulan alat fungsional dan kecerdasan buatan yang telah dibangun.</p>
+
+        <div class="grid-tools">
+            
+            <a href="index.html" class="card-tool">
+                <div class="card-icon">💬</div>
+                <div class="card-title">Asisten AI</div>
+                <div class="card-desc">Obrolan interaktif dengan Bot Rapi yang memiliki memori kontekstual.</div>
+            </a>
+
+            <a href="gambar.html" class="card-tool">
+                <div class="card-icon">🎨</div>
+                <div class="card-title">AI Image</div>
+                <div class="card-desc">Generator pembuat gambar otomatis berbasis deskripsi teks teks inggris.</div>
+            </a>
+
+            <a href="konten.html" class="card-tool">
+                <div class="card-icon">📱</div>
+                <div class="card-title">SEO Konten</div>
+                <div class="card-desc">Peracik judul, deskripsi, naskah, dan hashtag untuk TikTok & YouTube.</div>
+            </a>
+
+            <a href="chord.html" class="card-tool">
+                <div class="card-icon">🎸</div>
+                <div class="card-title">Kunci Gitar</div>
+                <div class="card-desc">Pencari lirik lagu dan struktur chord dasar dasar dengan format presisi.</div>
+            </a>
+
+            <a href="tiktok.html" class="card-tool">
+                <div class="card-icon">🎵</div>
+                <div class="card-title">TikTok Downloader</div>
+                <div class="card-desc">Pengunduh file video tanpa watermark atau ekstraksi audio MP3.</div>
+            </a>
+
+            <a href="teks.html" class="card-tool">
+                <div class="card-icon">✨</div>
+                <div class="card-title">Teks Estetik</div>
+                <div class="card-desc">Mengubah huruf standar menjadi font unik dan nickname game dekoratif.</div>
+            </a>
+
+            <a href="suara.html" class="card-tool">
+                <div class="card-icon">🎙️</div>
+                <div class="card-title">Voiceover Studio</div>
+                <div class="card-desc">Mengubah teks naskah menjadi suara digital dengan kontrol pitch.</div>
+            </a>
+
+            <a href="qr.html" class="card-tool">
+                <div class="card-icon">🔳</div>
+                <div class="card-title">QR Generator</div>
+                <div class="card-desc">Mengonversi link tautan URL menjadi gambar kode QR siap scan.</div>
+            </a>
+
+            <a href="penghitung.html" class="card-tool">
+                <div class="card-icon">📝</div>
+                <div class="card-title">Hitung Karakter</div>
+                <div class="card-desc">Analisis jumlah kata, karakter, dan paragraf teks secara real-time.</div>
+            </a>
+
+            <a href="tugas.html" class="card-tool">
+                <div class="card-icon">✅</div>
+                <div class="card-title">Manajer Tugas</div>
+                <div class="card-desc">Catatan tugas dan ide pemrograman permanen dengan LocalStorage.</div>
+            </a>
+
         </div>
     </section>
 
     <script>
-        // Logika JavaScript untuk Animasi Mengetik Teks
-        const textArray = [
-            "Pengembang Web & AI", 
-            "Pembuat Konten Tutorial", 
-            "E-Sports Enthusiast", 
-            "Creative Thinker"
-        ];
-        
-        let textIndex = 0;
-        let charIndex = 0;
-        let isDeleting = false;
+        // Efek Mengetik Otomatis
+        const textArray = ["Web Developer", "Content Creator", "AI Enthusiast", "Gamer & Rusher"];
+        let textIndex = 0, charIndex = 0, isDeleting = false;
         const typedTextElement = document.getElementById("typed-text");
 
         function typeEffect() {
             const currentText = textArray[textIndex];
-            
             if (isDeleting) {
-                // Menghapus huruf satu per satu
                 typedTextElement.textContent = currentText.substring(0, charIndex - 1);
                 charIndex--;
             } else {
-                // Mengetik huruf satu per satu
                 typedTextElement.textContent = currentText.substring(0, charIndex + 1);
                 charIndex++;
             }
 
-            // Kecepatan ketik dan hapus
             let typeSpeed = isDeleting ? 40 : 100;
 
             if (!isDeleting && charIndex === currentText.length) {
-                // Jeda setelah kalimat selesai diketik
-                typeSpeed = 2000; 
-                isDeleting = true;
+                typeSpeed = 2000; isDeleting = true;
             } else if (isDeleting && charIndex === 0) {
-                // Pindah ke kalimat selanjutnya setelah dihapus
                 isDeleting = false;
                 textIndex = (textIndex + 1) % textArray.length;
                 typeSpeed = 500; 
             }
-
             setTimeout(typeEffect, typeSpeed);
         }
 
-        // Jalankan animasi 1 detik setelah halaman dibuka agar selaras dengan animasi CSS
+        // Animasi Masuk Berantai (Staggered Animation) saat scroll sampai ke Grid Menu
         document.addEventListener("DOMContentLoaded", () => {
             setTimeout(typeEffect, 1000);
+
+            const cards = document.querySelectorAll('.card-tool');
+            const observerOptions = { root: null, threshold: 0.1 };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Memunculkan kartu satu per satu dengan jeda waktu teratur
+                        cards.forEach((card, index) => {
+                            setTimeout(() => {
+                                card.classList.add('card-show');
+                            }, index * 100); // Jeda 100ms antar kartu
+                        });
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            const targetSection = document.querySelector('.grid-tools');
+            if(targetSection) observer.observe(targetSection);
         });
     </script>
 </body>
