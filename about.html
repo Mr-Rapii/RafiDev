@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tentang Saya | Rapi Dev</title>
+    <style>
+        :root { --bg: #0f172a; --accent: #3b82f6; --glass: rgba(30, 41, 59, 0.6); --text: #f8fafc; }
+        body { 
+            margin: 0; min-height: 100vh; font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at bottom right, #1e3a8a, #0f172a); color: var(--text);
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+        .about-card {
+            background: var(--glass); backdrop-filter: blur(15px);
+            padding: 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
+            max-width: 500px; text-align: center; animation: fadeIn 1s ease-out;
+        }
+        .profile-img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--accent); margin-bottom: 20px; object-fit: cover; }
+        h1 { margin: 0; font-size: 2rem; color: var(--accent); }
+        p { color: #cbd5e1; line-height: 1.6; font-size: 1rem; margin: 20px 0; }
+        .tech-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        .tag { background: rgba(59, 130, 246, 0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; border: 1px solid var(--accent); }
+        .back-btn { display: inline-block; margin-top: 30px; color: white; text-decoration: none; border-bottom: 1px solid white; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="about-card">
+        <img src="https://ui-avatars.com/api/?name=Rapi+Dev&background=3b82f6&color=fff&size=200" alt="Rapi Dev" class="profile-img">
+        <h1>Raffi</h1>
+        <p>
+            Halo! Saya Raffi, seorang pelajar asal Bandung yang memiliki ketertarikan mendalam pada teknologi AI dan pengembangan web. 
+            AI Hub ini saya bangun sebagai proyek personal untuk mempermudah akses ke berbagai alat berbasis AI. 
+            Saya percaya bahwa teknologi harus bisa digunakan oleh siapa saja dengan cara yang sederhana dan elegan.
+        </p>
+        <div class="tech-tags">
+            <span class="tag">Python</span>
+            <span class="tag">Web Development</span>
+            <span class="tag">AI Enthusiast</span>
+            <span class="tag">Bandung Tech</span>
+        </div>
+        <a href="index.html" class="back-btn">← Kembali ke Dashboard</a>
+    </div>
+</body>
+</html>
