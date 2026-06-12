@@ -5,91 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapi Dev | AI Hub Dashboard</title>
     <style>
-        :root { --bg: #0f172a; --accent: #3b82f6; --glass: rgba(30, 41, 59, 0.6); --text: #f8fafc; }
+        :root { --bg: #0f172a; --accent: #3b82f6; --glass: rgba(30, 41, 59, 0.5); --text: #f8fafc; }
         body { 
             margin: 0; min-height: 100vh; font-family: 'Inter', sans-serif;
             background: radial-gradient(circle at top, #1e3a8a, #0f172a); color: var(--text);
-            display: flex; flex-direction: column; align-items: center; padding: 30px 20px;
+            display: flex; flex-direction: column; align-items: center; padding: 40px 20px;
         }
 
-        /* Logo Rapi-Dev */
-        .logo-container { margin-bottom: 25px; text-align: center; }
-        .logo-container img { width: 220px; height: auto; filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.3)); animation: fadeInDown 0.8s ease-out; }
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes appear { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: appear 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-        /* Dashboard */
-        .dashboard { width: 100%; max-width: 500px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .header-section { text-align: center; margin-bottom: 40px; }
+        .logo-img { 
+            width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--accent);
+            object-fit: cover; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3); margin-bottom: 15px;
+        }
+        h1 { font-size: 2.2rem; margin: 0; }
+        .sub-link { color: #94a3b8; text-decoration: none; border-bottom: 1px solid #475569; }
+
+        .dashboard { width: 100%; max-width: 500px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 40px; }
         .tool-card { 
-            background: var(--glass); backdrop-filter: blur(10px); padding: 20px 15px; border-radius: 20px; 
-            border: 1px solid rgba(255,255,255,0.1); text-decoration: none; color: white; 
-            display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background: var(--glass); backdrop-filter: blur(12px); padding: 20px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1); text-decoration: none; color: white;
+            display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;
+            opacity: 0; /* Animasi diatur via JS */
         }
-        .tool-card:hover { transform: translateY(-5px) scale(1.03); background: rgba(59, 130, 246, 0.2); border-color: var(--accent); }
-        .icon { font-size: 2rem; }
+        .tool-card:hover { transform: translateY(-8px); background: rgba(59, 130, 246, 0.3); border-color: var(--accent); }
+        .icon { font-size: 1.8rem; }
 
-        /* Form Styling */
         .interactive-box {
-            background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(10px);
-            padding: 25px; border-radius: 20px; border: 1px dashed rgba(255,255,255,0.2);
-            text-align: center; width: 100%; max-width: 500px; margin-top: 25px;
+            background: var(--glass); backdrop-filter: blur(12px); padding: 25px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 500px; margin-bottom: 20px;
         }
-        .interactive-box input, .interactive-box textarea {
-            width: 100%; background: rgba(15, 23, 42, 0.6); color: white; border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 12px; padding: 12px; margin-bottom: 10px; box-sizing: border-box;
-        }
-        .btn-action { 
-            background: var(--accent); color: white; border: none; border-radius: 12px; 
-            padding: 12px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s;
-        }
-        .btn-action:hover { background: #2563eb; }
+        input, textarea { width: 100%; background: rgba(0,0,0,0.3); color: white; border: 1px solid #334155; padding: 12px; border-radius: 12px; margin-bottom: 10px; box-sizing: border-box; }
+        .btn-action { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 12px; width: 100%; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="logo-container">
-        <img src="https://i.postimg.cc/ctKx1m8x/file-000000009a3c7207a2ab2d81fdc90db8.png" alt="Rapi-Dev Logo">
+    <div class="header-section fade-in">
+        <img src="https://i.postimg.cc/ctKx1m8x/file-000000009a3c7207a2ab2d81fdc90db8.png" alt="Rapi-Dev" class="logo-img">
+        <h1>Rapi-Dev</h1>
+        <a href="about.html" class="sub-link">Tentang Saya & Visi AI Hub →</a>
     </div>
 
     <div class="dashboard">
-        <a href="chatbot.html" class="tool-card"><div class="icon">💬</div><h3>Asisten AI</h3></a>
+        <a href="chatbot.html" class="tool-card"><div class="icon">💬</div><h3>Asisten</h3></a>
         <a href="gambar.html" class="tool-card"><div class="icon">🎨</div><h3>Generator</h3></a>
-        <a href="chord.html" class="tool-card"><div class="icon">🎸</div><h3>Chord Lagu</h3></a>
-        <a href="konten.html" class="tool-card"><div class="icon">📱</div><h3>Konten Kreator</h3></a>
+        <a href="chord.html" class="tool-card"><div class="icon">🎸</div><h3>Chord</h3></a>
+        <a href="konten.html" class="tool-card"><div class="icon">📱</div><h3>Konten</h3></a>
         <a href="tiktok.html" class="tool-card"><div class="icon">🎵</div><h3>TikTok DL</h3></a>
-        <a href="suara.html" class="tool-card"><div class="icon">🔊</div><h3>Teks ke Suara</h3></a>
+        <a href="suara.html" class="tool-card"><div class="icon">🔊</div><h3>Teks-Suara</h3></a>
         <a href="tugas.html" class="tool-card"><div class="icon">📚</div><h3>Bantu Tugas</h3></a>
-        <a href="penghitung.html" class="tool-card"><div class="icon">🔢</div><h3>Penghitung</h3></a>
+        <a href="penghitung.html" class="tool-card"><div class="icon">🔢</div><h3>Hitung Kata</h3></a>
         <a href="teks.html" class="tool-card"><div class="icon">📝</div><h3>Format Teks</h3></a>
         <a href="qr.html" class="tool-card"><div class="icon">🔲</div><h3>QR Code</h3></a>
     </div>
 
-    <form class="interactive-box" id="requestForm" action="https://api.web3forms.com/submit" method="POST">
-        <h3>💡 Request Fitur Baru</h3>
+    <form class="interactive-box fade-in" id="requestForm" action="https://api.web3forms.com/submit" method="POST">
+        <h3>💡 Request Fitur / Lapor Bug</h3>
         <input type="hidden" name="access_key" value="d6f8fcdc-bba9-41bd-b2cc-24c991d44c36">
-        <input type="text" name="Nama" placeholder="Nama Kamu (Opsional)">
-        <textarea name="Request" placeholder="Tulis ide fitur baru..." required></textarea>
-        <button type="submit" class="btn-action">Kirim Request</button>
+        <textarea name="Request" placeholder="Tuliskan ide fitur atau bug yang ditemukan..." required></textarea>
+        <button type="submit" class="btn-action">Kirim Laporan</button>
     </form>
 
-    <form class="interactive-box" id="ratingForm" action="https://api.web3forms.com/submit" method="POST" style="margin-bottom: 40px;">
-        <h3>Beri Rating</h3>
+    <form class="interactive-box fade-in" id="ratingForm" action="https://api.web3forms.com/submit" method="POST">
+        <h3>⭐ Beri Rating</h3>
         <input type="hidden" name="access_key" value="d6f8fcdc-bba9-41bd-b2cc-24c991d44c36">
         <textarea name="Rating" placeholder="Berikan kesan untuk AI Hub ini..." required></textarea>
         <button type="submit" class="btn-action">Kirim Rating</button>
     </form>
 
     <script>
-        // Logika sederhana untuk form agar tidak refresh
+        // Animasi muncul berurutan
+        document.querySelectorAll('.tool-card').forEach((card, index) => {
+            card.style.animation = `appear 0.8s ease forwards ${0.1 + (index * 0.05)}s`;
+        });
+
+        // Submit form tanpa refresh
         document.querySelectorAll('form').forEach(form => {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 const btn = this.querySelector('button');
                 btn.innerText = "Mengirim...";
                 fetch(this.action, { method: "POST", body: new FormData(this) })
-                .then(() => {
-                    this.innerHTML = "<h3>Terkirim! Terima kasih.</h3>";
-                });
+                .then(() => { this.innerHTML = "<h3>Terkirim! Terima kasih.</h3>"; });
             });
         });
     </script>
