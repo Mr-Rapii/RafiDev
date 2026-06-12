@@ -2,56 +2,503 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Lapor Fitur / Bug | Rapi Dev</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lapor Bug / Ide | Rapi Dev</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #0f172a; --accent: #3b82f6; --glass: rgba(30, 41, 59, 0.6); --text: #f8fafc; }
-        body { background: radial-gradient(circle at top, #1e3a8a, #0f172a); color: white; font-family: 'Inter', sans-serif; display: flex; justify-content: center; padding: 40px 20px; min-height: 100vh; }
-        .container { background: var(--glass); backdrop-filter: blur(15px); padding: 30px; border-radius: 25px; width: 100%; max-width: 450px; border: 1px solid rgba(255,255,255,0.1); }
-        input, textarea { width: 100%; background: rgba(0,0,0,0.3); color: white; border: 1px solid #334155; padding: 12px; border-radius: 12px; margin-bottom: 15px; box-sizing: border-box; }
-        .btn { background: var(--accent); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; cursor: pointer; font-weight: bold; }
-        .back-link { display: block; text-align: center; margin-top: 20px; color: #94a3b8; text-decoration: none; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:      #03030a;
+            --surface: rgba(12, 15, 28, 0.8);
+            --blue:    #3b82f6;
+            --violet:  #7c3aed;
+            --cyan:    #06b6d4;
+            --lime:    #a3e635;
+            --text:    #e2e8f0;
+            --muted:   #64748b;
+            --border:  rgba(255,255,255,0.07);
+        }
+
+        html, body { min-height: 100%; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex; flex-direction: column;
+            align-items: center;
+            padding: 48px 20px 60px;
+            position: relative; overflow-x: hidden;
+        }
+
+        /* ── BACKGROUND ── */
+        #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+        .aurora {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 10% 20%, rgba(59,130,246,0.14) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 90% 80%, rgba(124,58,237,0.14) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 35% at 50% 50%, rgba(6,182,212,0.07) 0%, transparent 70%);
+            animation: auroraShift 16s ease-in-out infinite alternate;
+        }
+        @keyframes auroraShift {
+            0%   { transform: scale(1) rotate(0deg); }
+            100% { transform: scale(1.07) rotate(2deg); }
+        }
+
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image:
+                linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        .orb {
+            position: fixed; border-radius: 50%; filter: blur(100px);
+            pointer-events: none; z-index: 0;
+        }
+        .orb-1 { width: 380px; height: 380px; background: rgba(59,130,246,0.15); top: -120px; right: -80px; animation: floatOrb 15s ease-in-out infinite; }
+        .orb-2 { width: 280px; height: 280px; background: rgba(124,58,237,0.18); bottom: 80px; left: -60px; animation: floatOrb 12s ease-in-out infinite reverse; }
+        @keyframes floatOrb {
+            0%,100% { transform: translate(0,0); }
+            50%      { transform: translate(25px,-30px); }
+        }
+
+        /* ── WRAPPER ── */
+        .wrapper { position: relative; z-index: 10; width: 100%; max-width: 500px; }
+
+        /* ── BACK LINK ── */
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 500;
+            padding: 8px 16px; border: 1px solid var(--border); border-radius: 50px;
+            background: var(--surface); backdrop-filter: blur(12px);
+            transition: 0.25s; margin-bottom: 28px;
+        }
+        .back-btn:hover { color: var(--text); border-color: rgba(59,130,246,0.4); background: rgba(59,130,246,0.08); transform: translateX(-3px); }
+        .back-btn .arrow { transition: transform 0.25s; }
+        .back-btn:hover .arrow { transform: translateX(-3px); }
+
+        /* ── HEADER ── */
+        .page-header { margin-bottom: 28px; animation: fadeUp 0.7s both; }
+        .page-eyebrow {
+            font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
+            color: var(--blue); font-weight: 600; margin-bottom: 8px;
+        }
+        .page-title {
+            font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+            line-height: 1.1; margin-bottom: 8px;
+        }
+        .page-title span {
+            background: linear-gradient(135deg, var(--blue), var(--violet));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .page-sub { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--surface); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 24px;
+            padding: 32px 28px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03) inset;
+            animation: fadeUp 0.7s 0.1s both;
+            position: relative; overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute; top: 0; left: 15%; right: 15%; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--blue), var(--violet), transparent);
+        }
+
+        /* ── CATEGORY TABS ── */
+        .category-label {
+            font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--muted); font-weight: 600; margin-bottom: 10px;
+        }
+        .tabs {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;
+        }
+        .tab {
+            padding: 7px 16px; border-radius: 50px; font-size: 0.8rem; font-weight: 600;
+            border: 1px solid var(--border); background: transparent;
+            color: var(--muted); cursor: pointer; font-family: 'Space Grotesk', sans-serif;
+            transition: 0.2s;
+        }
+        .tab:hover { border-color: rgba(59,130,246,0.4); color: var(--text); }
+        .tab.active {
+            background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.5);
+            color: var(--blue);
+        }
+        .tab.active.bug    { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.4); color: #f87171; }
+        .tab.active.ide    { background: rgba(163,230,53,0.1); border-color: rgba(163,230,53,0.4); color: var(--lime); }
+        .tab.active.saran  { background: rgba(124,58,237,0.12); border-color: rgba(124,58,237,0.4); color: #a78bfa; }
+        .tab.active.lainnya{ background: rgba(6,182,212,0.1); border-color: rgba(6,182,212,0.4); color: var(--cyan); }
+
+        /* ── FORM FIELDS ── */
+        .field { margin-bottom: 18px; }
+        .field label {
+            display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted);
+            margin-bottom: 7px; letter-spacing: 0.04em;
+        }
+        .field input, .field textarea {
+            width: 100%;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid var(--border);
+            color: var(--text); border-radius: 12px;
+            padding: 13px 16px;
+            font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem;
+            outline: none; resize: vertical;
+            transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+        }
+        .field input::placeholder, .field textarea::placeholder { color: var(--muted); }
+        .field input:focus, .field textarea:focus {
+            border-color: rgba(59,130,246,0.5);
+            background: rgba(59,130,246,0.04);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.08);
+        }
+        .field textarea { min-height: 120px; }
+
+        /* char counter */
+        .char-count { text-align: right; font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
+        .char-count.warn { color: #f97316; }
+
+        /* ── SUBMIT BTN ── */
+        .submit-btn {
+            width: 100%; padding: 15px;
+            background: linear-gradient(135deg, var(--blue), var(--violet));
+            border: none; border-radius: 14px;
+            color: white; font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.95rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s, opacity 0.3s;
+            position: relative; overflow: hidden;
+        }
+        .submit-btn::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .submit-btn:hover::before { opacity: 1; }
+        .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(59,130,246,0.35); }
+        .submit-btn:active { transform: translateY(0); }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* loading dots */
+        .dots span {
+            display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+            background: white; margin: 0 2px;
+            animation: dotBounce 0.9s ease-in-out infinite;
+        }
+        .dots span:nth-child(2) { animation-delay: 0.15s; }
+        .dots span:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes dotBounce { 0%,60%,100%{transform:translateY(0);} 30%{transform:translateY(-6px);} }
+
+        /* ── SUCCESS OVERLAY ── */
+        #success-overlay {
+            position: fixed; inset: 0; z-index: 200;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: var(--bg);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s;
+            text-align: center; padding: 40px;
+        }
+        #success-overlay.show { opacity: 1; pointer-events: all; }
+
+        .success-burst {
+            position: relative; width: 120px; height: 120px;
+            margin: 0 auto 32px;
+        }
+
+        /* concentric rings expanding */
+        .s-ring {
+            position: absolute; border-radius: 50%;
+            border: 2px solid var(--blue);
+            top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0);
+            opacity: 0;
+        }
+        .s-ring-1 { width: 60px;  height: 60px;  animation: ringExpand 1.2s 0.1s ease-out forwards; }
+        .s-ring-2 { width: 90px;  height: 90px;  border-color: rgba(59,130,246,0.5); animation: ringExpand 1.2s 0.25s ease-out forwards; }
+        .s-ring-3 { width: 120px; height: 120px; border-color: rgba(59,130,246,0.25); animation: ringExpand 1.2s 0.4s ease-out forwards; }
+        .s-ring-4 { width: 180px; height: 180px; border-color: rgba(59,130,246,0.1); border-width: 1px; animation: ringExpand 1.2s 0.55s ease-out forwards; }
+        @keyframes ringExpand {
+            0%   { transform: translate(-50%,-50%) scale(0); opacity: 1; }
+            80%  { opacity: 0.6; }
+            100% { transform: translate(-50%,-50%) scale(1); opacity: 0; }
+        }
+
+        .s-icon {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+            width: 56px; height: 56px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--blue), var(--violet));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem;
+            box-shadow: 0 0 30px rgba(59,130,246,0.5);
+            opacity: 0; transform: translate(-50%,-50%) scale(0);
+            animation: iconPop 0.6s 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;
+        }
+        @keyframes iconPop {
+            to { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+        }
+
+        /* particle confetti from icon */
+        .s-particle {
+            position: absolute; top: 50%; left: 50%;
+            width: 6px; height: 6px; border-radius: 50%;
+            opacity: 0;
+        }
+        .s-particle:nth-child(1)  { background: var(--blue);   animation: partFly 0.8s 0.5s ease-out forwards; --dx: -40px; --dy: -40px; }
+        .s-particle:nth-child(2)  { background: var(--violet); animation: partFly 0.8s 0.55s ease-out forwards; --dx: 0px;  --dy: -55px; }
+        .s-particle:nth-child(3)  { background: var(--cyan);   animation: partFly 0.8s 0.6s ease-out forwards; --dx: 42px; --dy: -38px; }
+        .s-particle:nth-child(4)  { background: var(--lime);   animation: partFly 0.8s 0.5s ease-out forwards; --dx: 50px; --dy: 5px; }
+        .s-particle:nth-child(5)  { background: #f472b6;       animation: partFly 0.8s 0.55s ease-out forwards; --dx: 35px; --dy: 42px; }
+        .s-particle:nth-child(6)  { background: var(--blue);   animation: partFly 0.8s 0.6s ease-out forwards; --dx: -38px; --dy: 40px; }
+        .s-particle:nth-child(7)  { background: var(--cyan);   animation: partFly 0.8s 0.5s ease-out forwards; --dx: -50px; --dy: 5px; }
+        .s-particle:nth-child(8)  { background: var(--violet); animation: partFly 0.8s 0.58s ease-out forwards; --dx: -15px; --dy: -52px; }
+        @keyframes partFly {
+            0%   { opacity: 1; transform: translate(-50%,-50%) translate(0,0) scale(1); }
+            100% { opacity: 0; transform: translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(0); }
+        }
+
+        .success-title {
+            font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800;
+            margin-bottom: 12px; opacity: 0;
+            animation: fadeUp 0.6s 0.7s both;
+        }
+        .success-msg {
+            font-size: 0.95rem; color: var(--muted); line-height: 1.7;
+            max-width: 340px; margin: 0 auto 32px;
+            opacity: 0; animation: fadeUp 0.6s 0.85s both;
+        }
+        .success-msg strong { color: var(--text); }
+
+        .success-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 20px; border-radius: 50px;
+            background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3);
+            color: var(--blue); font-size: 0.82rem; font-weight: 600;
+            margin-bottom: 28px;
+            opacity: 0; animation: fadeUp 0.6s 1s both;
+        }
+        .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 6px var(--blue); animation: indPulse 2s infinite; }
+        @keyframes indPulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+        .back-home {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 14px 28px; border-radius: 14px;
+            background: linear-gradient(135deg, var(--blue), var(--violet));
+            color: white; text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s;
+            opacity: 0; animation: fadeUp 0.6s 1.1s both;
+        }
+        .back-home:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(59,130,246,0.35); }
+
+        /* ── UTILS ── */
+        @keyframes fadeUp { from{opacity:0;transform:translateY(18px);} to{opacity:1;transform:translateY(0);} }
+
+        @media (max-width: 480px) {
+            .card { padding: 24px 18px; }
+            .page-title { font-size: 1.6rem; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h3>💡 Laporkan Masalah / Ide</h3>
-        <input type="text" id="username" placeholder="Username Telegram kamu (Contoh: @raffi)" required>
-        <textarea id="pesan" rows="5" placeholder="Tulis laporan atau saran fitur baru di sini..." required></textarea>
-        <button class="btn" id="btnKirim" onclick="kirimTelegram()">Kirim ke Rapi-Dev</button>
-        <a href="index.html" class="back-link">← Kembali ke Dashboard</a>
+
+<canvas id="bg-canvas"></canvas>
+<div class="aurora"></div>
+<div class="grid-overlay"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- ── SUCCESS OVERLAY ── -->
+<div id="success-overlay">
+    <div class="success-burst">
+        <div class="s-ring s-ring-4"></div>
+        <div class="s-ring s-ring-3"></div>
+        <div class="s-ring s-ring-2"></div>
+        <div class="s-ring s-ring-1"></div>
+        <div class="s-particle"></div>
+        <div class="s-particle"></div>
+        <div class="s-particle"></div>
+        <div class="s-particle"></div>
+        <div class="s-particle"></div>
+        <div class="s-particle"></div>
+        <div class="s-particle"></div>
+        <div class="s-particle"></div>
+        <div class="s-icon">✓</div>
     </div>
 
-    <script>
-        function kirimTelegram() {
-            const user = document.getElementById('username').value.trim();
-            const pesan = document.getElementById('pesan').value.trim();
-            const btn = document.getElementById('btnKirim');
+    <h2 class="success-title">Terima Kasih! 🎉</h2>
+    <p class="success-msg">
+        Terima kasih atas <strong>informasi dan sarannya</strong>.<br>
+        Pesanmu sudah diterima oleh Rapi Dev dan akan segera ditindaklanjuti.
+    </p>
+    <div class="success-badge"><div class="badge-dot"></div> Terkirim ke Rapi Dev</div>
+    <a href="portofolio.html" class="back-home">← Kembali ke Dashboard</a>
+</div>
 
-            if (!user || !pesan) return alert("Harap isi semua kolom!");
+<!-- ── MAIN WRAPPER ── -->
+<div class="wrapper">
 
-            btn.disabled = true;
-            btn.innerText = "Mengirim...";
+    <a href="portofolio.html" class="back-btn">
+        <span class="arrow">←</span> Kembali ke Dashboard
+    </a>
 
-            const botToken = "8675537430:AAFNdmH3-J0QCJOnQXh6nmUOFLc5Lhe_PBw";
-            const chatId = "7619879885";
-            const teks = `🚨 *Laporan Baru*\n\n👤 *User:* ${user}\n💬 *Pesan:* ${pesan}`;
+    <div class="page-header">
+        <p class="page-eyebrow">Feedback · Bug · Ide</p>
+        <h1 class="page-title">Laporkan <span>Masalah</span><br>atau Ide Baru</h1>
+        <p class="page-sub">Ada bug? Punya ide fitur keren? Semua masukan kamu sangat berarti untuk pengembangan Rapi Dev.</p>
+    </div>
 
-            fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: chatId, text: teks, parse_mode: "Markdown" })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.ok) {
-                    document.querySelector('.container').innerHTML = "<h3>Terima Kasih! 🎉</h3><p>Laporanmu sudah sampai ke Rapi Dev.</p><a href='index.html' class='back-link'>Kembali</a>";
-                } else {
-                    alert("Gagal: " + data.description);
-                    btn.disabled = false;
-                    btn.innerText = "Kirim ke Rapi-Dev";
-                }
-            });
+    <div class="card">
+
+        <!-- CATEGORY TABS -->
+        <p class="category-label">Kategori Laporan</p>
+        <div class="tabs">
+            <button class="tab active bug" data-cat="🐛 Bug">🐛 Bug</button>
+            <button class="tab ide"    data-cat="💡 Ide Fitur">💡 Ide Fitur</button>
+            <button class="tab saran"  data-cat="✨ Saran">✨ Saran</button>
+            <button class="tab lainnya" data-cat="📋 Lainnya">📋 Lainnya</button>
+        </div>
+
+        <!-- USERNAME -->
+        <div class="field">
+            <label>Username Telegram</label>
+            <input type="text" id="username" placeholder="Contoh: @namaKamu">
+        </div>
+
+        <!-- PESAN -->
+        <div class="field">
+            <label>Pesan / Deskripsi</label>
+            <textarea id="pesan" placeholder="Jelaskan bug yang kamu temukan, atau deskripsikan ide fitur yang kamu inginkan..." maxlength="500" oninput="updateCount(this)"></textarea>
+            <div class="char-count" id="charCount">0 / 500</div>
+        </div>
+
+        <!-- SUBMIT -->
+        <button class="submit-btn" id="btnKirim" onclick="kirimTelegram()">
+            <span id="btnLabel">🚀 Kirim Laporan</span>
+        </button>
+
+    </div>
+</div>
+
+<!-- PARTICLE BG -->
+<script>
+const canvas = document.getElementById('bg-canvas');
+const ctx    = canvas.getContext('2d');
+let W, H, pts = [];
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+for (let i = 0; i < 80; i++) pts.push({
+    x: Math.random()*1920, y: Math.random()*1080,
+    vx: (Math.random()-.5)*.3, vy: (Math.random()-.5)*.3,
+    r: Math.random()*1.2+.3, a: Math.random()*.4+.1,
+    c: Math.random()>.5 ? '#3b82f6' : '#7c3aed'
+});
+function draw() {
+    ctx.clearRect(0,0,W,H);
+    for (const p of pts) {
+        p.x+=p.vx; p.y+=p.vy;
+        if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+        if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+        ctx.save(); ctx.globalAlpha=p.a; ctx.fillStyle=p.c;
+        ctx.shadowBlur=8; ctx.shadowColor=p.c;
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+        ctx.restore();
+    }
+    requestAnimationFrame(draw);
+}
+draw();
+</script>
+
+<script>
+/* ── TABS ── */
+let selectedCat = '🐛 Bug';
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        selectedCat = tab.dataset.cat;
+    });
+});
+
+/* ── CHAR COUNT ── */
+function updateCount(el) {
+    const len = el.value.length;
+    const el2 = document.getElementById('charCount');
+    el2.textContent = `${len} / 500`;
+    el2.classList.toggle('warn', len > 420);
+}
+
+/* ── SUBMIT ── */
+function kirimTelegram() {
+    const user  = document.getElementById('username').value.trim();
+    const pesan = document.getElementById('pesan').value.trim();
+    const btn   = document.getElementById('btnKirim');
+    const label = document.getElementById('btnLabel');
+
+    if (!user || !pesan) {
+        // shake animation
+        btn.style.animation = 'shake 0.4s ease';
+        setTimeout(() => btn.style.animation = '', 400);
+        return;
+    }
+
+    btn.disabled = true;
+    label.innerHTML = `<span class="dots"><span></span><span></span><span></span></span>`;
+
+    const botToken = "8675537430:AAFNdmH3-J0QCJOnQXh6nmUOFLc5Lhe_PBw";
+    const chatId   = "7619879885";
+    const teks = `📣 *Laporan Baru dari Rapi Dev*\n\n🏷 *Kategori:* ${selectedCat}\n👤 *User:* ${user}\n💬 *Pesan:*\n${pesan}`;
+
+    fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: chatId, text: teks, parse_mode: "Markdown" })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.ok) {
+            showSuccess();
+        } else {
+            btn.disabled = false;
+            label.textContent = '🚀 Kirim Laporan';
+            alert("Gagal mengirim: " + data.description);
         }
-    </script>
+    })
+    .catch(() => {
+        btn.disabled = false;
+        label.textContent = '🚀 Kirim Laporan';
+        alert("Koneksi bermasalah. Coba lagi ya!");
+    });
+}
+
+function showSuccess() {
+    const overlay = document.getElementById('success-overlay');
+    overlay.classList.add('show');
+    // reset animations by re-cloning rings
+    overlay.querySelectorAll('.s-ring, .s-icon, .s-particle').forEach(el => {
+        el.style.animation = 'none';
+        el.offsetHeight; // reflow
+        el.style.animation = '';
+    });
+}
+</script>
+
+<style>
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%     { transform: translateX(-8px); }
+    40%     { transform: translateX(8px); }
+    60%     { transform: translateX(-5px); }
+    80%     { transform: translateX(5px); }
+}
+</style>
+
 </body>
 </html>
