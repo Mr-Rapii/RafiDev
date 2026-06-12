@@ -21,14 +21,10 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // Satpam: Cek apakah user sudah login
         onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = "login.html";
-            }
+            if (!user) window.location.href = "login.html";
         });
 
-        // Fungsi Logout
         window.logout = () => {
             signOut(auth).then(() => window.location.href = "login.html");
         };
@@ -38,17 +34,18 @@
     
     <style>
         :root { --accent: #3b82f6; --glass: rgba(30, 41, 59, 0.4); }
-        body { margin: 0; min-height: 100vh; font-family: 'Inter', sans-serif; background: #020617; color: #f8fafc; display: flex; flex-direction: column; align-items: center; padding: 60px 20px; }
+        body { margin: 0; min-height: 100vh; font-family: 'Inter', sans-serif; background: #020617; color: #f8fafc; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
         
-        .header-section { text-align: center; margin-bottom: 50px; }
-        .logo-img { width: 120px; height: 120px; border-radius: 25px; border: 2px solid rgba(59, 130, 246, 0.5); transition: 0.5s; }
-        .logo-img:hover { transform: rotate(10deg) scale(1.05); }
+        .header-section { text-align: center; margin-bottom: 40px; }
+        .logo-img { width: 100px; height: 100px; border-radius: 20px; border: 2px solid var(--accent); transition: 0.5s; }
         
-        .dashboard { width: 100%; max-width: 600px; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 20px; margin-bottom: 50px; }
-        .tool-card { background: var(--glass); backdrop-filter: blur(10px); padding: 25px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); text-align: center; text-decoration: none; color: white; transition: 0.4s; }
-        .tool-card:hover { background: var(--accent); transform: translateY(-10px); box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3); }
-
-        .logout-btn { background: #ef4444; color: white; padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; margin-top: 20px; }
+        .dashboard { width: 100%; max-width: 600px; display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .tool-card { background: var(--glass); backdrop-filter: blur(10px); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); text-align: center; text-decoration: none; color: white; font-size: 0.9rem; transition: 0.3s; }
+        .tool-card:hover { background: var(--accent); transform: translateY(-5px); }
+        
+        .action-row { display: flex; gap: 10px; margin-bottom: 40px; }
+        .glow-btn { background: #1e293b; color: white; padding: 10px 20px; border-radius: 10px; text-decoration: none; border: 1px solid rgba(255,255,255,0.1); }
+        .logout-btn { background: #991b1b; color: white; padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -56,7 +53,7 @@
     <div class="header-section">
         <img src="https://i.postimg.cc/ctKx1m8x/file-000000009a3c7207a2ab2d81fdc90db8.png" class="logo-img">
         <h1>Rapi Dev</h1>
-        <button class="logout-btn" onclick="logout()">Keluar (Logout)</button>
+        <a href="about.html" style="color:var(--accent); text-decoration:none;">Tentang Saya →</a>
     </div>
 
     <div class="dashboard">
@@ -64,26 +61,35 @@
         <a href="gambar.html" class="tool-card">🎨<br>Generator</a>
         <a href="chord.html" class="tool-card">🎸<br>Chord</a>
         <a href="konten.html" class="tool-card">📱<br>Konten</a>
-        <a href="tiktok.html" class="tool-card">🎵<br>TikTok DL</a>
+        <a href="tiktok.html" class="tool-card">🎵<br>TikTok</a>
         <a href="suara.html" class="tool-card">🔊<br>Teks-Suara</a>
+        <a href="tugas.html" class="tool-card">📚<br>Tugas</a>
+        <a href="penghitung.html" class="tool-card">🔢<br>Hitung</a>
+        <a href="teks.html" class="tool-card">📝<br>Teks</a>
+        <a href="qr.html" class="tool-card">🔲<br>QR Code</a>
     </div>
 
-    <div id="testimonialWall" style="width: 100%; max-width: 500px;"></div>
+    <div class="action-row">
+        <a href="lapor.html" class="glow-btn">🛠 Lapor Bug</a>
+        <a href="rating.html" class="glow-btn">⭐ Rating</a>
+        <button class="logout-btn" onclick="logout()">Keluar</button>
+    </div>
+
+    <div id="testimonialWall" style="width: 100%; max-width: 500px;">
+        <h2 style="text-align:center;">Wall of Fame</h2>
+    </div>
 
     <script>
-        // Setup Supabase untuk Load Testimoni
-        const supabaseUrl = 'https://tvhhtkkwbxoyztmnkjnh.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2aGh0a2t3YnhveXp0bW5ram5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNzYxMzAsImV4cCI6MjA5Njg1MjEzMH0.ABm1xdmmHnQl9sLW5Xn09OR7hXV38nau7yFSUIgVbTo';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabase = supabase.createClient('https://tvhhtkkwbxoyztmnkjnh.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2aGh0a2t3YnhveXp0bW5ram5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNzYxMzAsImV4cCI6MjA5Njg1MjEzMH0.ABm1xdmmHnQl9sLW5Xn09OR7hXV38nau7yFSUIgVbTo');
 
         async function loadTestimoni() {
             const { data } = await supabase.from('testimoni').select('*').order('created_at', { ascending: false });
             if (data) {
-                document.getElementById('testimonialWall').innerHTML = data.map(t => `
-                    <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:15px; margin-bottom:10px; border-left:4px solid #3b82f6;">
-                        <div style="color:#fbbf24; font-size:0.8rem;">${"★".repeat(t.rating)}</div>
-                        <p style="margin:8px 0;">"${t.pesan}"</p>
-                        <small style="color:#3b82f6; font-weight:bold;">— ${t.nama}</small>
+                document.getElementById('testimonialWall').innerHTML += data.map(t => `
+                    <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; margin-bottom:10px; border-left:4px solid #3b82f6;">
+                        <small>${"★".repeat(t.rating)}</small>
+                        <p style="margin:5px 0;">"${t.pesan}"</p>
+                        <small style="color:#3b82f6;">— ${t.nama}</small>
                     </div>
                 `).join('');
             }
