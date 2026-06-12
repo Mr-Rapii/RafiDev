@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Rapii AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <style>
+    .neon-text { text-shadow: 0 0 15px rgb(16 185 129); }
+    .card-hover:hover { transform: translateY(-8px); transition: all 0.3s; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-white min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-black border-b border-zinc-800 p-4 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <h1 class="text-3xl font-bold neon-text text-emerald-400">RAPII <span class="text-white">AI</span></h1>
+      <div class="flex items-center gap-4">
+        <div id="user-info" class="hidden items-center gap-3">
+          <img id="avatar" class="w-9 h-9 rounded-full border-2 border-emerald-500" src="">
+          <div>
+            <p id="username" class="font-medium text-sm"></p>
+            <p id="coin-small" class="text-emerald-400 text-xs font-bold">0 Koin</p>
+          </div>
+        </div>
+        <button onclick="logout()" class="text-zinc-400 hover:text-red-400">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto p-6 space-y-8">
+
+    <!-- Saldo Koin Besar -->
+    <div class="bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-3xl p-10 text-center border border-emerald-500/20">
+      <p class="text-emerald-400 text-sm tracking-widest">SALDO KOIN</p>
+      <div id="big-coin" class="text-8xl font-bold text-emerald-400 mt-4 mb-2">0</div>
+      <p class="text-zinc-400">1 Koin = 1 Follower</p>
+    </div>
+
+    <!-- Misi Utama -->
+    <div class="bg-zinc-900 rounded-3xl p-8 border border-pink-500/30">
+      <div class="flex items-center gap-4">
+        <i class="fas fa-instagram text-4xl text-pink-500"></i>
+        <div class="flex-1">
+          <h2 class="text-xl font-semibold">Misi Pertama</h2>
+          <p class="text-zinc-300">Follow Instagram <span class="text-pink-400 font-bold">@rapii_wehhh</span></p>
+        </div>
+      </div>
+      <button onclick="claimTask()" 
+        class="mt-6 w-full bg-gradient-to-r from-pink-500 to-purple-600 py-5 rounded-2xl text-lg font-semibold hover:brightness-110">
+        ✅ Klaim 1 Koin
+      </button>
+    </div>
+
+    <!-- Marketplace -->
+    <div>
+      <h2 class="text-2xl font-semibold mb-5 flex items-center gap-2">
+        <i class="fas fa-store"></i> Tukar Koin
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        
+        <div onclick="buyFollowers('tiktok')" class="bg-zinc-900 rounded-3xl p-6 card-hover cursor-pointer border border-red-500/20">
+          <div class="text-center">
+            <i class="fab fa-tiktok text-6xl text-red-500"></i>
+            <h3 class="mt-4 text-xl font-medium">TikTok Followers</h3>
+            <p class="text-3xl font-bold text-emerald-400 mt-2">10 <span class="text-sm font-normal text-zinc-400">Koin</span></p>
+          </div>
+        </div>
+
+        <div onclick="buyFollowers('instagram')" class="bg-zinc-900 rounded-3xl p-6 card-hover cursor-pointer border border-pink-500/20">
+          <div class="text-center">
+            <i class="fab fa-instagram text-6xl text-pink-500"></i>
+            <h3 class="mt-4 text-xl font-medium">Instagram Followers</h3>
+            <p class="text-3xl font-bold text-emerald-400 mt-2">8 <span class="text-sm font-normal text-zinc-400">Koin</span></p>
+          </div>
+        </div>
+
+        <div onclick="buyFollowers('youtube')" class="bg-zinc-900 rounded-3xl p-6 card-hover cursor-pointer border border-red-500/20">
+          <div class="text-center">
+            <i class="fab fa-youtube text-6xl text-red-500"></i>
+            <h3 class="mt-4 text-xl font-medium">YouTube Subscribers</h3>
+            <p class="text-3xl font-bold text-emerald-400 mt-2">15 <span class="text-sm font-normal text-zinc-400">Koin</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBJJjcICAkbVWjrw5-zYMzcKqPGhS0nS0I",
+      authDomain: "piwstore.firebaseapp.com",
+      projectId: "piwstore",
+      storageBucket: "piwstore.firebasestorage.app",
+      messagingSenderId: "419258630997",
+      appId: "1:419258630997:web:aefc0e34cc4b7ca16d25dc"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let currentUser = null;
+    let coins = 0;
+
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = "index.html";
+      } else {
+        currentUser = user;
+        initDashboard();
+      }
+    });
+
+    function initDashboard() {
+      document.getElementById('user-info').classList.remove('hidden');
+      document.getElementById('avatar').src = currentUser.photoURL;
+      document.getElementById('username').textContent = currentUser.displayName || "User";
+
+      loadUserCoins();
+    }
+
+    function loadUserCoins() {
+      db.collection("users").doc(currentUser.uid).get().then(doc => {
+        coins = doc.exists ? (doc.data().coins || 0) : 0;
+        document.getElementById('big-coin').textContent = coins;
+        document.getElementById('coin-small').textContent = coins + " Koin";
+      });
+    }
+
+    function claimTask() {
+      coins += 1;
+      db.collection("users").doc(currentUser.uid).update({ coins: coins });
+      document.getElementById('big-coin').textContent = coins;
+      document.getElementById('coin-small').textContent = coins + " Koin";
+      alert("🎉 +1 Koin berhasil! Terima kasih sudah follow @rapii_wehhh");
+    }
+
+    function buyFollowers(platform) {
+      const price = { tiktok: 10, instagram: 8, youtube: 15 }[platform];
+      if (coins < price) {
+        alert("❌ Koin tidak cukup!");
+        return;
+      }
+      coins -= price;
+      db.collection("users").doc(currentUser.uid).update({ coins: coins });
+      document.getElementById('big-coin').textContent = coins;
+      document.getElementById('coin-small').textContent = coins + " Koin";
+      alert(`✅ Permintaan ${platform.toUpperCase()} Followers berhasil dikirim!`);
+    }
+
+    function logout() {
+      if (confirm("Yakin ingin logout?")) {
+        auth.signOut().then(() => window.location.href = "index.html");
+      }
+    }
+  </script>
+</body>
+</html>
