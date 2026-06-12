@@ -6,120 +6,28 @@
     <title>AI Hub Personal</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background: #0f172a; 
-            color: #f8fafc; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-        }
+        body { background: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100vh; display: flex; flex-direction: column; }
         
-        .header { 
-            background: #1e293b; 
-            padding: 15px 20px; 
-            text-align: center; 
-            border-bottom: 1px solid #334155; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
-        }
-        .header h2 { font-size: 1.2rem; font-weight: 600; letter-spacing: 0.5px; }
-
-        .chat-container { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-        }
+        .header { background: #1e293b; padding: 15px 20px; text-align: center; border-bottom: 1px solid #334155; }
+        .header h2 { font-size: 1.2rem; font-weight: 600; }
         
-        .message { 
-            max-width: 85%; 
-            padding: 12px 16px; 
-            border-radius: 12px; 
-            font-size: 0.95rem; 
-            line-height: 1.5; 
-            word-wrap: break-word; 
-            position: relative;
-        }
-        .user-msg { 
-            background: #3b82f6; 
-            color: white; 
-            align-self: flex-end; 
-            border-bottom-right-radius: 2px; 
-        }
-        .ai-msg { 
-            background: #1e293b; 
-            border: 1px solid #334155; 
-            align-self: flex-start; 
-            border-bottom-left-radius: 2px; 
-            white-space: pre-wrap; 
-        }
+        /* Desain Menu Navigasi */
+        .nav-bar { display: flex; background: #1e293b; border-bottom: 1px solid #334155; }
+        .nav-link { flex: 1; text-align: center; padding: 12px; color: #94a3b8; text-decoration: none; font-size: 0.95rem; }
+        .nav-link.active { color: #3b82f6; border-bottom: 2px solid #3b82f6; background: #0f172a; font-weight: bold; }
         
-        /* Desain untuk Tombol Aksi di Bawah Teks AI */
-        .action-container {
-            margin-top: 10px;
-            display: flex;
-            gap: 15px;
-            border-top: 1px solid #334155;
-            padding-top: 8px;
-        }
-        .action-btn {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            font-size: 0.9rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: color 0.3s;
-        }
-        .action-btn:hover { color: #3b82f6; }
-
-        .typing { 
-            align-self: flex-start; 
-            color: #94a3b8; 
-            font-size: 0.85rem; 
-            font-style: italic; 
-            display: none; 
-            padding: 0 20px;
-        }
-
-        .input-area { 
-            background: #1e293b; 
-            padding: 15px; 
-            border-top: 1px solid #334155; 
-            display: flex; 
-            gap: 10px; 
-        }
-        input[type="text"] { 
-            flex: 1; 
-            background: #0f172a; 
-            color: white; 
-            border: 1px solid #334155; 
-            border-radius: 20px; 
-            padding: 12px 20px; 
-            font-size: 0.95rem; 
-            outline: none; 
-            transition: border 0.3s; 
-        }
-        input[type="text"]:focus { border-color: #3b82f6; }
+        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .message { max-width: 85%; padding: 12px 16px; border-radius: 12px; font-size: 0.95rem; line-height: 1.5; word-wrap: break-word; position: relative; }
+        .user-msg { background: #3b82f6; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .ai-msg { background: #1e293b; border: 1px solid #334155; align-self: flex-start; border-bottom-left-radius: 2px; white-space: pre-wrap; }
         
-        .btn-kirim { 
-            background: #3b82f6; 
-            color: white; 
-            border: none; 
-            border-radius: 50%; 
-            width: 45px; 
-            height: 45px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            cursor: pointer; 
-            transition: background 0.3s; 
-        }
-        .btn-kirim:hover { background: #2563eb; }
+        .action-container { margin-top: 10px; display: flex; gap: 15px; border-top: 1px solid #334155; padding-top: 8px; }
+        .action-btn { background: none; border: none; color: #94a3b8; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .typing { align-self: flex-start; color: #94a3b8; font-size: 0.85rem; font-style: italic; display: none; padding: 0 20px; }
+        
+        .input-area { background: #1e293b; padding: 15px; border-top: 1px solid #334155; display: flex; gap: 10px; }
+        input[type="text"] { flex: 1; background: #0f172a; color: white; border: 1px solid #334155; border-radius: 20px; padding: 12px 20px; font-size: 0.95rem; outline: none; }
+        .btn-kirim { background: #3b82f6; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
         .btn-kirim svg { width: 20px; height: 20px; fill: white; }
     </style>
 </head>
@@ -127,6 +35,11 @@
 
     <div class="header">
         <h2>🤖 AI Hub Personal</h2>
+    </div>
+    
+    <div class="nav-bar">
+        <a href="index.html" class="nav-link active">💬 Asisten AI</a>
+        <a href="gambar.html" class="nav-link">🎨 Generator Gambar</a>
     </div>
 
     <div class="chat-container" id="chatBox"></div>
@@ -143,8 +56,6 @@
         const chatBox = document.getElementById('chatBox');
         const typingIndicator = document.getElementById('typingIndicator');
         const promptInput = document.getElementById('prompt');
-
-        // FITUR BARU: Variabel untuk menyimpan memori percakapan
         let conversationHistory = [];
 
         function speakText(text) {
@@ -152,14 +63,10 @@
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'id-ID'; 
-                utterance.rate = 1.0; 
                 window.speechSynthesis.speak(utterance);
-            } else {
-                alert("Browser HP kamu tidak mendukung fitur Text-to-Speech.");
             }
         }
 
-        // Fitur menyalin teks ke clipboard HP
         function copyText(text, btnElement) {
             navigator.clipboard.writeText(text).then(() => {
                 const originalText = btnElement.innerHTML;
@@ -178,17 +85,14 @@
                 textSpan.innerText = text;
                 msgDiv.appendChild(textSpan);
 
-                // Container untuk tombol aksi
                 const actionDiv = document.createElement('div');
                 actionDiv.classList.add('action-container');
 
-                // Tombol Suara
                 const speakBtn = document.createElement('button');
                 speakBtn.innerHTML = '🔊 Suara';
                 speakBtn.classList.add('action-btn');
                 speakBtn.onclick = () => speakText(text);
 
-                // Tombol Salin
                 const copyBtn = document.createElement('button');
                 copyBtn.innerHTML = '📋 Salin';
                 copyBtn.classList.add('action-btn');
@@ -215,7 +119,6 @@
 
             appendMessage(prompt, 'user');
             promptInput.value = ''; 
-            
             typingIndicator.style.display = 'block';
             chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -225,24 +128,16 @@
 
             const instruksiSistem = "Kamu adalah Asisten AI cerdas bernama Bot Rapi. Kamu memiliki keahlian khusus dalam teknologi, pemrograman web, dan strategi pembuatan konten. Jawablah setiap pertanyaan dengan logis, serius, dan jujur. Jangan pernah menyebut dirimu sebagai AI buatan Google.";
 
-            // Memasukkan pesan terbaru ke dalam memori
-            conversationHistory.push({
-                role: "user",
-                parts: [{ text: prompt }]
-            });
+            conversationHistory.push({ role: "user", parts: [{ text: prompt }] });
 
             const payload = {
-                system_instruction: {
-                    parts: [{ text: instruksiSistem }]
-                },
-                contents: conversationHistory // Mengirim seluruh riwayat obrolan ke server
+                system_instruction: { parts: [{ text: instruksiSistem }] },
+                contents: conversationHistory
             };
 
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
+                    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
                 });
                 
                 const data = await response.json();
@@ -250,19 +145,13 @@
                 
                 if (!response.ok) {
                     appendMessage("Pesan Error: " + (data.error?.message || "Akses ditolak."), 'ai');
-                    // Hapus pesan terakhir dari memori jika gagal terkirim
                     conversationHistory.pop(); 
                     return;
                 }
                 
                 const aiResponseText = data.candidates[0].content.parts[0].text;
                 appendMessage(aiResponseText, 'ai');
-                
-                // Memasukkan balasan AI ke dalam memori agar ia ingat
-                conversationHistory.push({
-                    role: "model",
-                    parts: [{ text: aiResponseText }]
-                });
+                conversationHistory.push({ role: "model", parts: [{ text: aiResponseText }] });
                 
             } catch (error) {
                 typingIndicator.style.display = 'none';
