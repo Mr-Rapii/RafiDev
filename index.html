@@ -68,7 +68,7 @@
         .tool-card:nth-child(9) { animation-delay: 0.5s; }
         .tool-card:nth-child(10) { animation-delay: 0.55s; }
 
-        /* AREA RATING WEB3FORMS (Struktur Form Asli) */
+        /* AREA RATING WEB3FORMS */
         .rating-container {
             background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(10px);
             padding: 25px; border-radius: 20px; border: 1px dashed rgba(255,255,255,0.2);
@@ -141,47 +141,59 @@
             <input type="radio" name="Jumlah Bintang" id="star1" value="1 Bintang"><label for="star1">★</label>
         </div>
         
-        <textarea name="message" id="pesanRating" placeholder="Tulis masukan, saran, atau pujian di sini..." required></textarea>
+        <textarea name="Pesan Pengunjung" id="pesanRating" placeholder="Tulis masukan, saran, atau pujian di sini..." required></textarea>
         
         <button type="submit" class="btn-submit-rating" id="btnKirimRating">Kirim Penilaian</button>
     </form>
 
     <script>
-        // Mengubah perilaku form agar tidak berpindah halaman saat dikirim
         const form = document.getElementById('ratingForm');
         
-        form.addEventListener('submit', function(e) {
-            e.preventDefault(); // Mencegah browser melakukan reload halaman
-            
-            const btn = document.getElementById('btnKirimRating');
-            btn.disabled = true;
-            btn.innerText = "Menyimpan data...";
+        // 1. Pengecekan saat halaman pertama kali dibuka
+        // Jika memori browser mencatat pengunjung sudah pernah rating, form dihilangkan
+        if (localStorage.getItem('aiHub_sudah_rating') === 'true') {
+            form.innerHTML = `
+                <h3 style="color: #3b82f6; margin:0;">Terima Kasih! 🌟</h3>
+                <p style="color:#94a3b8; font-size: 0.9rem; margin-top:10px;">Kamu sudah memberikan rating untuk AI Hub ini sebelumnya.</p>
+            `;
+        } else {
+            // 2. Jika belum pernah rating, jalankan proses pengiriman normal
+            form.addEventListener('submit', function(e) {
+                e.preventDefault(); 
+                
+                const btn = document.getElementById('btnKirimRating');
+                btn.disabled = true;
+                btn.innerText = "Menyimpan data...";
 
-            // Mengambil semua data dari form (Sesuai dengan metode di contohmu)
-            const formData = new FormData(form);
+                const formData = new FormData(form);
 
-            fetch(form.action, {
-                method: "POST",
-                body: formData // Mengirim data secara mentah tanpa konversi JSON
-            })
-            .then(async (response) => {
-                if (response.status === 200) {
-                    form.innerHTML = `
-                        <h3 style="color: #10b981; margin:0;">Tersimpan! 🎉</h3>
-                        <p style="color:#94a3b8; font-size: 0.9rem; margin-top:10px;">Terima kasih banyak atas rating dan masukanmu.</p>
-                    `;
-                } else {
-                    alert("Gagal mengirim data. Silakan coba lagi nanti.");
+                fetch(form.action, {
+                    method: "POST",
+                    body: formData 
+                })
+                .then(async (response) => {
+                    if (response.status === 200) {
+                        
+                        // 3. Simpan jejak ke dalam memori browser pengunjung agar tidak bisa spam
+                        localStorage.setItem('aiHub_sudah_rating', 'true');
+                        
+                        form.innerHTML = `
+                            <h3 style="color: #10b981; margin:0;">Tersimpan! 🎉</h3>
+                            <p style="color:#94a3b8; font-size: 0.9rem; margin-top:10px;">Terima kasih banyak atas rating dan masukanmu.</p>
+                        `;
+                    } else {
+                        alert("Gagal mengirim data. Silakan coba lagi nanti.");
+                        btn.disabled = false;
+                        btn.innerText = "Kirim Penilaian";
+                    }
+                })
+                .catch(error => {
+                    alert("Terjadi masalah jaringan.");
                     btn.disabled = false;
                     btn.innerText = "Kirim Penilaian";
-                }
-            })
-            .catch(error => {
-                alert("Terjadi masalah jaringan.");
-                btn.disabled = false;
-                btn.innerText = "Kirim Penilaian";
+                });
             });
-        });
+        }
     </script>
 </body>
 </html>
