@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asisten Rapi | 📱 Konten Kreator</title>
+    <style>
+        :root { --bg: #0f172a; --glass: rgba(30, 41, 59, 0.7); --accent: #3b82f6; --text: #f8fafc; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: radial-gradient(circle at top, #1e293b, #0f172a); color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Header & Nav */
+        header { 
+            padding: 20px; display: flex; align-items: center; justify-content: space-between;
+            background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .back-btn { 
+            color: var(--accent); text-decoration: none; font-size: 0.9rem; 
+            padding: 8px 15px; border-radius: 20px; border: 1px solid var(--accent); transition: 0.3s;
+        }
+        .back-btn:hover { background: var(--accent); color: white; }
+        
+        .nav-bar { display: flex; background: rgba(0,0,0,0.2); padding: 5px; margin: 15px; border-radius: 12px; gap: 5px; }
+        .nav-link { flex: 1; text-align: center; padding: 10px; color: #94a3b8; text-decoration: none; font-size: 0.85rem; border-radius: 8px; transition: 0.3s; }
+        .nav-link.active { background: var(--accent); color: white; font-weight: bold; }
+        
+        /* Main Content */
+        .main-content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        .input-group { 
+            width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; 
+            background: var(--glass); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);
+            animation: slideDown 0.5s ease-out;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .input-field { display: flex; flex-direction: column; gap: 8px; }
+        label { font-size: 0.85rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        input[type="text"] { 
+            width: 100%; background: #0f172a; color: white; border: 1px solid #334155; 
+            border-radius: 12px; padding: 15px; outline: none; transition: 0.3s; font-size: 0.95rem;
+        }
+        input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+        
+        button.btn-generate { 
+            background: var(--accent); color: white; border: none; border-radius: 12px; 
+            padding: 15px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        button.btn-generate:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4); }
+        button:disabled { background: #475569; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Loading & Results */
+        .status { color: var(--accent); margin: 20px 0; font-style: italic; display: none; animation: pulse 1.5s infinite; text-align: center; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        
+        .result-container { width: 100%; max-width: 500px; display: none; flex-direction: column; gap: 15px; margin-top: 20px; animation: fadeIn 0.6s ease-out; }
+        .result-area { 
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 25px; 
+            font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; color: #e2e8f0;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        button.btn-copy { 
+            background: #10b981; color: white; border: none; border-radius: 12px; 
+            padding: 15px; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        button.btn-copy:hover { background: #059669; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="back-btn">← Portofolio</a>
+        <h3 style="margin: 0; font-size: 1.1rem;">📱 Ide Konten</h3>
+        <div style="width: 80px;"></div>
+    </header>
+    
+    <div class="nav-bar">
+        <a href="chatbot.html" class="nav-link">💬 Chat</a>
+        <a href="gambar.html" class="nav-link">🎨 Gambar</a>
+        <a href="konten.html" class="nav-link active">📱 Konten</a>
+        <a href="chord.html" class="nav-link">🎸 Chord</a>
+    </div>
+
+    <div class="main-content">
+        <div class="input-group">
+            <div class="input-field">
+                <label for="topik">Topik Video / Tutorial</label>
+                <input type="text" id="topik" placeholder="Contoh: Cara edit jedag-jedug di CapCut">
+            </div>
+            
+            <div class="input-field">
+                <label for="platform">Platform Utama</label>
+                <input type="text" id="platform" placeholder="Contoh: TikTok / YouTube Shorts" onkeypress="if(event.key === 'Enter') buatSEO()">
+            </div>
+            
+            <button id="generateBtn" class="btn-generate" onclick="buatSEO()">🚀 Mulai Racik Ide</button>
+        </div>
+
+        <div id="statusText" class="status">Bot Rapi sedang meracik ide viral...</div>
+        
+        <div class="result-container" id="resultContainer">
+            <div class="result-area" id="resultArea"></div>
+            <button id="copyBtn" class="btn-copy" onclick="salinTeks()">📋 Salin Semua Hasil</button>
+        </div>
+    </div>
+
+    <script>
+        async function buatSEO() {
+            const topik = document.getElementById('topik').value.trim();
+            const platform = document.getElementById('platform').value.trim();
+            const btn = document.getElementById('generateBtn');
+            const status = document.getElementById('statusText');
+            const resContainer = document.getElementById('resultContainer');
+            const resArea = document.getElementById('resultArea');
+
+            if (!topik || !platform) return alert("Harap isi topik dan platform terlebih dahulu!");
+
+            btn.disabled = true;
+            status.style.display = 'block';
+            resContainer.style.display = 'none';
+
+            const b1 = "AQ.Ab8RN6I17XNIEcT7Mx2C"; 
+            const b2 = "mRe7UxYMdK9xqGAfsImM-nLsqCNr1g";
+            const KEY = b1 + b2;
+
+            const promptSistem = `Kamu adalah pakar strategi media sosial yang jenius. Buatkan strategi konten untuk video tentang "${topik}" di platform "${platform}". 
+            Format Wajib:
+            🔥 3 Ide Judul (Clickbait tapi relevan)
+            📝 Deskripsi Video (Singkat & SEO-friendly)
+            #️⃣ 15 Hashtag (Viral & spesifik)
+            🎬 Draf Naskah/Hook (Singkat, memancing penonton di 3 detik pertama)`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${KEY}`, {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: promptSistem }] }] })
+                });
+                
+                const data = await response.json();
+                status.style.display = 'none';
+                
+                resArea.innerText = data.candidates[0].content.parts[0].text;
+                resContainer.style.display = 'flex';
+                
+            } catch (error) {
+                status.style.display = 'none';
+                resArea.innerText = "Sistem Error: Gagal mendapatkan ide.";
+                resContainer.style.display = 'flex';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function salinTeks() {
+            const textToCopy = document.getElementById('resultArea').innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.innerText = "✅ Berhasil Disalin!";
+                btn.style.background = "#059669";
+                setTimeout(() => { 
+                    btn.innerText = "📋 Salin Semua Hasil"; 
+                    btn.style.background = "#10b981";
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
