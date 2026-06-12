@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Hub - QR Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100vh; display: flex; flex-direction: column; }
+        
+        .header { background: #1e293b; padding: 15px 20px; text-align: center; border-bottom: 1px solid #334155; }
+        .header h2 { font-size: 1.2rem; font-weight: 600; }
+        
+        /* Menu Navigasi Diperbarui (8 Menu, Scroll ke Samping) */
+        .nav-bar { display: flex; background: #1e293b; border-bottom: 1px solid #334155; overflow-x: auto; white-space: nowrap; padding-bottom: 2px;}
+        .nav-link { flex: 1; text-align: center; padding: 12px; color: #94a3b8; text-decoration: none; font-size: 0.9rem; min-width: 80px; }
+        .nav-link.active { color: #3b82f6; border-bottom: 2px solid #3b82f6; background: #0f172a; font-weight: bold; }
+        
+        .main-content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .input-group { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        
+        input[type="text"] { width: 100%; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 8px; padding: 12px; font-size: 0.95rem; outline: none; }
+        input[type="text"]:focus { border-color: #3b82f6; }
+        
+        button { background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        button:hover { background: #2563eb; }
+        button:disabled { background: #475569; cursor: not-allowed; }
+        
+        .result-area { width: 100%; max-width: 300px; background: #1e293b; border: 1px dashed #334155; border-radius: 8px; padding: 20px; display: none; flex-direction: column; gap: 15px; align-items: center; text-align: center; margin-bottom: 20px; margin-left: auto; margin-right: auto; }
+        .result-area img { width: 100%; max-width: 250px; border-radius: 8px; background: white; padding: 10px; }
+        
+        .download-btn { background: #10b981; color: white; width: 100%; padding: 12px; text-decoration: none; border-radius: 8px; font-weight: bold; display: block; }
+        .download-btn:hover { background: #059669; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>🤖 AI Hub Personal</h2>
+    </div>
+    
+    <div class="nav-bar">
+        <a href="index.html" class="nav-link">💬 Asisten</a>
+        <a href="gambar.html" class="nav-link">🎨 Gambar</a>
+        <a href="konten.html" class="nav-link">📱 Konten</a>
+        <a href="chord.html" class="nav-link">🎸 Chord</a>
+        <a href="tiktok.html" class="nav-link">🎵 TikTok</a>
+        <a href="teks.html" class="nav-link">✨ Teks</a>
+        <a href="suara.html" class="nav-link">🎙️ Suara</a>
+        <a href="qr.html" class="nav-link active">🔳 QR Code</a>
+    </div>
+
+    <div class="main-content">
+        <div class="input-group">
+            <input type="text" id="qrInput" placeholder="Masukkan Link (contoh: https://github.com)..." onkeypress="handleEnter(event)">
+            <button id="generateBtn" onclick="buatQR()">Buat QR Code</button>
+        </div>
+
+        <div id="statusText" style="color: #94a3b8; display: none; margin-bottom: 15px; text-align: center;">Merender kode QR...</div>
+        
+        <div class="result-area" id="resultArea">
+            <img id="qrImage" src="" alt="QR Code">
+            <a id="downloadBtn" class="download-btn" href="#" download="QRCode.png">⬇️ Simpan ke Galeri</a>
+        </div>
+    </div>
+
+    <script>
+        function handleEnter(event) {
+            if (event.key === 'Enter') buatQR();
+        }
+
+        async function buatQR() {
+            const qrInput = document.getElementById('qrInput').value.trim();
+            const generateBtn = document.getElementById('generateBtn');
+            const statusText = document.getElementById('statusText');
+            const resultArea = document.getElementById('resultArea');
+            const qrImage = document.getElementById('qrImage');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            if (!qrInput) {
+                alert("Kotak teks tidak boleh kosong.");
+                return;
+            }
+
+            generateBtn.disabled = true;
+            statusText.style.display = 'block';
+            resultArea.style.display = 'none';
+
+            // Menyusun URL API
+            const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&margin=10&data=${encodeURIComponent(qrInput)}`;
+
+            try {
+                // Menggunakan Fetch agar gambar bisa diunduh langsung tanpa membuka tab baru
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error("Gagal merender gambar.");
+
+                const imageBlob = await response.blob();
+                const imageObjectURL = URL.createObjectURL(imageBlob);
+
+                // Menampilkan ke layar
+                qrImage.src = imageObjectURL;
+                downloadBtn.href = imageObjectURL;
+                downloadBtn.download = `QR_${Math.floor(Math.random() * 1000)}.png`;
+                
+                statusText.style.display = 'none';
+                resultArea.style.display = 'flex';
+
+            } catch (error) {
+                alert("Sistem Error: " + error.message);
+                statusText.style.display = 'none';
+            } finally {
+                generateBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
