@@ -34,6 +34,7 @@
             --violet: #7c3aed;
             --cyan: #06b6d4;
             --pink: #ec4899;
+            --amber: #f59e0b;
             --text: #e2e8f0;
             --muted: #64748b;
         }
@@ -48,12 +49,8 @@
             overflow-x: hidden;
         }
 
-        /* ── CANVAS STARS ── */
-        #stars-canvas {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none;
-        }
+        #stars-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 
-        /* ── AURORA BG ── */
         .aurora {
             position: fixed; inset: 0; z-index: 0; pointer-events: none;
             background:
@@ -67,7 +64,6 @@
             100% { transform: scale(1.1) rotate(3deg); }
         }
 
-        /* ── GRID LINES ── */
         .grid-overlay {
             position: fixed; inset: 0; z-index: 0; pointer-events: none;
             background-image:
@@ -76,17 +72,13 @@
             background-size: 60px 60px;
         }
 
-        /* ── WRAPPER ── */
         .wrapper {
             position: relative; z-index: 1;
             display: flex; flex-direction: column; align-items: center;
             padding: 40px 20px 60px;
         }
 
-        /* ── FLOATING ORBS ── */
-        .orb {
-            position: fixed; border-radius: 50%; pointer-events: none; filter: blur(80px); z-index: 0;
-        }
+        .orb { position: fixed; border-radius: 50%; pointer-events: none; filter: blur(80px); z-index: 0; }
         .orb-1 { width: 350px; height: 350px; background: rgba(124,58,237,0.25); top: -100px; left: -100px; animation: floatOrb 14s ease-in-out infinite; }
         .orb-2 { width: 250px; height: 250px; background: rgba(6,182,212,0.2); bottom: 100px; right: -80px; animation: floatOrb 10s ease-in-out infinite reverse; }
         .orb-3 { width: 180px; height: 180px; background: rgba(236,72,153,0.18); top: 50%; left: 30%; animation: floatOrb 18s ease-in-out infinite 4s; }
@@ -96,7 +88,6 @@
             66%       { transform: translate(-20px, 20px) scale(0.95); }
         }
 
-        /* ── HEADER ── */
         .header-section {
             text-align: center; margin-bottom: 48px;
             animation: slideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -130,15 +121,10 @@
             font-weight: 800;
             background: linear-gradient(135deg, #fff 20%, var(--cyan) 50%, var(--blue) 80%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            letter-spacing: -0.02em;
-            line-height: 1;
-            margin-bottom: 6px;
+            letter-spacing: -0.02em; line-height: 1; margin-bottom: 6px;
         }
 
-        /* ── TYPEWRITER SUBTITLE ── */
-        .typewriter-wrap {
-            font-size: 0.95rem; color: var(--muted); margin-bottom: 14px; height: 1.5em;
-        }
+        .typewriter-wrap { font-size: 0.95rem; color: var(--muted); margin-bottom: 14px; height: 1.5em; }
         #typewriter { color: var(--cyan); font-weight: 600; }
         .cursor { display: inline-block; width: 2px; height: 1em; background: var(--cyan); animation: blink 0.8s step-end infinite; vertical-align: text-bottom; margin-left: 2px; }
         @keyframes blink { 50% { opacity: 0; } }
@@ -153,7 +139,6 @@
         .about-link span { transition: transform 0.3s; }
         .about-link:hover span { transform: translateX(4px); }
 
-        /* ── STATUS BAR ── */
         .status-bar {
             display: flex; align-items: center; gap: 8px;
             font-size: 0.78rem; color: var(--muted);
@@ -165,7 +150,6 @@
         .dot-live { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px #22c55e; animation: pulse 2s infinite; }
         @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
 
-        /* ── SECTION LABEL ── */
         .section-label {
             font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em;
             text-transform: uppercase; color: var(--muted);
@@ -173,7 +157,6 @@
             animation: fadeUp 0.8s 0.4s both;
         }
 
-        /* ── DASHBOARD GRID ── */
         .dashboard {
             width: 100%; max-width: 620px;
             display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -205,7 +188,6 @@
         .tool-card .label { font-size: 0.78rem; font-weight: 600; color: var(--muted); transition: color 0.3s; }
         .tool-card:hover .label { color: #fff; }
 
-        /* Staggered card animation */
         .tool-card:nth-child(1)  { animation-delay: 0.05s; }
         .tool-card:nth-child(2)  { animation-delay: 0.10s; }
         .tool-card:nth-child(3)  { animation-delay: 0.15s; }
@@ -218,7 +200,171 @@
         .tool-card:nth-child(10) { animation-delay: 0.50s; }
         @keyframes cardPop { from { opacity:0; transform: scale(0.8) translateY(20px); } to { opacity:1; transform: scale(1) translateY(0); } }
 
-        /* ── SCROLLING MARQUEE ── */
+        /* ═══════════════════════════════════════
+           TOKO BUTTON — SIGNATURE ELEMENT
+        ═══════════════════════════════════════ */
+        .toko-section {
+            width: 100%; max-width: 620px;
+            margin-bottom: 32px;
+            animation: fadeUp 0.8s 0.55s both;
+        }
+
+        .toko-banner {
+            position: relative; overflow: hidden;
+            border-radius: 24px;
+            text-decoration: none;
+            display: block;
+            background: linear-gradient(135deg, #0a0a1a 0%, #0f0820 50%, #080d1a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 28px 28px 28px 32px;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s;
+            cursor: pointer;
+        }
+
+        /* animated gradient border */
+        .toko-banner::before {
+            content: '';
+            position: absolute; inset: -2px;
+            border-radius: 26px;
+            background: linear-gradient(90deg,
+                var(--amber), var(--pink), var(--violet),
+                var(--blue), var(--cyan), var(--amber));
+            background-size: 300% 300%;
+            animation: borderFlow 3s linear infinite;
+            z-index: -1;
+        }
+        @keyframes borderFlow {
+            0%   { background-position: 0%   50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0%   50%; }
+        }
+
+        /* inner mask so gradient only shows as border */
+        .toko-banner::after {
+            content: '';
+            position: absolute; inset: 1px;
+            border-radius: 23px;
+            background: linear-gradient(135deg, #0a0a1a 0%, #0f0820 50%, #080d1a 100%);
+            z-index: 0;
+        }
+
+        .toko-banner:hover {
+            transform: translateY(-6px) scale(1.01);
+            box-shadow:
+                0 20px 60px rgba(245,158,11,0.2),
+                0 0 0 1px rgba(245,158,11,0.3),
+                0 0 80px rgba(124,58,237,0.15);
+        }
+
+        /* sheen sweep on hover */
+        .toko-sheen {
+            position: absolute; inset: 0; z-index: 1;
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 50%, transparent 60%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+            border-radius: 24px;
+        }
+        .toko-banner:hover .toko-sheen { transform: translateX(150%); }
+
+        /* floating particles inside the banner */
+        .toko-particles {
+            position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; border-radius: 24px;
+        }
+        .toko-particle {
+            position: absolute; border-radius: 50%;
+            animation: tokoFloat linear infinite;
+        }
+        .tp1 { width:3px; height:3px; background:var(--amber); left:10%; animation-duration:4s; animation-delay:0s; }
+        .tp2 { width:2px; height:2px; background:var(--cyan);  left:30%; animation-duration:5s; animation-delay:1s; }
+        .tp3 { width:4px; height:4px; background:var(--pink);  left:55%; animation-duration:3.5s; animation-delay:0.5s; }
+        .tp4 { width:2px; height:2px; background:var(--violet);left:75%; animation-duration:6s; animation-delay:2s; }
+        .tp5 { width:3px; height:3px; background:var(--blue);  left:90%; animation-duration:4.5s; animation-delay:1.5s; }
+        @keyframes tokoFloat {
+            0%   { bottom: -8px; opacity:0; transform:scale(0); }
+            10%  { opacity:1; transform:scale(1); }
+            90%  { opacity:0.6; }
+            100% { bottom: 108%; opacity:0; }
+        }
+
+        .toko-content {
+            position: relative; z-index: 2;
+            display: flex; align-items: center; gap: 20px;
+        }
+
+        .toko-icon-wrap {
+            flex-shrink: 0;
+            width: 68px; height: 68px; border-radius: 18px;
+            background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(236,72,153,0.2));
+            border: 1px solid rgba(245,158,11,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem;
+            position: relative;
+            animation: iconPulse 3s ease-in-out infinite;
+        }
+        @keyframes iconPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+            50%       { box-shadow: 0 0 0 12px rgba(245,158,11,0); }
+        }
+
+        /* rotating ring around icon */
+        .toko-icon-wrap::before {
+            content: '';
+            position: absolute; inset: -5px; border-radius: 22px;
+            border: 1.5px solid transparent;
+            border-top-color: var(--amber);
+            border-right-color: var(--pink);
+            animation: spinRing 3s linear infinite;
+        }
+
+        .toko-text { flex: 1; }
+        .toko-eyebrow {
+            font-size: 0.65rem; font-weight: 700; letter-spacing: 0.18em;
+            text-transform: uppercase; color: var(--amber);
+            margin-bottom: 4px; display: flex; align-items: center; gap: 6px;
+        }
+        .toko-eyebrow .live-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: var(--amber);
+            box-shadow: 0 0 8px var(--amber); animation: pulse 1.5s infinite;
+        }
+        .toko-title {
+            font-family: 'Syne', sans-serif; font-size: 1.35rem; font-weight: 800;
+            background: linear-gradient(90deg, #fff 0%, var(--amber) 50%, var(--pink) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            line-height: 1.2; margin-bottom: 5px;
+        }
+        .toko-desc {
+            font-size: 0.78rem; color: var(--muted); line-height: 1.5;
+        }
+
+        .toko-arrow {
+            flex-shrink: 0;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--amber), var(--pink));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; color: #fff;
+            box-shadow: 0 4px 16px rgba(245,158,11,0.4);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+        }
+        .toko-banner:hover .toko-arrow {
+            transform: translateX(5px) scale(1.12);
+            box-shadow: 0 6px 24px rgba(245,158,11,0.6);
+        }
+
+        /* bottom tag strip */
+        .toko-tags {
+            position: relative; z-index: 2;
+            display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;
+        }
+        .toko-tag {
+            font-size: 0.68rem; font-weight: 600; padding: 3px 10px;
+            border-radius: 50px; border: 1px solid;
+        }
+        .tt-amber  { color: var(--amber); border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.08); }
+        .tt-pink   { color: var(--pink);  border-color: rgba(236,72,153,0.35); background: rgba(236,72,153,0.08); }
+        .tt-violet { color: #a78bfa;      border-color: rgba(124,58,237,0.35); background: rgba(124,58,237,0.08); }
+
+        /* ═══════════════════════════════════════ */
+
         .marquee-wrap {
             width: 100%; max-width: 620px; overflow: hidden;
             border-top: 1px solid rgba(255,255,255,0.06);
@@ -234,7 +380,6 @@
         .marquee-item span { color: var(--cyan); }
         @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-        /* ── TECH BADGES ── */
         .badges {
             display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
             max-width: 620px; margin-bottom: 32px;
@@ -251,7 +396,6 @@
         .badge-pink   { color: var(--pink);    border-color: rgba(236,72,153,0.4);   background: rgba(236,72,153,0.08); }
         .badge-green  { color: #4ade80;        border-color: rgba(74,222,128,0.4);   background: rgba(74,222,128,0.08); }
 
-        /* ── ACTION BUTTONS ── */
         .actions {
             display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
             margin-bottom: 48px;
@@ -269,291 +413,7 @@
         .logout-btn { background: rgba(127,29,29,0.4); border-color: rgba(239,68,68,0.3); }
         .logout-btn:hover { background: rgba(239,68,68,0.25); border-color: rgba(239,68,68,0.6); box-shadow: 0 6px 20px rgba(239,68,68,0.2); }
 
-        /* ── TESTIMONIALS ── */
         .wall-title {
             font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800;
             text-align: center; margin-bottom: 20px;
-            background: linear-gradient(90deg, var(--blue), var(--violet));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        #testimonialWall { width: 100%; max-width: 540px; }
-
-        .testi-card {
-            background: var(--surface); border: 1px solid rgba(255,255,255,0.07);
-            border-left: 3px solid var(--blue); padding: 18px 20px;
-            border-radius: 16px; margin-bottom: 12px;
-            backdrop-filter: blur(12px);
-            animation: fadeUp 0.5s both;
-            transition: transform 0.3s, border-color 0.3s;
-        }
-        .testi-card:hover { transform: translateX(4px); border-left-color: var(--cyan); }
-        .testi-stars { color: #fbbf24; font-size: 0.9rem; margin-bottom: 6px; }
-        .testi-msg { font-size: 0.88rem; color: var(--text); line-height: 1.6; margin-bottom: 8px; }
-        .testi-author { font-size: 0.78rem; color: var(--blue); font-weight: 600; }
-
-        /* ── FOOTER ── */
-        .footer {
-            margin-top: 60px; text-align: center;
-            font-size: 0.75rem; color: var(--muted);
-            animation: fadeUp 0.8s 0.9s both;
-        }
-        .footer a { color: var(--blue); text-decoration: none; }
-
-        /* ── UTILITIES ── */
-        @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
-
-        /* ── FLOATING CODE PARTICLES ── */
-        .code-particle {
-            position: fixed; font-family: monospace; font-size: 0.7rem;
-            color: rgba(59,130,246,0.25); pointer-events: none; z-index: 0;
-            animation: floatUp linear infinite;
-        }
-        @keyframes floatUp { from { transform: translateY(100vh) rotate(0deg); opacity:0; } 10% { opacity:1; } 90% { opacity:0.4; } to { transform: translateY(-10vh) rotate(360deg); opacity:0; } }
-
-        /* ── MOUSE GLOW ── */
-        #mouse-glow {
-            position: fixed; width: 300px; height: 300px; border-radius: 50%;
-            background: radial-gradient(circle, rgba(59,130,246,0.08), transparent 70%);
-            pointer-events: none; z-index: 0; transform: translate(-50%,-50%);
-            transition: left 0.12s, top 0.12s;
-        }
-
-        @media (max-width: 480px) {
-            .dashboard { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-        }
-    </style>
-</head>
-<body>
-
-<canvas id="stars-canvas"></canvas>
-<div class="aurora"></div>
-<div class="grid-overlay"></div>
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
-<div class="orb orb-3"></div>
-<div id="mouse-glow"></div>
-
-<div class="wrapper">
-
-    <!-- HEADER -->
-    <div class="header-section">
-        <div class="logo-ring">
-            <img src="https://i.postimg.cc/ctKx1m8x/file-000000009a3c7207a2ab2d81fdc90db8.png" class="logo-img" alt="Rapi Dev Logo">
-        </div>
-        <h1 class="site-title">Rapi Dev</h1>
-        <div class="typewriter-wrap">
-            <span id="typewriter"></span><span class="cursor"></span>
-        </div>
-        <a href="about.html" class="about-link">Tentang Saya <span>→</span></a>
-    </div>
-
-    <!-- STATUS -->
-    <div class="status-bar">
-        <div class="dot-live"></div>
-        Semua sistem aktif &nbsp;·&nbsp; 10 Tools tersedia &nbsp;·&nbsp; Versi 2.0
-    </div>
-
-    <!-- TECH BADGES -->
-    <div class="badges">
-        <span class="badge badge-blue">Firebase</span>
-        <span class="badge badge-violet">Supabase</span>
-        <span class="badge badge-cyan">Claude AI</span>
-        <span class="badge badge-pink">TTS Engine</span>
-        <span class="badge badge-green">QR Generator</span>
-        <span class="badge badge-blue">Image Gen</span>
-        <span class="badge badge-violet">Chord DB</span>
-        <span class="badge badge-cyan">Content AI</span>
-    </div>
-
-    <!-- SECTION LABEL -->
-    <p class="section-label">⚡ Pilih Tool</p>
-
-    <!-- DASHBOARD GRID -->
-    <div class="dashboard">
-        <a href="chatbot.html" class="tool-card"><span class="icon">💬</span><span class="label">Asisten</span></a>
-        <a href="gambar.html" class="tool-card"><span class="icon">🎨</span><span class="label">Generator</span></a>
-        <a href="chord.html"  class="tool-card"><span class="icon">🎸</span><span class="label">Chord</span></a>
-        <a href="konten.html" class="tool-card"><span class="icon">📱</span><span class="label">Konten</span></a>
-        <a href="tiktok.html" class="tool-card"><span class="icon">🎵</span><span class="label">TikTok</span></a>
-        <a href="suara.html"  class="tool-card"><span class="icon">🔊</span><span class="label">Teks-Suara</span></a>
-        <a href="tugas.html"  class="tool-card"><span class="icon">📚</span><span class="label">Tugas</span></a>
-        <a href="penghitung.html" class="tool-card"><span class="icon">🔢</span><span class="label">Hitung</span></a>
-        <a href="teks.html"   class="tool-card"><span class="icon">📝</span><span class="label">Teks</span></a>
-        <a href="qr.html"     class="tool-card"><span class="icon">🔲</span><span class="label">QR Code</span></a>
-    </div>
-
-    <!-- MARQUEE -->
-    <div class="marquee-wrap">
-        <div class="marquee-track">
-            <span class="marquee-item">🤖 <span>AI Powered</span> Tools</span>
-            <span class="marquee-item">🎨 <span>Generatif</span> Images</span>
-            <span class="marquee-item">💬 <span>Smart</span> Chatbot</span>
-            <span class="marquee-item">🎵 <span>TikTok</span> Scripts</span>
-            <span class="marquee-item">🔊 <span>Text to</span> Speech</span>
-            <span class="marquee-item">🎸 <span>Chord</span> Finder</span>
-            <span class="marquee-item">📚 <span>Homework</span> Helper</span>
-            <span class="marquee-item">🔲 <span>QR</span> Generator</span>
-            <!-- duplicate for seamless loop -->
-            <span class="marquee-item">🤖 <span>AI Powered</span> Tools</span>
-            <span class="marquee-item">🎨 <span>Generatif</span> Images</span>
-            <span class="marquee-item">💬 <span>Smart</span> Chatbot</span>
-            <span class="marquee-item">🎵 <span>TikTok</span> Scripts</span>
-            <span class="marquee-item">🔊 <span>Text to</span> Speech</span>
-            <span class="marquee-item">🎸 <span>Chord</span> Finder</span>
-            <span class="marquee-item">📚 <span>Homework</span> Helper</span>
-            <span class="marquee-item">🔲 <span>QR</span> Generator</span>
-        </div>
-    </div>
-
-    <!-- ACTION BUTTONS -->
-    <div class="actions">
-        <a href="lapor.html" class="glow-btn">🛠 Lapor Bug</a>
-        <a href="rating.html" class="glow-btn">⭐ Rating</a>
-        <button class="glow-btn logout-btn" onclick="logout()">🚪 Keluar</button>
-    </div>
-
-    <!-- TESTIMONIALS -->
-    <div id="testimonialWall">
-        <h2 class="wall-title">✦ Wall of Fame</h2>
-    </div>
-
-    <footer class="footer">
-        Made with ❤️ by <a href="about.html">Rapi Dev</a> &nbsp;·&nbsp; © 2025
-    </footer>
-
-</div>
-
-<script>
-/* ── STARS CANVAS ── */
-const canvas = document.getElementById('stars-canvas');
-const ctx = canvas.getContext('2d');
-let stars = [];
-
-function resizeCanvas() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-resizeCanvas();
-window.addEventListener('resize', () => { resizeCanvas(); initStars(); });
-
-function initStars() {
-    stars = [];
-    const count = Math.floor((canvas.width * canvas.height) / 4000);
-    for (let i = 0; i < count; i++) {
-        stars.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            r: Math.random() * 1.5 + 0.3,
-            alpha: Math.random(),
-            speed: Math.random() * 0.4 + 0.1,
-            twinkleSpeed: Math.random() * 0.02 + 0.005,
-            twinkleDir: Math.random() > 0.5 ? 1 : -1,
-        });
-    }
-}
-initStars();
-
-function drawStars() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (const s of stars) {
-        s.alpha += s.twinkleSpeed * s.twinkleDir;
-        if (s.alpha >= 1) { s.alpha = 1; s.twinkleDir = -1; }
-        if (s.alpha <= 0.1) { s.alpha = 0.1; s.twinkleDir = 1; }
-        ctx.save();
-        ctx.globalAlpha = s.alpha;
-        ctx.fillStyle = '#e2e8f0';
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-    }
-    requestAnimationFrame(drawStars);
-}
-drawStars();
-
-/* ── MOUSE GLOW ── */
-const glow = document.getElementById('mouse-glow');
-document.addEventListener('mousemove', e => {
-    glow.style.left = e.clientX + 'px';
-    glow.style.top  = e.clientY + 'px';
-});
-
-/* ── TYPEWRITER ── */
-const phrases = [
-    'AI Hub untuk semua kebutuhanmu 🚀',
-    'Buat konten lebih cepat & cerdas ✨',
-    'Powered by kecerdasan buatan 🤖',
-    'Generator • Asisten • Creator 🎨',
-];
-let pi = 0, ci = 0, deleting = false;
-const tw = document.getElementById('typewriter');
-
-function typeLoop() {
-    const current = phrases[pi];
-    if (!deleting) {
-        tw.textContent = current.slice(0, ci + 1);
-        ci++;
-        if (ci === current.length) { deleting = true; setTimeout(typeLoop, 1800); return; }
-        setTimeout(typeLoop, 55);
-    } else {
-        tw.textContent = current.slice(0, ci - 1);
-        ci--;
-        if (ci === 0) {
-            deleting = false;
-            pi = (pi + 1) % phrases.length;
-            setTimeout(typeLoop, 400);
-            return;
-        }
-        setTimeout(typeLoop, 28);
-    }
-}
-typeLoop();
-
-/* ── FLOATING CODE PARTICLES ── */
-const snippets = ['<div>', '</>', 'AI()', 'const', '=>', '{  }', '✦', '01', '10', 'fn()', 'async', 'await'];
-function spawnParticle() {
-    const el = document.createElement('div');
-    el.className = 'code-particle';
-    el.textContent = snippets[Math.floor(Math.random() * snippets.length)];
-    el.style.left = Math.random() * 100 + 'vw';
-    const dur = 12 + Math.random() * 16;
-    el.style.animationDuration = dur + 's';
-    el.style.animationDelay = Math.random() * 4 + 's';
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), (dur + 4) * 1000);
-}
-setInterval(spawnParticle, 1200);
-for (let i = 0; i < 8; i++) setTimeout(spawnParticle, i * 300);
-
-/* ── SUPABASE TESTIMONIALS ── */
-const { createClient } = supabase;
-const sb = createClient(
-    'https://tvhhtkkwbxoyztmnkjnh.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2aGh0a2t3YnhveXp0bW5ram5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNzYxMzAsImV4cCI6MjA5Njg1MjEzMH0.ABm1xdmmHnQl9sLW5Xn09OR7hXV38nau7yFSUIgVbTo'
-);
-
-async function loadTestimoni() {
-    const { data } = await sb.from('testimoni').select('*').order('created_at', { ascending: false });
-    const wall = document.getElementById('testimonialWall');
-    if (data && data.length) {
-        data.forEach((t, i) => {
-            const card = document.createElement('div');
-            card.className = 'testi-card';
-            card.style.animationDelay = (i * 0.1) + 's';
-            card.innerHTML = `
-                <div class="testi-stars">${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)}</div>
-                <p class="testi-msg">"${t.pesan}"</p>
-                <span class="testi-author">— ${t.nama}</span>
-            `;
-            wall.appendChild(card);
-        });
-    }
-}
-loadTestimoni();
-</script>
-</body>
-</html>
+            background: l
