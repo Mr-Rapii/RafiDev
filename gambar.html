@@ -1,130 +1,696 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Hub | Generator Gambar</title>
-    <style>
-        :root { --bg: #0f172a; --glass: rgba(30, 41, 59, 0.7); --accent: #3b82f6; --text: #f8fafc; }
-        
-        body { 
-            background: radial-gradient(circle at top, #1e293b, #0f172a); 
-            color: var(--text); font-family: 'Inter', sans-serif; margin: 0; min-height: 100vh;
-            display: flex; flex-direction: column;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RAPI·AI — Image Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-        /* Navigasi & Header */
-        header { 
-            padding: 20px; display: flex; align-items: center; justify-content: space-between;
-            background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        .back-btn { 
-            color: var(--accent); text-decoration: none; font-size: 0.9rem; 
-            padding: 8px 15px; border-radius: 20px; border: 1px solid var(--accent);
-        }
-        .nav-tabs { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
-        .tab { color: #94a3b8; text-decoration: none; padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; }
-        .tab.active { background: var(--accent); color: white; }
+  <style>
+    /* ━━━━ RESET & TOKENS ━━━━ */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* Main Content */
-        .container { max-width: 500px; margin: 0 auto 40px auto; padding: 20px; text-align: center; }
-        
-        textarea { 
-            width: 100%; height: 100px; background: rgba(0,0,0,0.3); color: white; 
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 15px;
-            font-size: 1rem; outline: none; margin-bottom: 15px; resize: none;
-        }
-        
-        button { 
-            width: 100%; padding: 15px; background: var(--accent); color: white; 
-            border: none; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.3s;
-        }
-        button:hover { background: #2563eb; transform: scale(1.02); }
+    :root {
+      --void:   #02040c;
+      --deep:   #070b17;
+      --glass:  rgba(255,255,255,0.035);
+      --rim:    rgba(255,255,255,0.07);
+      --plasma: #5c6ef8;
+      --ember:  #f97316;
+      --text:   #eef2ff;
+      --muted:  #3d4a63;
+      --soft:   #8492ae;
+    }
 
-        /* Area Gambar */
-        .result-area { 
-            margin-top: 30px; min-height: 300px; border-radius: 20px; 
-            background: rgba(0,0,0,0.2); border: 2px dashed rgba(255,255,255,0.1);
-            display: flex; justify-content: center; align-items: center; overflow: hidden;
-            position: relative; transition: 0.5s;
-        }
-        
-        .result-area img { width: 100%; height: auto; display: none; animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    body {
+      background: var(--void);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-        /* Animasi Loading Spinner */
-        .loader { display: none; border: 4px solid #f3f3f3; border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    /* ━━━━ PARTICLE CANVAS ━━━━ */
+    #bg {
+      position: fixed; inset: 0; z-index: 0;
+      pointer-events: none; opacity: 0.6;
+    }
 
-        .download-btn { display: none; margin-top: 20px; padding: 12px; background: #10b981; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; }
-    </style>
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━
+       INTRO SCREEN
+    ━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #intro {
+      position: fixed; inset: 0; z-index: 500;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: #000;
+      transition: opacity 1s ease;
+    }
+    #intro.exit { opacity: 0; pointer-events: none; }
+
+    .intro-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.8rem, 10vw, 5.5rem);
+      letter-spacing: 0.18em;
+      color: var(--text);
+      position: relative;
+      user-select: none;
+    }
+
+    /* glitch layers */
+    .intro-logo::before,
+    .intro-logo::after {
+      content: attr(data-text);
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      overflow: hidden;
+    }
+    .intro-logo::before {
+      color: var(--plasma);
+      animation: ga 3s infinite;
+    }
+    .intro-logo::after {
+      color: var(--ember);
+      animation: gb 3s infinite;
+    }
+
+    @keyframes ga {
+      0%,85%,100% { opacity:0; transform:none; clip-path:inset(0 0 100% 0); }
+      86%          { opacity:1; transform:translateX(-4px); clip-path:inset(20% 0 50% 0); }
+      89%          { transform:translateX(4px);  clip-path:inset(40% 0 30% 0); }
+      92%          { opacity:0; }
+    }
+    @keyframes gb {
+      0%,88%,100% { opacity:0; transform:none; clip-path:inset(0 0 100% 0); }
+      89%          { opacity:1; transform:translateX(3px);  clip-path:inset(60% 0 10% 0); }
+      92%          { transform:translateX(-3px); clip-path:inset(75% 0 5% 0); }
+      95%          { opacity:0; }
+    }
+
+    .intro-sub {
+      margin-top: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      animation: fadeUp 0.7s 0.3s ease both;
+    }
+
+    .intro-bar {
+      margin-top: 44px;
+      width: 160px; height: 1px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+      animation: fadeUp 0s 0.3s ease both;
+    }
+    .intro-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--plasma), var(--ember));
+      animation: barFill 2.5s 0.4s ease-out forwards;
+      width: 0;
+    }
+    @keyframes barFill { to { width: 100%; } }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(12px); }
+      to   { opacity:1; transform:none; }
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━
+       MAIN APP
+    ━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #app {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      opacity: 0; transition: opacity 0.9s ease;
+    }
+    #app.show { opacity: 1; }
+
+    /* ── Header ── */
+    header {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px;
+      background: rgba(2,4,12,0.82);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--rim);
+    }
+    .back-btn {
+      font-size: 0.8rem; color: var(--plasma);
+      text-decoration: none;
+      padding: 7px 15px;
+      border-radius: 30px;
+      border: 1px solid rgba(92,110,248,0.25);
+      transition: background 0.2s;
+    }
+    .back-btn:hover { background: rgba(92,110,248,0.08); }
+
+    .brand {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700; font-size: 1rem;
+      letter-spacing: 0.14em;
+    }
+    .brand b { color: var(--plasma); font-weight: 800; }
+
+    /* ── Nav tabs ── */
+    .nav {
+      display: flex; justify-content: center;
+      gap: 8px; padding: 18px 0;
+    }
+    .nav a {
+      font-size: 0.83rem; color: var(--soft);
+      text-decoration: none;
+      padding: 7px 20px;
+      border-radius: 30px;
+      border: 1px solid var(--rim);
+      transition: all 0.2s;
+    }
+    .nav a:hover { color: var(--plasma); border-color: rgba(92,110,248,0.35); }
+    .nav a.on {
+      background: var(--plasma); border-color: var(--plasma);
+      color: #fff;
+    }
+
+    /* ── Main content ── */
+    main {
+      flex: 1;
+      max-width: 560px; width: 100%;
+      margin: 0 auto;
+      padding: 0 18px 80px;
+    }
+
+    /* labels */
+    .lbl {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.67rem; color: var(--muted);
+      letter-spacing: 0.22em; text-transform: uppercase;
+      margin-bottom: 9px;
+    }
+
+    /* ── Prompt card ── */
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--rim);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 14px;
+      transition: border-color 0.3s;
+    }
+    .card:focus-within { border-color: rgba(92,110,248,0.4); }
+
+    textarea.prompt {
+      width: 100%; min-height: 96px;
+      background: transparent; border: none; outline: none;
+      color: var(--text); font-family: 'Inter', sans-serif;
+      font-size: 0.93rem; line-height: 1.65;
+      resize: none;
+    }
+    textarea.prompt::placeholder { color: var(--muted); }
+
+    .card-foot {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 10px; margin-top: 10px;
+      border-top: 1px solid var(--rim);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem; color: var(--muted);
+    }
+
+    /* ── Style chips ── */
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+
+    .chip {
+      padding: 5px 13px; border-radius: 20px; font-size: 0.77rem;
+      border: 1px solid var(--rim); background: transparent;
+      color: var(--soft); cursor: pointer; transition: all 0.18s;
+      font-family: 'Inter', sans-serif;
+    }
+    .chip:hover { border-color: rgba(92,110,248,0.45); color: #a5b4fc; }
+    .chip.on   { border-color: var(--plasma); color: #a5b4fc; background: rgba(92,110,248,0.1); }
+
+    /* ── Model picker ── */
+    .models {
+      display: flex; gap: 4px;
+      background: var(--glass); border: 1px solid var(--rim);
+      border-radius: 12px; padding: 4px;
+      margin-bottom: 20px;
+    }
+    .mdl {
+      flex: 1; padding: 9px 6px; border-radius: 9px;
+      border: none; background: transparent;
+      color: var(--muted); font-size: 0.75rem;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer; transition: all 0.2s;
+      text-align: center; line-height: 1.35;
+    }
+    .mdl:hover:not(.on) { color: var(--soft); }
+    .mdl.on { background: rgba(92,110,248,0.15); color: #a5b4fc; }
+
+    /* ── Generate button ── */
+    .gen {
+      width: 100%; padding: 17px;
+      border-radius: 14px; border: none;
+      background: linear-gradient(135deg, var(--plasma), #818cf8 100%);
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.97rem; font-weight: 700;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.3s, opacity 0.2s;
+      margin-bottom: 18px;
+    }
+    .gen::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.12));
+    }
+    .gen:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 44px rgba(92,110,248,0.35);
+    }
+    .gen:active:not(:disabled) { transform: translateY(0); }
+    .gen:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Result area ── */
+    .result {
+      background: var(--glass); border: 1px solid var(--rim);
+      border-radius: 18px; min-height: 280px; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+
+    /* empty */
+    .s-empty {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 10px; padding: 48px 24px; text-align: center;
+    }
+    .s-empty .ico { font-size: 2.8rem; opacity: 0.18; }
+    .s-empty p   { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+
+    /* generating */
+    .s-gen {
+      display: none; flex-direction: column; align-items: center;
+      gap: 22px; padding: 48px 24px; text-align: center;
+    }
+    canvas#neural { width: 96px; height: 96px; }
+
+    .gen-info p   { font-size: 0.88rem; color: var(--soft); }
+    .gen-info .preview {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; color: var(--muted);
+      max-width: 300px; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
+      margin-top: 4px;
+    }
+    .dot-anim::after {
+      content: '';
+      animation: dots 1.4s steps(4,end) infinite;
+    }
+    @keyframes dots {
+      0%  { content: ''; }
+      25% { content: '.'; }
+      50% { content: '..'; }
+      75% { content: '...'; }
+    }
+
+    /* image */
+    .s-img {
+      display: none; flex-direction: column;
+      width: 100%; align-self: stretch;
+    }
+    .s-img img {
+      width: 100%; display: block;
+      animation: imgIn 0.65s cubic-bezier(0.22,1,0.36,1);
+    }
+    @keyframes imgIn {
+      from { opacity:0; transform:scale(0.96); filter:blur(14px); }
+      to   { opacity:1; transform:scale(1);    filter:blur(0); }
+    }
+    .img-bar {
+      display: flex; gap: 10px; padding: 13px;
+      background: rgba(0,0,0,0.35);
+    }
+    .abtn {
+      flex: 1; padding: 11px; border-radius: 10px;
+      border: 1px solid var(--rim);
+      background: transparent; color: var(--soft);
+      font-family: 'Inter', sans-serif; font-size: 0.8rem;
+      cursor: pointer; transition: all 0.2s;
+      text-decoration: none; text-align: center;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .abtn:hover { background: rgba(255,255,255,0.04); }
+    .abtn.dl {
+      background: rgba(92,110,248,0.14);
+      border-color: rgba(92,110,248,0.3);
+      color: #a5b4fc;
+    }
+
+    /* error */
+    .s-err {
+      display: none; flex-direction: column; align-items: center;
+      gap: 10px; padding: 40px 24px; text-align: center;
+    }
+    .s-err .ico { font-size: 2.5rem; }
+    .s-err .title { color: var(--ember); font-size: 0.9rem; font-weight: 500; }
+    .s-err .msg  { color: var(--muted); font-size: 0.78rem; line-height: 1.65; max-width: 300px; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: rgba(12,18,36,0.96);
+      border: 1px solid var(--rim); border-radius: 30px;
+      padding: 10px 22px; font-size: 0.83rem; color: var(--text);
+      opacity: 0; transition: all 0.3s;
+      backdrop-filter: blur(20px); z-index: 100;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Radial glow behind result ── */
+    .result::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(92,110,248,0.06), transparent);
+      pointer-events: none;
+    }
+
+    @media (max-width: 480px) {
+      .mdl { font-size: 0.68rem; padding: 8px 4px; }
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <a href="portofolio.html" class="back-btn">← Portofolio</a>
-        <h3 style="margin:0">🎨 Generator</h3>
-        <div style="width: 80px;"></div> </header>
+<!-- ════ BACKGROUND PARTICLES ════ -->
+<canvas id="bg"></canvas>
 
-    <div class="nav-tabs">
-        <a href="chatbot.html" class="tab">Chatbot</a>
-        <a href="gambar.html" class="tab active">Generator</a>
+<!-- ════ INTRO ════ -->
+<div id="intro">
+  <div class="intro-logo" data-text="RAPI·AI">RAPI·AI</div>
+  <p class="intro-sub">// image generator</p>
+  <div class="intro-bar"><div class="intro-bar-fill"></div></div>
+</div>
+
+<!-- ════ APP ════ -->
+<div id="app">
+
+  <header>
+    <a href="portofolio.html" class="back-btn">← Portofolio</a>
+    <div class="brand"><b>RAPI</b>·AI</div>
+    <div style="width:86px"></div>
+  </header>
+
+  <nav class="nav">
+    <a href="chatbot.html">Chatbot</a>
+    <a href="gambar.html" class="on">Generator</a>
+  </nav>
+
+  <main>
+
+    <!-- Prompt -->
+    <p class="lbl">✦ Deskripsi Gambar</p>
+    <div class="card">
+      <textarea class="prompt" id="prompt" maxlength="400"
+        placeholder="Contoh: A lone samurai standing in a foggy bamboo forest at dusk, cinematic lighting, ultra detailed..."></textarea>
+      <div class="card-foot">
+        <span><span id="cc">0</span>/400</span>
+        <span>Ctrl+Enter untuk buat</span>
+      </div>
     </div>
 
-    <div class="container">
-        <textarea id="prompt" placeholder="Contoh: Futuristic robot in cyberpunk city..."></textarea>
-        <button id="generateBtn" onclick="buatGambar()">Buat Gambar</button>
+    <!-- Style chips -->
+    <p class="lbl">✦ Gaya Visual</p>
+    <div class="chips" id="chipGroup">
+      <button class="chip" data-s="photorealistic, sharp focus">📷 Realistic</button>
+      <button class="chip" data-s="anime style, vibrant">🎌 Anime</button>
+      <button class="chip" data-s="cyberpunk, neon lights">🌆 Cyberpunk</button>
+      <button class="chip" data-s="oil painting, textured">🖼️ Oil Paint</button>
+      <button class="chip" data-s="8K ultra detailed">✨ 8K Ultra</button>
+      <button class="chip" data-s="dark fantasy, atmospheric">🌑 Dark Fantasy</button>
+      <button class="chip" data-s="watercolor, soft edges">💧 Watercolor</button>
+      <button class="chip" data-s="cinematic lighting, depth of field">🎬 Cinematic</button>
+    </div>
 
-        <div class="result-area" id="resultArea">
-            <div id="loader" class="loader"></div>
-            <img id="outputImage" alt="Hasil">
-            <span id="statusText" style="color:#64748b">Gambar akan muncul di sini...</span>
+    <!-- Model picker -->
+    <p class="lbl" style="margin-top:16px">✦ Model AI</p>
+    <div class="models" id="modelGroup">
+      <button class="mdl on" data-m="@cf/stabilityai/stable-diffusion-xl-base-1.0">⚡ SD XL<br><small>Kualitas Tinggi</small></button>
+      <button class="mdl" data-m="@cf/bytedance/stable-diffusion-xl-lightning">🚀 Lightning<br><small>Lebih Cepat</small></button>
+      <button class="mdl" data-m="@cf/lykon/dreamshaper-8-lcm">🎨 Dreamshaper<br><small>Artistik</small></button>
+    </div>
+
+    <!-- Generate button -->
+    <button class="gen" id="genBtn">
+      <span id="genLabel">✦ Buat Gambar</span>
+    </button>
+
+    <!-- Result -->
+    <div class="result" id="result">
+
+      <div class="s-empty" id="sEmpty">
+        <div class="ico">🎨</div>
+        <p>Gambar AI-mu akan muncul di sini.<br>Masukkan deskripsi lalu tekan buat.</p>
+      </div>
+
+      <div class="s-gen" id="sGen">
+        <canvas id="neural" width="96" height="96"></canvas>
+        <div class="gen-info">
+          <p>AI sedang melukis<span class="dot-anim"></span></p>
+          <p class="preview" id="prev"></p>
         </div>
+      </div>
 
-        <a id="downloadBtn" class="download-btn" href="#" download="RapiArt.jpg">⬇️ Download Gambar</a>
-    </div>
+      <div class="s-img" id="sImg">
+        <img id="out" alt="Generated Image">
+        <div class="img-bar">
+          <a class="abtn dl" id="dlBtn" href="#" download="RapiAI.png">⬇️ Download</a>
+          <button class="abtn" onclick="go()">🔄 Buat Lagi</button>
+        </div>
+      </div>
 
-    <script>
-        function buatGambar() {
-            const prompt = document.getElementById('prompt').value.trim();
-            const btn = document.getElementById('generateBtn');
-            const img = document.getElementById('outputImage');
-            const loader = document.getElementById('loader');
-            const status = document.getElementById('statusText');
-            const dl = document.getElementById('downloadBtn');
+      <div class="s-err" id="sErr">
+        <div class="ico">⚠️</div>
+        <p class="title">Gagal membuat gambar</p>
+        <p class="msg" id="errMsg"></p>
+      </div>
 
-            if (!prompt) return alert("Masukkan deskripsi gambar!");
+    </div><!-- /result -->
 
-            // UI State: Loading
-            btn.disabled = true;
-            btn.innerText = "Seni sedang dibuat...";
-            loader.style.display = 'block';
-            img.style.display = 'none';
-            status.style.display = 'none';
-            dl.style.display = 'none';
+  </main>
+</div>
 
-            const seed = Math.floor(Math.random() * 1000000);
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&nologo=true`;
+<div class="toast" id="toast"></div>
 
-            img.onload = () => {
-                loader.style.display = 'none';
-                img.style.display = 'block';
-                dl.style.display = 'block';
-                dl.href = url;
-                btn.disabled = false;
-                btn.innerText = "Buat Gambar";
-            };
+<!-- ════ SCRIPTS ════ -->
+<script>
+/* ── Config ── */
+const CF_ID  = '596608c47ef7c71e3140c2539bd3c75b';
+const CF_TOK = 'cfut_AS2zGBjwUJaqJhNTtvysBjYI80MniYZv6fWDMLjb1dcd4caa';
 
-            img.onerror = () => {
-                loader.style.display = 'none';
-                status.style.display = 'block';
-                status.innerText = "Error: Server sedang sibuk. Coba lagi!";
-                btn.disabled = false;
-                btn.innerText = "Buat Gambar";
-            };
-
-            img.src = url;
+/* ━━━━ PARTICLE BG ━━━━ */
+(function () {
+  const c = document.getElementById('bg');
+  const x = c.getContext('2d');
+  const P = [];
+  function resize() { c.width = innerWidth; c.height = innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  for (let i = 0; i < 72; i++) P.push({
+    x: Math.random() * innerWidth, y: Math.random() * innerHeight,
+    vx: (Math.random()-.5)*.22, vy: (Math.random()-.5)*.22,
+    r: Math.random()*1.1+.4, a: Math.random()*.18+.04
+  });
+  (function frame() {
+    x.clearRect(0,0,c.width,c.height);
+    P.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0) p.x=c.width; if(p.x>c.width) p.x=0;
+      if(p.y<0) p.y=c.height; if(p.y>c.height) p.y=0;
+      x.beginPath(); x.arc(p.x,p.y,p.r,0,Math.PI*2);
+      x.fillStyle=`rgba(92,110,248,${p.a})`; x.fill();
+    });
+    P.forEach((p1,i)=>{
+      for(let j=i+1;j<P.length;j++){
+        const p2=P[j], d=Math.hypot(p1.x-p2.x,p1.y-p2.y);
+        if(d<110){
+          x.beginPath(); x.moveTo(p1.x,p1.y); x.lineTo(p2.x,p2.y);
+          x.strokeStyle=`rgba(92,110,248,${.035*(1-d/110)})`;
+          x.lineWidth=.5; x.stroke();
         }
-    </script>
+      }
+    });
+    requestAnimationFrame(frame);
+  })();
+})();
+
+/* ━━━━ INTRO ━━━━ */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('intro').classList.add('exit');
+    document.getElementById('app').classList.add('show');
+    setTimeout(()=>{ document.getElementById('intro').style.display='none'; }, 1000);
+  }, 3000);
+});
+
+/* ━━━━ NEURAL CANVAS LOADER ━━━━ */
+const nc  = document.getElementById('neural');
+const ncx = nc.getContext('2d');
+const NS  = [];
+for(let i=0;i<14;i++) NS.push({
+  x:8+Math.random()*80, y:8+Math.random()*80,
+  vx:(Math.random()-.5)*.45, vy:(Math.random()-.5)*.45,
+  ph: Math.random()*Math.PI*2
+});
+let nraf=null;
+
+function drawNeural(t) {
+  ncx.clearRect(0,0,96,96);
+  NS.forEach(n=>{ n.x+=n.vx; n.y+=n.vy; n.ph+=.025;
+    if(n.x<4||n.x>92) n.vx*=-1; if(n.y<4||n.y>92) n.vy*=-1; });
+  NS.forEach((a,i)=>{
+    for(let j=i+1;j<NS.length;j++){
+      const b=NS[j], d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d<42){
+        const pulse=(Math.sin(t*.018+a.ph)+1)/2;
+        ncx.beginPath(); ncx.moveTo(a.x,a.y); ncx.lineTo(b.x,b.y);
+        ncx.strokeStyle=`rgba(92,110,248,${.32*pulse*(1-d/42)})`;
+        ncx.lineWidth=.9; ncx.stroke();
+      }
+    }
+  });
+  NS.forEach(n=>{
+    const p=(Math.sin(t*.04+n.ph)+1)/2;
+    ncx.beginPath(); ncx.arc(n.x,n.y,1.4+p*.9,0,Math.PI*2);
+    ncx.fillStyle=`rgba(92,110,248,${.5+p*.5})`; ncx.fill();
+  });
+}
+function startNeural(){ function f(t){drawNeural(t);nraf=requestAnimationFrame(f);} nraf=requestAnimationFrame(f); }
+function stopNeural() { if(nraf){cancelAnimationFrame(nraf);nraf=null;} ncx.clearRect(0,0,96,96); }
+
+/* ━━━━ UI STATE ━━━━ */
+let dotI=null;
+function setState(s) {
+  ['sEmpty','sGen','sImg','sErr'].forEach(id=>{
+    const el=document.getElementById(id);
+    const show = id===s;
+    el.style.display = show
+      ? (id==='sImg' ? 'flex' : 'flex')
+      : 'none';
+  });
+  if(s==='sGen'){ startNeural(); dotI=setInterval(()=>{},400); }
+  else { stopNeural(); clearInterval(dotI); }
+  // make result align top for image
+  document.getElementById('result').style.alignItems = s==='sImg' ? 'flex-start' : 'center';
+}
+
+/* ━━━━ CHIPS ━━━━ */
+const activeS = new Set();
+document.getElementById('chipGroup').addEventListener('click', e=>{
+  const b = e.target.closest('.chip'); if(!b) return;
+  const s = b.dataset.s;
+  activeS.has(s) ? (activeS.delete(s), b.classList.remove('on')) : (activeS.add(s), b.classList.add('on'));
+});
+
+/* ━━━━ MODEL ━━━━ */
+let selModel = '@cf/stabilityai/stable-diffusion-xl-base-1.0';
+document.getElementById('modelGroup').addEventListener('click', e=>{
+  const b=e.target.closest('.mdl'); if(!b) return;
+  document.querySelectorAll('.mdl').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  selModel = b.dataset.m;
+});
+
+/* ━━━━ CHAR COUNTER ━━━━ */
+const ptEl = document.getElementById('prompt');
+ptEl.addEventListener('input',()=>{ document.getElementById('cc').textContent=ptEl.value.length; });
+
+/* ━━━━ TOAST ━━━━ */
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); }
+
+/* ━━━━ IMAGE GENERATION ━━━━ */
+async function go() {
+  const raw = ptEl.value.trim();
+  if(!raw){ toast('⚠️ Masukkan deskripsi gambar dulu!'); return; }
+
+  const styles  = [...activeS].join(', ');
+  const full    = styles ? `${raw}, ${styles}` : raw;
+  const btn     = document.getElementById('genBtn');
+  const lbl     = document.getElementById('genLabel');
+
+  btn.disabled  = true;
+  lbl.textContent = '⚙️ Memproses...';
+  document.getElementById('prev').textContent = `"${full.length > 60 ? full.slice(0,57)+'...' : full}"`;
+  setState('sGen');
+
+  try {
+    const res = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${CF_ID}/ai/run/${selModel}`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${CF_TOK}`,
+          'Content-Type':  'application/json',
+        },
+        body: JSON.stringify({ prompt: full }),
+      }
+    );
+
+    if (!res.ok) {
+      let em = `HTTP ${res.status}`;
+      try { const j=await res.json(); em=j.errors?.[0]?.message||em; } catch{}
+      throw new Error(em);
+    }
+
+    const ct = res.headers.get('content-type') || '';
+    let url;
+
+    if (ct.includes('image/')) {
+      // Raw binary image (expected for CF image models)
+      const blob = await res.blob();
+      url = URL.createObjectURL(blob);
+    } else {
+      // JSON wrapper (fallback)
+      const j = await res.json();
+      const b64 = j.result?.image || j.image;
+      if (!b64) throw new Error('Format respons tidak dikenali dari API');
+      const bytes = atob(b64);
+      const arr   = new Uint8Array(bytes.length);
+      for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
+      url = URL.createObjectURL(new Blob([arr],{type:'image/png'}));
+    }
+
+    const img = document.getElementById('out');
+    const dl  = document.getElementById('dlBtn');
+    img.src = url;
+    dl.href = url;
+    setState('sImg');
+
+  } catch(err) {
+    console.error(err);
+    const el = document.getElementById('errMsg');
+    if(err.message.toLowerCase().includes('fetch') || err.message.toLowerCase().includes('network')) {
+      el.innerHTML = 'Tidak bisa terhubung ke API Cloudflare.<br>'
+        + 'Kemungkinan ada pembatasan CORS dari browser.<br>'
+        + '<span style="color:#5c6ef8">Solusi: deploy via Cloudflare Worker sebagai proxy.</span>';
+    } else {
+      el.textContent = err.message || 'Terjadi kesalahan yang tidak diketahui.';
+    }
+    setState('sErr');
+  } finally {
+    btn.disabled = false;
+    lbl.textContent = '✦ Buat Gambar';
+  }
+}
+
+document.getElementById('genBtn').addEventListener('click', go);
+ptEl.addEventListener('keydown', e=>{ if(e.ctrlKey && e.key==='Enter') go(); });
+
+/* ── init ── */
+setState('sEmpty');
+</script>
 </body>
 </html>
