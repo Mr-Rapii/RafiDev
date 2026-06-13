@@ -87,6 +87,11 @@
             box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
             margin: 20px;
             animation: sceneEntry 1s cubic-bezier(0.16,1,0.3,1) both;
+            transition: opacity .4s, transform .4s, filter .4s;
+        }
+        .scene.hide {
+            opacity: 0; transform: scale(0.92) translateY(20px); filter: blur(8px);
+            pointer-events: none;
         }
         @keyframes sceneEntry {
             from { opacity:0; transform: scale(0.88) translateY(40px); filter: blur(6px); }
@@ -224,7 +229,6 @@
         .right-title {
             font-size: 2rem; font-weight: 700; line-height: 1.15;
             color: var(--white); margin-bottom: 6px;
-            /* NOT using gradient — deliberate restraint for contrast with dashboard */
         }
         .right-title span { color: var(--lime); }
 
@@ -258,7 +262,7 @@
             transform: translateY(-4px);
             box-shadow: 0 12px 36px rgba(163,230,53,0.25), 0 4px 16px rgba(0,0,0,0.3);
         }
-        .g-btn:active { transform: translateY(-1px); }
+        .g-btn:active { transform: translateY(-1px) scale(0.98); }
         .g-btn img { width: 20px; height: 20px; flex-shrink: 0; }
         .g-btn .btn-text { position: relative; z-index: 1; }
 
@@ -275,6 +279,14 @@
         .g-btn.loading .btn-text,
         .g-btn.loading .btn-icon { display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* success ripple on button */
+        .g-btn.success { background: var(--lime); color: #0f1a04; pointer-events: none; }
+        .g-btn.success .btn-text::before { content: '✓ '; }
+        .g-btn.success .spinner,
+        .g-btn.success .btn-icon { display: none; }
+        .g-btn.success .btn-text { display: inline-block; animation: successPop .5s cubic-bezier(.34,1.56,.64,1); }
+        @keyframes successPop { from { transform: scale(0.6); opacity:0; } to { transform: scale(1); opacity:1; } }
 
         /* divider */
         .or-row {
@@ -308,7 +320,7 @@
             pointer-events: none; opacity: 0;
             background: #080d14;
         }
-        #portal-overlay.active { pointer-events: all; }
+        #portal-overlay.active { pointer-events: all; opacity: 1; }
 
         .portal-ring {
             position: absolute;
@@ -341,6 +353,126 @@
             opacity: 0;
         }
 
+        /* ── PROFILE OVERLAY (nama & tanggal lahir) ── */
+        #profile-overlay {
+            position: fixed; inset: 0; z-index: 1100;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity .5s ease;
+            background: radial-gradient(circle at 50% 40%, rgba(163,230,53,0.06), #080d14 75%);
+        }
+        #profile-overlay.active { opacity: 1; pointer-events: all; }
+
+        .profile-card {
+            width: 100%; max-width: 380px; margin: 20px;
+            background: rgba(15,23,42,0.6);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 30px 90px rgba(0,0,0,0.6);
+            transform: translateY(30px) scale(0.94); opacity: 0;
+            animation: cardIn .7s cubic-bezier(0.16,1,0.3,1) forwards;
+            animation-delay: .15s;
+            text-align: center;
+        }
+        @keyframes cardIn {
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .profile-icon {
+            width: 60px; height: 60px; margin: 0 auto 18px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(163,230,53,0.25), transparent 70%);
+            border: 1px solid rgba(163,230,53,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem;
+            animation: iconFloat 2.6s ease-in-out infinite;
+        }
+        @keyframes iconFloat {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .profile-card h2 {
+            font-size: 1.3rem; font-weight: 700; margin-bottom: 6px;
+        }
+        .profile-card h2 span { color: var(--lime); }
+        .profile-card p.sub {
+            font-size: 0.82rem; color: var(--dim); margin-bottom: 28px; line-height: 1.6;
+        }
+
+        .field-group {
+            margin-bottom: 18px; text-align: left;
+            opacity: 0; transform: translateY(14px);
+            animation: fieldIn .5s ease forwards;
+        }
+        .field-group:nth-child(1) { animation-delay: .35s; }
+        .field-group:nth-child(2) { animation-delay: .5s; }
+        @keyframes fieldIn { to { opacity: 1; transform: translateY(0); } }
+
+        .field-group label {
+            display: block; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--dim); margin-bottom: 8px; font-weight: 500;
+        }
+        .field-group input {
+            width: 100%; padding: 13px 16px; border-radius: 12px;
+            border: 1px solid var(--border); background: rgba(255,255,255,0.03);
+            color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 0.92rem;
+            outline: none; transition: all .25s;
+        }
+        .field-group input::placeholder { color: #475569; }
+        .field-group input:focus {
+            border-color: rgba(163,230,53,0.5);
+            background: rgba(163,230,53,0.05);
+            box-shadow: 0 0 0 3px rgba(163,230,53,0.1);
+        }
+        .field-group input::-webkit-calendar-picker-indicator {
+            filter: invert(0.8) sepia(1) saturate(4) hue-rotate(45deg);
+            cursor: pointer;
+        }
+
+        .profile-submit {
+            width: 100%; padding: 14px 20px; margin-top: 6px;
+            background: linear-gradient(135deg, var(--lime), var(--lime2));
+            border: none; border-radius: 12px;
+            color: #0f1a04; font-weight: 700; font-size: 0.92rem;
+            cursor: pointer; font-family: 'DM Sans', sans-serif;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
+            opacity: 0; transform: translateY(14px);
+            animation: fieldIn .5s ease forwards;
+            animation-delay: .65s;
+        }
+        .profile-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(163,230,53,0.3);
+        }
+        .profile-submit:active { transform: translateY(0) scale(0.98); }
+        .profile-submit .spinner {
+            display: none; width: 18px; height: 18px;
+            border: 2.5px solid rgba(15,26,4,0.25);
+            border-top-color: #0f1a04;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        .profile-submit.loading .spinner { display: block; }
+        .profile-submit.loading .ps-text { display: none; }
+        .profile-submit.success { pointer-events: none; }
+
+        .profile-error {
+            font-size: 0.74rem; color: #f87171; margin-top: -6px; margin-bottom: 14px;
+            text-align: left; min-height: 14px; opacity: 0;
+            transition: opacity .25s;
+        }
+        .profile-error.show { opacity: 1; }
+
+        /* welcome confetti-ish burst */
+        .burst-dot {
+            position: absolute; border-radius: 50%; pointer-events: none;
+            background: var(--lime);
+        }
+
         /* ── MOBILE ── */
         @media (max-width: 640px) {
             .scene {
@@ -350,6 +482,7 @@
             .panel-left { display: none; }
             .panel-right { padding: 48px 28px; }
             .right-title { font-size: 1.7rem; }
+            .profile-card { padding: 32px 24px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -375,12 +508,38 @@
     <div class="portal-ring pr-1" id="pr1"></div>
     <div class="portal-text" id="pText">
         <div class="pt-main">Membuka Portal</div>
-        <div class="pt-sub">Menyiapkan dashboard...</div>
+        <div class="pt-sub">Memverifikasi akun...</div>
+    </div>
+</div>
+
+<!-- ── PROFILE OVERLAY (nama & tanggal lahir) ── -->
+<div id="profile-overlay">
+    <div class="profile-card">
+        <div class="profile-icon">👋</div>
+        <h2>Kenalan dulu <span>yuk!</span></h2>
+        <p class="sub">Sebelum masuk ke dashboard, lengkapi sedikit data dirimu ya.</p>
+
+        <div class="field-group">
+            <label for="userName">Nama Kamu</label>
+            <input type="text" id="userName" placeholder="cth. Budi Santoso" autocomplete="off">
+        </div>
+
+        <div class="field-group">
+            <label for="userDob">Tanggal Lahir</label>
+            <input type="date" id="userDob">
+        </div>
+
+        <div class="profile-error" id="profileError">Lengkapi semua data terlebih dahulu.</div>
+
+        <button class="profile-submit" id="profileSubmit">
+            <span class="ps-text">Lanjutkan</span>
+            <div class="spinner"></div>
+        </button>
     </div>
 </div>
 
 <!-- ── SPLIT SCENE ── -->
-<div class="scene">
+<div class="scene" id="scene">
 
     <!-- LEFT PANEL -->
     <div class="panel-left">
@@ -485,7 +644,7 @@ drawParticles();
 
 <!-- PORTAL ANIMATION -->
 <script>
-function playPortal(onDone) {
+function playPortal(textMain, textSub, successText, successSub, onDone) {
     const overlay = document.getElementById('portal-overlay');
     const rings = [
         document.getElementById('pr1'),
@@ -497,10 +656,26 @@ function playPortal(onDone) {
     const pText  = document.getElementById('pText');
     const pFlash = document.getElementById('pFlash');
 
+    // reset ring styles
+    rings.forEach(r => {
+        r.style.transition = 'none';
+        r.style.transform = 'scale(0)';
+        r.style.opacity = '0';
+    });
+    pFlash.style.transition = 'none';
+    pFlash.style.opacity = '0';
+    pText.style.transition = 'none';
+    pText.style.opacity = '0';
+    pText.innerHTML = `<div class="pt-main">${textMain}</div><div class="pt-sub">${textSub}</div>`;
+
+    overlay.style.background = '#080d14';
+    overlay.style.transition = 'none';
     overlay.style.opacity = '1';
     overlay.classList.add('active');
 
-    // Animate each ring expanding outward in sequence
+    // force reflow so transitions re-apply
+    void overlay.offsetWidth;
+
     const delays = [0, 120, 240, 360, 480];
     rings.forEach((ring, i) => {
         setTimeout(() => {
@@ -510,37 +685,102 @@ function playPortal(onDone) {
         }, delays[i]);
     });
 
-    // Show portal text
     setTimeout(() => {
         pText.style.transition = 'opacity 0.5s';
         pText.style.opacity = '1';
     }, 400);
 
-    // Rings continue expanding to fill screen
     setTimeout(() => {
-        rings.forEach((ring, i) => {
+        rings.forEach((ring) => {
             ring.style.transition = 'transform 0.7s ease-in, opacity 0.7s';
             ring.style.transform = 'scale(6)';
             ring.style.opacity = '0';
         });
     }, 1000);
 
-    // Flash + full white-out
     setTimeout(() => {
         pFlash.style.transition = 'opacity 0.3s';
         pFlash.style.opacity = '1';
         overlay.style.background = 'rgba(163,230,53,0.06)';
     }, 1400);
 
-    // Fade to black then redirect
     setTimeout(() => {
         overlay.style.transition = 'opacity 0.4s';
         overlay.style.background = '#080d14';
         overlay.style.opacity = '1';
-        pText.innerHTML = '<div class="pt-main" style="color:#f8fafc;">✓ Berhasil</div><div class="pt-sub">Menuju dashboard...</div>';
+        pText.innerHTML = `<div class="pt-main" style="color:#f8fafc;">✓ ${successText}</div><div class="pt-sub">${successSub}</div>`;
     }, 1700);
 
-    setTimeout(onDone, 2400);
+    setTimeout(() => {
+        overlay.style.opacity = '0';
+        overlay.classList.remove('active');
+        if (onDone) onDone();
+    }, 2400);
+}
+</script>
+
+<!-- PROFILE STEP (nama & tanggal lahir) -->
+<script>
+function showProfileStep(onComplete) {
+    const scene = document.getElementById('scene');
+    const profile = document.getElementById('profile-overlay');
+    const nameInput = document.getElementById('userName');
+    const dobInput = document.getElementById('userDob');
+    const submitBtn = document.getElementById('profileSubmit');
+    const errorEl = document.getElementById('profileError');
+
+    scene.classList.add('hide');
+
+    setTimeout(() => {
+        profile.classList.add('active');
+        setTimeout(() => nameInput.focus(), 400);
+    }, 250);
+
+    submitBtn.onclick = () => {
+        const name = nameInput.value.trim();
+        const dob = dobInput.value;
+
+        if (!name || !dob) {
+            errorEl.classList.add('show');
+            if (!name) nameInput.style.borderColor = '#f87171';
+            if (!dob) dobInput.style.borderColor = '#f87171';
+            return;
+        }
+        errorEl.classList.remove('show');
+        nameInput.style.borderColor = '';
+        dobInput.style.borderColor = '';
+
+        submitBtn.classList.add('loading');
+
+        // simulate saving
+        setTimeout(() => {
+            try {
+                localStorage.setItem('rapidev_user_name', name);
+                localStorage.setItem('rapidev_user_dob', dob);
+                localStorage.setItem('rapidev_profile_done', '1');
+            } catch (e) {}
+
+            submitBtn.classList.remove('loading');
+            submitBtn.classList.add('success');
+
+            profile.style.transition = 'opacity .5s ease';
+            profile.style.opacity = '0';
+            setTimeout(() => {
+                profile.classList.remove('active');
+                onComplete(name);
+            }, 500);
+        }, 900);
+    };
+
+    [nameInput, dobInput].forEach(el => {
+        el.addEventListener('keypress', e => {
+            if (e.key === 'Enter') submitBtn.click();
+        });
+        el.addEventListener('input', () => {
+            errorEl.classList.remove('show');
+            el.style.borderColor = '';
+        });
+    });
 }
 </script>
 
@@ -565,14 +805,32 @@ const provider = new GoogleAuthProvider();
 document.getElementById("loginBtn").onclick = async () => {
     const btn = document.getElementById("loginBtn");
     btn.classList.add('loading');
+
     try {
         await signInWithPopup(auth, provider);
-        // Play portal animation THEN redirect
-        playPortal(() => {
-            window.location.href = "portofolio.html";
-        });
+
+        btn.classList.remove('loading');
+        btn.classList.add('success');
+
+        // small delay so user sees the success state on the button
+        setTimeout(() => {
+            playPortal('Memverifikasi Akun', 'Mohon tunggu sebentar...', 'Berhasil Masuk', 'Menyiapkan data...', () => {
+                const done = localStorage.getItem('rapidev_profile_done');
+                if (!done) {
+                    showProfileStep((name) => {
+                        playPortal('Menyimpan Profil', `Halo, ${name}!`, 'Profil Tersimpan', 'Menuju dashboard...', () => {
+                            window.location.href = "portofolio.html";
+                        });
+                    });
+                } else {
+                    window.location.href = "portofolio.html";
+                }
+            });
+        }, 500);
+
     } catch (error) {
         btn.classList.remove('loading');
+        btn.classList.remove('success');
         if (error.code !== 'auth/popup-closed-by-user') {
             alert("Login gagal: " + error.message);
         }
