@@ -8,7 +8,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0a0e1a;--glass:rgba(30,41,59,.55);--glass2:rgba(255,255,255,.04);
+  --bg:#0a0e1a;--glass:rgba(30,41,59,.55);--glass2:rgba(255,255,255,.045);
   --accent:#3b82f6;--accent2:#8b5cf6;--accent3:#06b6d4;
   --text:#f8fafc;--muted:#94a3b8;--border:rgba(255,255,255,.08);
 }
@@ -26,6 +26,19 @@ body{
   box-shadow:0 0 60px rgba(0,0,0,.6);
 }
 
+/* Animated gradient backdrop */
+.phone-frame::before{
+  content:'';position:absolute;inset:0;z-index:0;
+  background:linear-gradient(135deg,#0a0e1a,#0c1224,#0a0e1a,#11182e);
+  background-size:300% 300%;
+  animation:gradientShift 18s ease infinite;
+}
+@keyframes gradientShift{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
 /* Animated background blobs */
 .bg-blobs{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
 .blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.35}
@@ -35,6 +48,19 @@ body{
 @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,60px)}}
 @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-40px,-50px)}}
 @keyframes float3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,30px) scale(1.15)}}
+
+/* Floating particles */
+.particle{
+  position:absolute;border-radius:50%;background:var(--accent3);
+  opacity:.5;pointer-events:none;
+  animation:rise linear infinite;
+}
+@keyframes rise{
+  0%{transform:translateY(0) translateX(0);opacity:0}
+  10%{opacity:.6}
+  90%{opacity:.3}
+  100%{transform:translateY(-820px) translateX(20px);opacity:0}
+}
 
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -55,7 +81,12 @@ body{
   display:flex;align-items:center;justify-content:center;font-size:2.2rem;
   margin-bottom:22px;
   box-shadow:0 0 40px rgba(59,130,246,.5);
-  animation:logoPop 1s cubic-bezier(.34,1.56,.64,1) both;
+  animation:logoPop 1s cubic-bezier(.34,1.56,.64,1) both, logoSpin 2.4s ease-in-out .9s;
+}
+@keyframes logoSpin{
+  0%{transform:rotate(0)}
+  50%{transform:rotate(360deg)}
+  100%{transform:rotate(360deg)}
 }
 .splash h1{
   font-family:'Space Grotesk',sans-serif;font-size:1.7rem;font-weight:800;
@@ -68,10 +99,20 @@ body{
   margin-top:10px;color:var(--muted);font-size:.85rem;
   animation:fadeUp .8s ease .45s both;
 }
-.splash-dots{margin-top:26px;display:flex;gap:6px;animation:fadeUp .8s ease .6s both}
-.splash-dots span{width:7px;height:7px;border-radius:50%;background:var(--accent3);animation:bounce 1.3s infinite}
-.splash-dots span:nth-child(2){animation-delay:.15s;background:var(--accent2)}
-.splash-dots span:nth-child(3){animation-delay:.3s;background:var(--accent)}
+.splash-bar{
+  margin-top:26px;width:160px;height:4px;border-radius:4px;
+  background:rgba(255,255,255,.08);overflow:hidden;
+  animation:fadeUp .8s ease .6s both;
+}
+.splash-bar::after{
+  content:'';display:block;height:100%;width:40%;border-radius:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));
+  animation:loadBar 2.2s ease-in-out infinite;
+}
+@keyframes loadBar{
+  0%{transform:translateX(-100%)}
+  100%{transform:translateX(350%)}
+}
 
 @keyframes logoPop{from{opacity:0;transform:scale(.4) rotate(-15deg)}to{opacity:1;transform:scale(1) rotate(0)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
@@ -83,6 +124,7 @@ header{
   padding:14px 16px;background:var(--glass);backdrop-filter:blur(16px);
   border-bottom:1px solid var(--border);
   display:flex;align-items:center;gap:12px;
+  animation:fadeUp .6s ease both;
 }
 .back-btn{
   color:var(--accent3);text-decoration:none;font-size:.78rem;font-weight:600;
@@ -91,6 +133,7 @@ header{
   display:flex;align-items:center;gap:6px;flex-shrink:0;
 }
 .back-btn:hover{background:var(--accent3);color:#06283a;transform:translateY(-1px)}
+.back-btn:active{transform:scale(.95)}
 
 .header-info{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
 .bot-avatar{
@@ -116,6 +159,15 @@ header{
 .status-dot{width:6px;height:6px;background:#34d399;border-radius:50%;animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
 
+.clear-btn{
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  color:var(--muted);width:34px;height:34px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:.25s;flex-shrink:0;
+}
+.clear-btn:hover{color:#f87171;border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.08);transform:rotate(15deg)}
+.clear-btn svg{width:15px;height:15px}
+
 /* ===== CHAT AREA ===== */
 #chatBox{
   position:relative;z-index:1;
@@ -137,6 +189,7 @@ header{
 .msg{
   padding:10px 14px;border-radius:16px;line-height:1.5;font-size:.86rem;
   word-break:break-word;white-space:pre-wrap;
+  transition:transform .15s;
 }
 .msg-row.user .msg{
   background:linear-gradient(135deg,var(--accent),#2563eb);
@@ -146,8 +199,18 @@ header{
 .msg-row.ai .msg{
   background:var(--glass2);border:1px solid var(--border);
   border-bottom-left-radius:4px;backdrop-filter:blur(8px);
+  box-shadow:0 4px 14px rgba(0,0,0,.2);
+}
+.msg-row.error .msg{
+  border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.07);color:#fecaca;
 }
 @keyframes slideIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+
+.timestamp{
+  font-size:.62rem;color:var(--muted);margin-top:4px;opacity:.7;
+  padding:0 4px;
+}
+.msg-row.user .timestamp{text-align:right}
 
 .welcome{
   text-align:center;color:var(--muted);font-size:.74rem;padding:4px 0 10px;
@@ -168,18 +231,42 @@ header{
 .dot:nth-child(3){animation-delay:.3s;background:var(--accent)}
 @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-7px);opacity:1}}
 
+/* ===== QUICK SUGGESTIONS ===== */
+.suggestions{
+  display:flex;gap:8px;overflow-x:auto;padding:0 14px 12px;
+  position:relative;z-index:2;scrollbar-width:none;
+}
+.suggestions::-webkit-scrollbar{display:none}
+.chip{
+  flex-shrink:0;padding:8px 14px;border-radius:50px;font-size:.76rem;
+  background:var(--glass2);border:1px solid var(--border);color:var(--muted);
+  cursor:pointer;transition:.25s;white-space:nowrap;
+  animation:fadeUp .5s ease both;
+}
+.chip:nth-child(1){animation-delay:.05s}
+.chip:nth-child(2){animation-delay:.1s}
+.chip:nth-child(3){animation-delay:.15s}
+.chip:nth-child(4){animation-delay:.2s}
+.chip:hover{
+  background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.35);
+  color:var(--text);transform:translateY(-2px);
+}
+.chip:active{transform:scale(.96)}
+
 /* ===== INPUT AREA ===== */
 .input-area{
   position:relative;z-index:2;
-  padding:12px;background:var(--glass);backdrop-filter:blur(16px);
+  padding:10px 12px 18px;background:var(--glass);backdrop-filter:blur(16px);
   border-top:1px solid var(--border);
-  display:flex;gap:8px;align-items:center;
+  display:flex;gap:8px;align-items:flex-end;
 }
 #prompt{
-  flex:1;padding:11px 16px;border-radius:50px;
+  flex:1;padding:12px 16px;border-radius:20px;
   border:1px solid var(--border);background:rgba(255,255,255,.03);
   color:var(--text);outline:none;font-size:.86rem;font-family:'Inter',sans-serif;
-  transition:all .25s;min-width:0;
+  transition:all .25s;min-width:0;resize:none;
+  max-height:110px;line-height:1.4;
+  font-family:inherit;
 }
 #prompt::placeholder{color:#64748b}
 #prompt:focus{
@@ -187,7 +274,7 @@ header{
   box-shadow:0 0 0 3px rgba(59,130,246,.12);
 }
 .send-btn{
-  width:42px;height:42px;border-radius:50%;flex-shrink:0;
+  width:44px;height:44px;border-radius:50%;flex-shrink:0;
   background:linear-gradient(135deg,var(--accent),var(--accent2));
   color:#fff;border:none;cursor:pointer;font-size:1.05rem;
   display:flex;align-items:center;justify-content:center;
@@ -196,7 +283,14 @@ header{
 .send-btn:hover{transform:scale(1.08) rotate(8deg);box-shadow:0 8px 22px rgba(59,130,246,.4)}
 .send-btn:active{transform:scale(.94)}
 .send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.send-btn svg{width:16px;height:16px}
+.send-btn svg{width:17px;height:17px}
+.send-btn.loading svg{display:none}
+.send-btn .spinner{
+  display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;
+}
+.send-btn.loading .spinner{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -207,7 +301,7 @@ header{
     <div class="splash-logo">🤖</div>
     <h1>Selamat Datang Di<br>Asisten Rapi</h1>
     <p>Menyiapkan asisten pribadimu...</p>
-    <div class="splash-dots"><span></span><span></span><span></span></div>
+    <div class="splash-bar"></div>
   </div>
 
   <div class="bg-blobs">
@@ -225,13 +319,18 @@ header{
         <div class="status"><span class="status-dot"></span> Online &amp; siap membantu</div>
       </div>
     </div>
+    <div class="clear-btn" id="clearBtn" title="Hapus chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+    </div>
   </header>
 
   <div id="chatBox">
     <div class="welcome">Mulai percakapan dengan Asisten Rapi ✨</div>
     <div class="msg-row ai">
       <div class="msg-avatar">🤖</div>
-      <div class="msg">Halo! Saya Asisten Rapi. Ada yang bisa saya bantu hari ini?</div>
+      <div>
+        <div class="msg">Halo! Saya Asisten Rapi. Ada yang bisa saya bantu hari ini?</div>
+      </div>
     </div>
     <div class="typing-row" id="typingRow">
       <div class="msg-avatar">🤖</div>
@@ -241,10 +340,18 @@ header{
     </div>
   </div>
 
+  <div class="suggestions" id="suggestions">
+    <div class="chip">👋 Perkenalkan dirimu</div>
+    <div class="chip">💡 Beri aku ide</div>
+    <div class="chip">📝 Bantu buat tulisan</div>
+    <div class="chip">😂 Ceritakan lelucon</div>
+  </div>
+
   <div class="input-area">
-    <input type="text" id="prompt" placeholder="Ketik pesan kamu..." autocomplete="off">
+    <textarea id="prompt" placeholder="Ketik pesan kamu..." rows="1"></textarea>
     <button class="send-btn" id="sendBtn" onclick="askAI()" title="Kirim">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      <div class="spinner"></div>
     </button>
   </div>
 
@@ -255,23 +362,89 @@ header{
 const splash = document.getElementById('splash');
 setTimeout(() => splash.remove(), 3300);
 
+// Floating particles
+const frame = document.querySelector('.phone-frame');
+for (let i = 0; i < 18; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  const size = Math.random() * 3 + 1;
+  p.style.width = size + 'px';
+  p.style.height = size + 'px';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.bottom = '-10px';
+  p.style.animationDuration = (Math.random() * 12 + 10) + 's';
+  p.style.animationDelay = (Math.random() * 12) + 's';
+  frame.querySelector('.bg-blobs').appendChild(p);
+}
+
 const chatBox = document.getElementById('chatBox');
 const typingRow = document.getElementById('typingRow');
 const promptEl = document.getElementById('prompt');
 const sendBtn = document.getElementById('sendBtn');
+const clearBtn = document.getElementById('clearBtn');
+const suggestions = document.getElementById('suggestions');
 let history = [];
 let busy = false;
 
-promptEl.addEventListener('keypress', e => {
-  if (e.key === 'Enter') askAI();
+// Auto-resize textarea
+promptEl.addEventListener('input', () => {
+  promptEl.style.height = 'auto';
+  promptEl.style.height = Math.min(promptEl.scrollHeight, 110) + 'px';
 });
+
+promptEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    askAI();
+  }
+});
+
+// Quick suggestion chips
+suggestions.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    promptEl.value = chip.textContent.replace(/^\S+\s/, '').trim();
+    promptEl.focus();
+    askAI();
+  });
+});
+
+// Clear chat
+clearBtn.addEventListener('click', () => {
+  history = [];
+  document.querySelectorAll('#chatBox .msg-row:not(#typingRow)').forEach((el, i) => {
+    if (i === 0) return; // keep first welcome message
+    el.remove();
+  });
+});
+
+function timeNow() {
+  const d = new Date();
+  return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+}
 
 function addMessage(text, who) {
   const row = document.createElement('div');
   row.className = 'msg-row ' + who;
   row.innerHTML = `
     <div class="msg-avatar">${who === 'user' ? '🙂' : '🤖'}</div>
-    <div class="msg"></div>`;
+    <div>
+      <div class="msg"></div>
+      <div class="timestamp">${timeNow()}</div>
+    </div>`;
+  row.querySelector('.msg').textContent = text;
+  chatBox.insertBefore(row, typingRow);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function addErrorMessage(text) {
+  const row = document.createElement('div');
+  row.className = 'msg-row ai error';
+  row.innerHTML = `
+    <div class="msg-avatar">⚠️</div>
+    <div>
+      <div class="msg"></div>
+      <div class="timestamp">${timeNow()}</div>
+    </div>`;
   row.querySelector('.msg').textContent = text;
   chatBox.insertBefore(row, typingRow);
   chatBox.scrollTop = chatBox.scrollHeight;
@@ -284,37 +457,52 @@ async function askAI() {
 
   addMessage(prompt, 'user');
   promptEl.value = '';
+  promptEl.style.height = 'auto';
   busy = true;
   sendBtn.disabled = true;
+  sendBtn.classList.add('loading');
   typingRow.classList.add('show');
   chatBox.scrollTop = chatBox.scrollHeight;
 
-  const KEY = "AQ.Ab8RN6L-7nGV5Vxf5qOSGAbIT-xVbjFxeyEQmzCS18WpG1YEBQ";
+  if (suggestions.parentNode) suggestions.remove();
 
-  history.push({ role: "user", parts: [{ text: prompt }] });
+  const KEY = "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";
+
+  history.push({ role: "user", content: prompt });
 
   try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${KEY}`, {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: history })
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + KEY
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: "Kamu adalah Asisten Rapi, asisten AI yang ramah, sopan, dan membantu. Jawab dalam Bahasa Indonesia kecuali diminta lain." },
+          ...history
+        ],
+        temperature: 0.7
+      })
     });
     const data = await res.json();
 
-    if (data.candidates && data.candidates[0]) {
-      const aiText = data.candidates[0].content.parts[0].text;
+    if (data.choices && data.choices[0] && data.choices[0].message) {
+      const aiText = data.choices[0].message.content;
       addMessage(aiText, 'ai');
-      history.push({ role: "model", parts: [{ text: aiText }] });
+      history.push({ role: "assistant", content: aiText });
     } else {
-      addMessage("Maaf, terjadi kesalahan saat memproses permintaan. Coba lagi ya.", 'ai');
+      addErrorMessage("Maaf, terjadi kesalahan saat memproses permintaan. Coba lagi ya.");
       history.pop();
     }
   } catch (e) {
-    addMessage("Asisten sedang sibuk, coba lagi sebentar ya 🙏", 'ai');
+    addErrorMessage("Asisten sedang sibuk, coba lagi sebentar ya 🙏");
     history.pop();
   } finally {
     typingRow.classList.remove('show');
     sendBtn.disabled = false;
+    sendBtn.classList.remove('loading');
     busy = false;
     chatBox.scrollTop = chatBox.scrollHeight;
     promptEl.focus();
@@ -323,4 +511,3 @@ async function askAI() {
 </script>
 </body>
 </html>
- 
