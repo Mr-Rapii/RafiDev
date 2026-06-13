@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>Admin Chat</title>
+  <meta charset="UTF-8">
+  <title>Admin Panel Chat</title>
 </head>
-<body style="background:black;color:white;font-family:Arial">
 
-<h2>Panel Admin</h2>
+<body style="background:#111;color:white;font-family:Arial;padding:20px;">
 
-<div id="chatList"></div>
+<h2>Panel Admin Chat</h2>
+
+<div id="chatList">Loading...</div>
 
 <script type="module">
 
@@ -16,9 +18,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/fireba
 import {
   getDatabase,
   ref,
-  onValue
+  onValue,
+  push
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBacN-a-DYcQ9oQ6ZlhhY6MmycOwMbQtDg",
   authDomain: "rapi-chat.firebaseapp.com",
@@ -32,36 +36,75 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ambil semua chat
+// lihat semua chat realtime
 onValue(ref(db, "chats"), (snapshot)=>{
 
   let data = snapshot.val();
 
   let html = "";
 
+  if(!data){
+    html = "<p>Belum ada chat masuk...</p>";
+    document.getElementById("chatList").innerHTML = html;
+    return;
+  }
+
   for(let user in data){
 
-     html += `<h3>${user}</h3>`;
+     html += `
+     <div style="border:1px solid #444;padding:15px;margin-bottom:20px;border-radius:10px">
+     <h3>${user}</h3>
+     `;
 
      let msgs = data[user].messages;
 
      for(let id in msgs){
 
+        let warna = msgs[id].sender === "admin" ? "#00ff88" : "#ffffff";
+
         html += `
-        <p>
-        ${msgs[id].sender} : ${msgs[id].text}
+        <p style="color:${warna}">
+        <b>${msgs[id].sender}</b> : ${msgs[id].text}
         </p>
         `;
 
      }
 
-     html += "<hr>";
+     html += `
+     <input 
+       id="reply_${user}" 
+       placeholder="Ketik balasan..."
+       style="padding:8px;width:220px;"
+     >
 
+     <button onclick="sendReply('${user}')">
+       Kirim Balasan
+     </button>
+
+     </div>
+     `;
   }
 
   document.getElementById("chatList").innerHTML = html;
 
 });
+
+// fungsi balas admin
+window.sendReply = async function(user){
+
+  let text = document.getElementById("reply_" + user).value;
+
+  if(text.trim() === "") return;
+
+  await push(ref(db, `chats/${user}/messages`), {
+      sender: "admin",
+      text: text,
+      time: Date.now()
+  });
+
+  document.getElementById("reply_" + user).value = "";
+
+}
 
 </script>
 
