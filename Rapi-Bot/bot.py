@@ -17,7 +17,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 # =====================
 # KONFIGURASI
 # =====================
-BOT_TOKEN   = os.environ.get("BOT_TOKEN", "8675537430:AAFNdmH3-J0QCJOnQXh6nmUOFLc5Lhe_PBw")
+BOT_TOKEN   = os.environ.get("BOT_TOKEN", "8564738258:AAGO9B_CS5Xt3RkQqcm6C67ostOZxyUCq6c")
 ADMIN_ID    = int(os.environ.get("ADMIN_ID", "7619879885"))
 GMAIL_USER  = os.environ.get("GMAIL_USER", "raffiramadhan8488@gmail.com")   # Ganti email Gmail kamu
 GMAIL_PASS  = os.environ.get("GMAIL_PASS", "osdfyqnbvlhwepnm")              # App password (spasi dihapus otomatis)
