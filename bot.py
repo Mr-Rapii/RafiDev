@@ -19,7 +19,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 # =====================
 BOT_TOKEN   = os.environ.get("BOT_TOKEN", "8990224933:AAEdC3tfalP4y-8tHTorqlHu-qUuPiJM5cg")
 ADMIN_ID    = int(os.environ.get("ADMIN_ID", "7619879885"))
-GMAIL_USER  = os.environ.get("GMAIL_USER", "nexostore.official@gmail.com")   # Ganti email Gmail kamu
+GMAIL_USER  = os.environ.get("GMAIL_USER", "raffiramadhan8488@gmail.com")   # Ganti email Gmail kamu
 GMAIL_PASS  = os.environ.get("GMAIL_PASS", "osdfyqnbvlhwepnm")              # App password (spasi dihapus otomatis)
 
 # Hapus spasi dari app password jika ada
@@ -29,12 +29,12 @@ GMAIL_PASS = GMAIL_PASS.replace(" ", "")
 # URL QR CODE PEMBAYARAN
 # Ganti dengan link gambar QR QRIS/GoPay/dll kamu
 # =====================
-QR_IMAGE_URL = os.environ.get("QR_IMAGE_URL", "https://i.imgur.com/exampleQR.png")
+QR_IMAGE_URL = os.environ.get("QR_IMAGE_URL", "gambar/qr_ID1025413112901_10.06.26_1781089235_1781089235997.jpeg")
 
 # =====================
 # NOMOR DANA
 # =====================
-DANA_NUMBER = os.environ.get("DANA_NUMBER", "08xxxxxxxxxx")   # Ganti nomor DANA kamu
+DANA_NUMBER = os.environ.get("DANA_NUMBER", "088218403135")   # Ganti nomor DANA kamu
 
 logging.basicConfig(
     format="%(asctime)s — %(levelname)s — %(message)s",
