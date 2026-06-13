@@ -617,54 +617,61 @@ document.querySelectorAll('.nav-links a').forEach(a=>{
 });
 </script>
 
-<!-- BUTTON CHAT -->
-
-<div onclick="toggleChat()" 
-style="position:fixed;bottom:20px;right:20px;
-width:60px;height:60px;
+<!-- ================= CHAT BUTTON ================= -->
+<div onclick="toggleChat()"
+style="position:fixed;
+bottom:20px;
+right:20px;
+width:60px;
+height:60px;
 background:#00ff88;
 border-radius:50%;
 display:flex;
 justify-content:center;
 align-items:center;
-font-size:30px;
+font-size:28px;
 cursor:pointer;
-z-index:9999;">
-
+z-index:9999;
+box-shadow:0 10px 25px rgba(0,255,136,.3);">
 💬
-
 </div>
 
-
-<!-- BOX CHAT -->
-
+<!-- ================= CHAT BOX ================= -->
 <div id="chatBox"
 style="display:none;
 position:fixed;
 bottom:90px;
 right:20px;
 background:#111;
-padding:15px;
+border:1px solid #333;
+padding:12px;
 border-radius:12px;
 width:260px;
-z-index:9999;">
+z-index:9999;
+box-shadow:0 10px 30px rgba(0,0,0,.4);">
 
-<input id="msg" 
+<div style="color:#00ff88;font-size:12px;margin-bottom:8px;">
+Live Chat Support
+</div>
+
+<input id="msg"
 placeholder="Ketik pesan..."
-style="width:100%;padding:8px;margin-bottom:10px;">
+style="width:100%;padding:8px;margin-bottom:8px;
+background:#000;border:1px solid #333;color:white;border-radius:6px;">
 
-<button onclick="sendMsg()">Kirim</button>
+<button onclick="sendMsg()"
+style="width:100%;padding:8px;background:#00ff88;
+border:none;border-radius:6px;font-weight:bold;cursor:pointer;">
+Kirim
+</button>
 
 </div>
+
+<!-- ================= FIREBASE SCRIPT ================= -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-
-import {
- getDatabase,
- ref,
- push
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
-
+import { getDatabase, ref, push }
+from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBacN-a-DYcQ9oQ6ZlhhY6MmycOwMbQtDg",
@@ -679,67 +686,34 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// bikin ID unik untuk tiap pengunjung
+// user id unik
 let userId = localStorage.getItem("uid");
 
 if(!userId){
-   userId = "user_" + Date.now();
-   localStorage.setItem("uid", userId);
+  userId = "user_" + Date.now();
+  localStorage.setItem("uid", userId);
 }
 
 // kirim pesan
-async function sendMsg(){
+window.sendMsg = async function(){
+  let text = document.getElementById("msg").value;
 
- let text = document.getElementById("msg").value;
-console.log("UID:", userId);
-console.log("Pesan:", text);
-  
- if(text.trim() === "") return;
+  if(!text.trim()) return;
 
- try{
+  await push(ref(db, `chats/${userId}/messages`), {
+    sender: "user",
+    text: text,
+    time: Date.now()
+  });
 
-   await push(ref(db, `chats/${userId}/messages`), {
-      sender: "user",
-      text: text,
-      time: Date.now()
-   });
-
-   alert("Pesan berhasil dikirim!");
-   document.getElementById("msg").value = "";
-
- } catch(err){
-
-   alert("Error: " + err.message);
-
- }
-
+  document.getElementById("msg").value = "";
 }
 
-// tekan Enter untuk kirim
-document.getElementById("msg").addEventListener("keypress", function(e){
-
-   if(e.key === "Enter"){
-      sendMsg();
-   }
-
-});
-
-// buka/tutup chat
-function toggleChat(){
-
- let box = document.getElementById("chatBox");
-
- if(box.style.display == "none"){
-   box.style.display = "block";
- } else {
-   box.style.display = "none";
- }
-
+// toggle chat
+window.toggleChat = function(){
+  const box = document.getElementById("chatBox");
+  box.style.display = box.style.display === "block" ? "none" : "block";
 }
-
-// biar bisa dipanggil dari HTML onclick
-window.sendMsg = sendMsg;
-window.toggleChat = toggleChat;
 </script>
 </body>
 </html>
