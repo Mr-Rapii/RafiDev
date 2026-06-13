@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Chat</title>
+</head>
+<body style="background:black;color:white;font-family:Arial">
+
+<h2>Panel Admin</h2>
+
+<div id="chatList"></div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+
+import {
+  getDatabase,
+  ref,
+  onValue
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBacN-a-DYcQ9oQ6ZlhhY6MmycOwMbQtDg",
+  authDomain: "rapi-chat.firebaseapp.com",
+  databaseURL: "https://rapi-chat-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "rapi-chat",
+  storageBucket: "rapi-chat.firebasestorage.app",
+  messagingSenderId: "429300669703",
+  appId: "1:429300669703:web:9a18843744c306b350b9a2"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ambil semua chat
+onValue(ref(db, "chats"), (snapshot)=>{
+
+  let data = snapshot.val();
+
+  let html = "";
+
+  for(let user in data){
+
+     html += `<h3>${user}</h3>`;
+
+     let msgs = data[user].messages;
+
+     for(let id in msgs){
+
+        html += `
+        <p>
+        ${msgs[id].sender} : ${msgs[id].text}
+        </p>
+        `;
+
+     }
+
+     html += "<hr>";
+
+  }
+
+  document.getElementById("chatList").innerHTML = html;
+
+});
+
+</script>
+
+</body>
+</html>
