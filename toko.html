@@ -631,18 +631,49 @@ document.querySelectorAll('.nav-links a').forEach(a=>{
   });
 });
 </script>
-  <!-- LIVE CHAT -->
+...
+</script>
 
-<div style="position:fixed;bottom:100px;left:20px;background:#111;padding:12px;border-radius:10px;z-index:9999;">
+<!-- BUTTON CHAT -->
 
-<input id="msg" placeholder="Ketik pesan..." style="padding:8px;">
-<button onclick="sendMsg()">Kirim</button>
+<div onclick="toggleChat()" 
+style="position:fixed;bottom:20px;right:20px;
+width:60px;height:60px;
+background:#00ff88;
+border-radius:50%;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:30px;
+cursor:pointer;
+z-index:9999;">
+
+💬
 
 </div>
 
 
-<script type="module">
+<!-- BOX CHAT -->
 
+<div id="chatBox"
+style="display:none;
+position:fixed;
+bottom:90px;
+right:20px;
+background:#111;
+padding:15px;
+border-radius:12px;
+width:260px;
+z-index:9999;">
+
+<input id="msg" 
+placeholder="Ketik pesan..."
+style="width:100%;padding:8px;margin-bottom:10px;">
+
+<button onclick="sendMsg()">Kirim</button>
+
+</div>
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 
 import {
@@ -689,7 +720,19 @@ async function sendMsg(){
 }
 
 window.sendMsg = sendMsg;
+function toggleChat(){
 
+ let box = document.getElementById("chatBox");
+
+ if(box.style.display=="none"){
+   box.style.display="block";
+ } else {
+   box.style.display="none";
+ }
+
+}
+
+window.toggleChat = toggleChat;  
 </script>
 </body>
 </html>
