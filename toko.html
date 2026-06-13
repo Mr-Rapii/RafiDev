@@ -679,20 +679,33 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// bikin ID unik untuk tiap pengunjung
+let userId = localStorage.getItem("uid");
 
+if(!userId){
+   userId = "user_" + Date.now();
+   localStorage.setItem("uid", userId);
+}
+
+// kirim pesan
 async function sendMsg(){
 
  let text = document.getElementById("msg").value;
+console.log("UID:", userId);
+console.log("Pesan:", text);
+  
+ if(text.trim() === "") return;
 
  try{
 
-   await push(ref(db,"chats/user1/messages"),{
-      sender:"user",
-      text:text,
+   await push(ref(db, `chats/${userId}/messages`), {
+      sender: "user",
+      text: text,
       time: Date.now()
    });
 
    alert("Pesan berhasil dikirim!");
+   document.getElementById("msg").value = "";
 
  } catch(err){
 
@@ -702,20 +715,31 @@ async function sendMsg(){
 
 }
 
-window.sendMsg = sendMsg;
+// tekan Enter untuk kirim
+document.getElementById("msg").addEventListener("keypress", function(e){
+
+   if(e.key === "Enter"){
+      sendMsg();
+   }
+
+});
+
+// buka/tutup chat
 function toggleChat(){
 
  let box = document.getElementById("chatBox");
 
- if(box.style.display=="none"){
-   box.style.display="block";
+ if(box.style.display == "none"){
+   box.style.display = "block";
  } else {
-   box.style.display="none";
+   box.style.display = "none";
  }
 
 }
 
-window.toggleChat = toggleChat;  
+// biar bisa dipanggil dari HTML onclick
+window.sendMsg = sendMsg;
+window.toggleChat = toggleChat;
 </script>
 </body>
 </html>
