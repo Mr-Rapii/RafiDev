@@ -233,18 +233,6 @@ footer{background:var(--surface);padding:60px 5% 28px;border-top:1px solid var(-
 .sl:hover{background:rgba(123,95,255,.1);border-color:var(--accent);color:var(--text);transform:translateY(-3px)}
 .fb2{padding-top:2rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:var(--muted);flex-wrap:wrap;gap:1rem}
 
-/* === FLOAT WA === */
-.wa{
-  position:fixed;bottom:28px;right:28px;z-index:300;
-  width:54px;height:54px;background:#25D366;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:1.55rem;cursor:pointer;
-  box-shadow:0 8px 30px rgba(37,211,102,.45);transition:all .3s;
-  text-decoration:none;animation:waf 3.5s ease-in-out infinite
-}
-.wa:hover{transform:scale(1.15);box-shadow:0 12px 40px rgba(37,211,102,.65)}
-@keyframes waf{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-
 /* === REVEAL === */
 .rv{opacity:0;transform:translateY(32px);transition:opacity .65s cubic-bezier(.4,0,.2,1),transform .65s cubic-bezier(.4,0,.2,1)}
 .rv.on{opacity:1;transform:none}
@@ -535,9 +523,6 @@ footer{background:var(--surface);padding:60px 5% 28px;border-top:1px solid var(-
   </div>
 </footer>
 
-<!-- WhatsApp Float -->
-<a href="https://wa.me/6281234567890" class="wa" target="_blank">💬</a>
-
 <script>
 // === PARTICLES ===
 const ptsEl = document.getElementById('pts');
@@ -630,8 +615,6 @@ document.querySelectorAll('.nav-links a').forEach(a=>{
     a.style.color='var(--text)';
   });
 });
-</script>
-...
 </script>
 
 <!-- BUTTON CHAT -->
