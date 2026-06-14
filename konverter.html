@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Konverter Mata Uang</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;min-height:100vh;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);display:flex;align-items:center;justify-content:center;color:#fff;padding:20px;overflow:hidden}
+  .orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;animation:orbMove 8s ease-in-out infinite}
+  .orb1{width:400px;height:400px;background:rgba(99,102,241,.15);top:-100px;right:-100px}
+  .orb2{width:300px;height:300px;background:rgba(16,185,129,.1);bottom:-80px;left:-80px;animation-delay:-4s}
+  @keyframes orbMove{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-30px)}}
+  .container{position:relative;z-index:1;width:min(460px,100%);background:rgba(255,255,255,.05);backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,.1);border-radius:28px;padding:36px}
+  .header{text-align:center;margin-bottom:30px}
+  .header h1{font-size:1.7rem;font-weight:700}
+  .header h1 span{background:linear-gradient(90deg,#818cf8,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .rate-badge{display:inline-block;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:20px;padding:4px 14px;font-size:.75rem;color:#34d399;margin-top:6px}
+  .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:20px;margin-bottom:16px;transition:.3s}
+  .card:focus-within{border-color:rgba(129,140,248,.5);background:rgba(129,140,248,.06)}
+  .card label{font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;opacity:.5;display:block;margin-bottom:10px}
+  .card-row{display:flex;gap:12px;align-items:center}
+  .card-row input{flex:1;background:none;border:none;color:#fff;font-family:'Inter',sans-serif;font-size:2rem;font-weight:700;outline:none;width:100%;min-width:0}
+  .card-row input::placeholder{color:rgba(255,255,255,.2)}
+  .card-row select{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:#fff;padding:10px 14px;font-family:'Inter',sans-serif;font-size:.9rem;cursor:pointer;outline:none;min-width:100px}
+  .swap-btn{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#818cf8,#34d399);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin:0 auto;transition:.3s;position:relative;z-index:2}
+  .swap-btn:hover{transform:rotate(180deg) scale(1.1)}
+  .result-bar{background:linear-gradient(90deg,rgba(129,140,248,.15),rgba(52,211,153,.15));border:1px solid rgba(129,140,248,.2);border-radius:14px;padding:16px 20px;text-align:center;margin-top:16px}
+  .result-bar .big{font-size:1.6rem;font-weight:700;background:linear-gradient(90deg,#818cf8,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .result-bar .small{font-size:.8rem;opacity:.5;margin-top:4px}
+  .rates-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+  .rate-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center}
+  .rate-item .flag{font-size:1.2rem}
+  .rate-item .name{font-size:.7rem;opacity:.5;margin-top:2px}
+  .rate-item .rate{font-size:.95rem;font-weight:600;color:#818cf8}
+  .loading-text{text-align:center;opacity:.5;font-size:.85rem;padding:10px}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="container">
+  <div class="header">
+    <h1>💱 <span>Konverter</span> Mata Uang</h1>
+    <div class="rate-badge" id="rateBadge">Memuat data real-time...</div>
+  </div>
+  <div class="card">
+    <label>Dari</label>
+    <div class="card-row">
+      <input type="number" id="amountFrom" value="1" oninput="convert('from')">
+      <select id="currFrom" onchange="convert('from')">
+        <option value="USD">🇺🇸 USD</option>
+        <option value="IDR" selected>🇮🇩 IDR</option>
+        <option value="EUR">🇪🇺 EUR</option>
+        <option value="JPY">🇯🇵 JPY</option>
+        <option value="GBP">🇬🇧 GBP</option>
+        <option value="SGD">🇸🇬 SGD</option>
+        <option value="MYR">🇲🇾 MYR</option>
+        <option value="AUD">🇦🇺 AUD</option>
+        <option value="CNY">🇨🇳 CNY</option>
+        <option value="SAR">🇸🇦 SAR</option>
+      </select>
+    </div>
+  </div>
+  <button class="swap-btn" onclick="swapCurr()">⇅</button>
+  <div class="card">
+    <label>Ke</label>
+    <div class="card-row">
+      <input type="number" id="amountTo" value="" oninput="convert('to')">
+      <select id="currTo" onchange="convert('from')">
+        <option value="USD" selected>🇺🇸 USD</option>
+        <option value="IDR">🇮🇩 IDR</option>
+        <option value="EUR">🇪🇺 EUR</option>
+        <option value="JPY">🇯🇵 JPY</option>
+        <option value="GBP">🇬🇧 GBP</option>
+        <option value="SGD">🇸🇬 SGD</option>
+        <option value="MYR">🇲🇾 MYR</option>
+        <option value="AUD">🇦🇺 AUD</option>
+        <option value="CNY">🇨🇳 CNY</option>
+        <option value="SAR">🇸🇦 SAR</option>
+      </select>
+    </div>
+  </div>
+  <div class="result-bar">
+    <div class="big" id="resultText">--</div>
+    <div class="small" id="rateText">Menghitung...</div>
+  </div>
+  <div class="rates-grid" id="ratesGrid"><div class="loading-text">Memuat kurs populer...</div></div>
+</div>
+<script>
+let rates={};
+const popularPairs=[
+  {from:'USD',to:'IDR',flag:'🇮🇩',name:'Rupiah'},
+  {from:'USD',to:'EUR',flag:'🇪🇺',name:'Euro'},
+  {from:'USD',to:'JPY',flag:'🇯🇵',name:'Yen'},
+  {from:'USD',to:'SGD',flag:'🇸🇬',name:'Dolar SG'},
+  {from:'USD',to:'MYR',flag:'🇲🇾',name:'Ringgit'},
+  {from:'USD',to:'GBP',flag:'🇬🇧',name:'Pound'},
+];
+
+async function loadRates(){
+  try{
+    const r=await fetch('https://open.er-api.com/v6/latest/USD');
+    const d=await r.json();
+    rates=d.rates;
+    document.getElementById('rateBadge').textContent='✓ Data real-time — '+new Date(d.time_last_update_utc).toLocaleDateString('id-ID');
+    convert('from');
+    renderGrid();
+  }catch(e){
+    document.getElementById('rateBadge').textContent='⚠ Gagal memuat';
+  }
+}
+
+function getRate(from,to){
+  if(!rates[from]||!rates[to])return null;
+  return rates[to]/rates[from];
+}
+
+function fmt(n){return n>=1000?n.toLocaleString('id-ID',{maximumFractionDigits:2}):n.toPrecision(5).replace(/\.?0+$/,'');}
+
+function convert(dir){
+  const from=document.getElementById('currFrom').value,to=document.getElementById('currTo').value;
+  const rate=getRate(from,to);
+  if(!rate){document.getElementById('resultText').textContent='--';return;}
+  if(dir==='from'){
+    const amt=parseFloat(document.getElementById('amountFrom').value)||0;
+    const res=amt*rate;
+    document.getElementById('amountTo').value=Math.round(res*100)/100;
+    document.getElementById('resultText').textContent=`${fmt(amt)} ${from} = ${fmt(res)} ${to}`;
+  }else{
+    const amt=parseFloat(document.getElementById('amountTo').value)||0;
+    const res=amt/rate;
+    document.getElementById('amountFrom').value=Math.round(res*100)/100;
+    document.getElementById('resultText').textContent=`${fmt(amt)} ${to} = ${fmt(res)} ${from}`;
+  }
+  document.getElementById('rateText').textContent=`1 ${from} = ${fmt(rate)} ${to}`;
+}
+
+function swapCurr(){
+  const fs=document.getElementById('currFrom'),ts=document.getElementById('currTo');
+  [fs.value,ts.value]=[ts.value,fs.value];
+  convert('from');
+}
+
+function renderGrid(){
+  const grid=document.getElementById('ratesGrid');
+  grid.innerHTML='';
+  popularPairs.forEach(p=>{
+    const r=getRate(p.from,p.to);
+    if(!r)return;
+    const el=document.createElement('div');el.className='rate-item';
+    el.innerHTML=`<div class="flag">${p.flag}</div><div class="name">${p.name}</div><div class="rate">${fmt(r)}</div>`;
+    grid.appendChild(el);
+  });
+}
+
+loadRates();
+</script>
+</body>
+</html>

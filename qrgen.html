@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Space Grotesk',sans-serif;min-height:100vh;background:#050510;display:flex;align-items:center;justify-content:center;color:#fff;overflow:hidden}
+  canvas.stars{position:fixed;inset:0;z-index:0}
+  .container{position:relative;z-index:1;width:min(440px,95vw);background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(16,185,129,0.08));backdrop-filter:blur(24px);border:1px solid rgba(99,102,241,0.3);border-radius:28px;padding:36px;text-align:center}
+  .glow{position:absolute;width:200px;height:200px;background:rgba(99,102,241,0.3);border-radius:50%;filter:blur(80px);top:-60px;left:50%;transform:translateX(-50%);pointer-events:none}
+  h1{font-size:1.6rem;font-weight:700;margin-bottom:6px}
+  h1 span{background:linear-gradient(90deg,#6366f1,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  p{opacity:.5;font-size:.85rem;margin-bottom:24px}
+  .input-group{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+  .input-group input,.input-group select{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:13px 18px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:.95rem;outline:none;transition:.3s;width:100%}
+  .input-group input:focus,.input-group select:focus{border-color:#6366f1;background:rgba(99,102,241,0.1)}
+  .input-group input::placeholder{color:rgba(255,255,255,0.3)}
+  .colors{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+  .colors label{font-size:.8rem;opacity:.6}
+  .colors input[type=color]{width:38px;height:38px;border:2px solid rgba(255,255,255,0.2);border-radius:10px;cursor:pointer;background:none;padding:2px}
+  .btn{width:100%;background:linear-gradient(135deg,#6366f1,#10b981);border:none;border-radius:14px;padding:14px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:.3s;letter-spacing:.5px}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,0.4)}
+  .qr-wrap{margin-top:24px;display:none;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes popIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+  .qr-wrap img{width:200px;height:200px;border-radius:16px;border:3px solid rgba(99,102,241,0.4);box-shadow:0 0 40px rgba(99,102,241,0.3)}
+  .dl-btn{display:inline-block;margin-top:14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:9px 22px;color:#fff;font-size:.85rem;cursor:pointer;transition:.3s;text-decoration:none}
+  .dl-btn:hover{background:rgba(255,255,255,0.15)}
+</style>
+</head>
+<body>
+<canvas class="stars" id="stars"></canvas>
+<div class="container">
+  <div class="glow"></div>
+  <h1><span>⬛ QR</span> Generator</h1>
+  <p>Buat QR Code kustom secara instan</p>
+  <div class="input-group">
+    <input type="text" id="qrText" placeholder="Masukkan teks atau URL..." oninput="autoGenerate()">
+    <select id="size" onchange="autoGenerate()">
+      <option value="200">Kecil (200px)</option>
+      <option value="300" selected>Sedang (300px)</option>
+      <option value="400">Besar (400px)</option>
+    </select>
+  </div>
+  <div class="colors">
+    <label>Warna QR:</label>
+    <input type="color" id="fgColor" value="#000000" onchange="autoGenerate()">
+    <label>Background:</label>
+    <input type="color" id="bgColor" value="#ffffff" onchange="autoGenerate()">
+  </div>
+  <div id="qrWrap" class="qr-wrap">
+    <img id="qrImg" src="" alt="QR Code">
+    <br>
+    <a id="dlBtn" class="dl-btn" download="qr-code.png">⬇️ Unduh QR Code</a>
+  </div>
+</div>
+<script>
+// Stars
+const canvas=document.getElementById('stars'),ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+const stars=Array.from({length:120},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.5,o:Math.random()}));
+function drawStars(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{s.o+=.005*(Math.random()>.5?1:-1);s.o=Math.max(.1,Math.min(1,s.o));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${s.o})`;ctx.fill()});requestAnimationFrame(drawStars)}
+drawStars();
+
+let timer;
+function autoGenerate(){
+  clearTimeout(timer);
+  timer=setTimeout(generateQR,400);
+}
+
+function generateQR(){
+  const text=document.getElementById('qrText').value.trim();
+  if(!text)return;
+  const size=document.getElementById('size').value;
+  const fg=document.getElementById('fgColor').value.replace('#','');
+  const bg=document.getElementById('bgColor').value.replace('#','');
+  const url=`https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(text)}&color=${fg}&bgcolor=${bg}&margin=20`;
+  const wrap=document.getElementById('qrWrap');
+  const img=document.getElementById('qrImg');
+  img.src=url;
+  img.onload=()=>{
+    wrap.style.display='block';
+    wrap.style.animation='none';
+    wrap.offsetHeight;
+    wrap.style.animation='popIn .4s cubic-bezier(.34,1.56,.64,1)';
+    document.getElementById('dlBtn').href=url;
+  };
+}
+</script>
+</body>
+</html>

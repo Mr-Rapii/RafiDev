@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Penerjemah Teks</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Nunito',sans-serif;min-height:100vh;background:linear-gradient(135deg,#1a0533,#0d1b3e,#031a0d);display:flex;align-items:center;justify-content:center;color:#fff;overflow:hidden;padding:20px}
+  .bubbles{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .bubble{position:absolute;bottom:-50px;border-radius:50%;animation:bubbleUp linear infinite;opacity:0}
+  @keyframes bubbleUp{0%{bottom:-50px;opacity:0;transform:scale(0)}10%{opacity:.6}90%{opacity:.2}100%{bottom:110vh;opacity:0;transform:scale(1.2) translateX(var(--drift))}}
+  .container{position:relative;z-index:1;width:min(700px,100%);background:rgba(255,255,255,.06);backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,.1);border-radius:28px;overflow:hidden}
+  .header{background:linear-gradient(135deg,rgba(139,92,246,.3),rgba(20,184,166,.3));padding:24px 32px;display:flex;align-items:center;justify-content:space-between}
+  .header h1{font-size:1.4rem;font-weight:800}
+  .header h1 span{font-size:.85rem;font-weight:400;opacity:.6;display:block;margin-top:2px}
+  .lang-row{display:flex;align-items:center;gap:12px;padding:20px 24px;background:rgba(0,0,0,.15);border-bottom:1px solid rgba(255,255,255,.06)}
+  .lang-sel{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 14px;color:#fff;font-family:'Nunito',sans-serif;font-size:.9rem;cursor:pointer;outline:none}
+  .swap-lang{background:linear-gradient(135deg,#8b5cf6,#14b8a6);border:none;border-radius:50%;width:38px;height:38px;color:#fff;font-size:1rem;cursor:pointer;transition:.4s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .swap-lang:hover{transform:rotate(180deg)}
+  .panels{display:grid;grid-template-columns:1fr 1fr;min-height:260px}
+  @media(max-width:500px){.panels{grid-template-columns:1fr}}
+  .panel{padding:20px}
+  .panel:first-child{border-right:1px solid rgba(255,255,255,.06)}
+  .panel label{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;opacity:.4;display:block;margin-bottom:10px}
+  .panel textarea{width:100%;min-height:180px;background:none;border:none;color:#fff;font-family:'Nunito',sans-serif;font-size:1rem;line-height:1.6;resize:none;outline:none}
+  .panel textarea::placeholder{color:rgba(255,255,255,.2)}
+  .panel-out{background:rgba(0,0,0,.1)}
+  .panel-out textarea{color:#a78bfa}
+  .actions{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-top:1px solid rgba(255,255,255,.06);gap:10px;flex-wrap:wrap}
+  .char-count{font-size:.75rem;opacity:.4}
+  .btn-group{display:flex;gap:8px}
+  .btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 18px;color:#fff;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:600;transition:.3s}
+  .btn:hover{background:rgba(255,255,255,.14)}
+  .btn.primary{background:linear-gradient(135deg,#8b5cf6,#14b8a6);border:none}
+  .btn.primary:hover{opacity:.9;transform:translateY(-1px)}
+  .status{padding:8px 24px 14px;font-size:.78rem;opacity:.5;text-align:center;min-height:30px}
+  .typing-dots{display:inline-flex;gap:4px}
+  .typing-dots span{width:6px;height:6px;border-radius:50%;background:#a78bfa;animation:dot .8s ease-in-out infinite}
+  .typing-dots span:nth-child(2){animation-delay:.15s}
+  .typing-dots span:nth-child(3){animation-delay:.3s}
+  @keyframes dot{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-5px);opacity:1}}
+</style>
+</head>
+<body>
+<div class="bubbles" id="bubbles"></div>
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>🌐 Penerjemah Teks</h1>
+      <span>Terjemahkan ke berbagai bahasa seketika</span>
+    </div>
+    <div style="font-size:2rem">✨</div>
+  </div>
+  <div class="lang-row">
+    <select id="langFrom" class="lang-sel" onchange="translate()">
+      <option value="id">🇮🇩 Indonesia</option>
+      <option value="en">🇬🇧 Inggris</option>
+      <option value="ar">🇸🇦 Arab</option>
+      <option value="zh">🇨🇳 Mandarin</option>
+      <option value="ja">🇯🇵 Jepang</option>
+      <option value="ko">🇰🇷 Korea</option>
+      <option value="fr">🇫🇷 Prancis</option>
+      <option value="de">🇩🇪 Jerman</option>
+      <option value="es">🇪🇸 Spanyol</option>
+      <option value="pt">🇧🇷 Portugis</option>
+      <option value="ru">🇷🇺 Rusia</option>
+      <option value="hi">🇮🇳 Hindi</option>
+      <option value="ms">🇲🇾 Melayu</option>
+    </select>
+    <button class="swap-lang" onclick="swapLang()">⇄</button>
+    <select id="langTo" class="lang-sel" onchange="translate()">
+      <option value="en" selected>🇬🇧 Inggris</option>
+      <option value="id">🇮🇩 Indonesia</option>
+      <option value="ar">🇸🇦 Arab</option>
+      <option value="zh">🇨🇳 Mandarin</option>
+      <option value="ja">🇯🇵 Jepang</option>
+      <option value="ko">🇰🇷 Korea</option>
+      <option value="fr">🇫🇷 Prancis</option>
+      <option value="de">🇩🇪 Jerman</option>
+      <option value="es">🇪🇸 Spanyol</option>
+      <option value="pt">🇧🇷 Portugis</option>
+      <option value="ru">🇷🇺 Rusia</option>
+      <option value="hi">🇮🇳 Hindi</option>
+      <option value="ms">🇲🇾 Melayu</option>
+    </select>
+  </div>
+  <div class="panels">
+    <div class="panel">
+      <label>Teks Sumber</label>
+      <textarea id="inputText" placeholder="Ketik teks di sini..." oninput="onInput()"></textarea>
+    </div>
+    <div class="panel panel-out">
+      <label>Hasil Terjemahan</label>
+      <textarea id="outputText" placeholder="Terjemahan muncul di sini..." readonly></textarea>
+    </div>
+  </div>
+  <div class="actions">
+    <span class="char-count" id="charCount">0 karakter</span>
+    <div class="btn-group">
+      <button class="btn" onclick="clearAll()">🗑 Hapus</button>
+      <button class="btn" onclick="copyResult()">📋 Salin</button>
+      <button class="btn primary" onclick="translate()">🔁 Terjemahkan</button>
+    </div>
+  </div>
+  <div class="status" id="status">Siap menerjemahkan</div>
+</div>
+<script>
+// Bubbles
+const bc=document.getElementById('bubbles');
+for(let i=0;i<15;i++){const b=document.createElement('div');b.className='bubble';const s=10+Math.random()*40;const colors=['rgba(139,92,246,.3)','rgba(20,184,166,.3)','rgba(99,102,241,.3)'];b.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;background:${colors[~~(Math.random()*3)]};animation-duration:${6+Math.random()*10}s;animation-delay:-${Math.random()*10}s;--drift:${(Math.random()*60-30)}px`;bc.appendChild(b)}
+
+let timer;
+function onInput(){
+  const txt=document.getElementById('inputText').value;
+  document.getElementById('charCount').textContent=txt.length+' karakter';
+  clearTimeout(timer);
+  timer=setTimeout(translate,800);
+}
+
+async function translate(){
+  const text=document.getElementById('inputText').value.trim();
+  if(!text){document.getElementById('outputText').value='';document.getElementById('status').textContent='Siap menerjemahkan';return;}
+  const from=document.getElementById('langFrom').value,to=document.getElementById('langTo').value;
+  if(from===to){document.getElementById('outputText').value=text;return;}
+  document.getElementById('status').innerHTML='Menerjemahkan <span class="typing-dots"><span></span><span></span><span></span></span>';
+  try{
+    // Using MyMemory free translation API (no key needed, 5000 chars/day free)
+    const r=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`);
+    const d=await r.json();
+    if(d.responseStatus===200){
+      document.getElementById('outputText').value=d.responseData.translatedText;
+      document.getElementById('status').textContent='✓ Terjemahan selesai';
+    }else{throw new Error(d.responseMessage);}
+  }catch(e){
+    document.getElementById('status').textContent='⚠ Gagal menerjemahkan. Coba lagi.';
+  }
+}
+
+function swapLang(){
+  const fs=document.getElementById('langFrom'),ts=document.getElementById('langTo');
+  const fi=document.getElementById('inputText'),fo=document.getElementById('outputText');
+  [fs.value,ts.value]=[ts.value,fs.value];
+  fi.value=fo.value;
+  fo.value='';
+  if(fi.value)translate();
+}
+
+function clearAll(){document.getElementById('inputText').value='';document.getElementById('outputText').value='';document.getElementById('charCount').textContent='0 karakter';document.getElementById('status').textContent='Siap menerjemahkan';}
+function copyResult(){const t=document.getElementById('outputText').value;if(t)navigator.clipboard.writeText(t).then(()=>{document.getElementById('status').textContent='✓ Disalin ke clipboard!'});}
+</script>
+</body>
+</html>
