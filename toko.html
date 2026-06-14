@@ -523,13 +523,8 @@ footer{background:var(--surface);padding:60px 5% 28px;border-top:1px solid var(-
 
 <section id="produk">
   <div class="sh"><span class="sec-ey">Produk Unggulan</span><h2 class="sec-t">Barang Pilihan Terbaik</h2><p class="sec-d">Produk berkualitas dengan harga kompetitif. Pengiriman cepat ke seluruh Indonesia.</p></div>
-  <div class="pg rv">
-    <div class="pc"><div class="pi" style="background:linear-gradient(135deg,#0e1525,#1a1040)">🎧<span class="pbadge">TERLARIS</span></div><div class="pinfo"><div class="pcat">Elektronik</div><div class="pname">Wireless Headphone Pro X</div><div class="pr"><div><span class="price">Rp 459.000</span><span class="oprice">Rp 599.000</span></div><button class="addBtn" onclick="openPayment('prod_1','🎧','Wireless Headphone Pro X',459000)">🛒</button></div></div></div>
-    <div class="pc"><div class="pi" style="background:linear-gradient(135deg,#1a0b4b,#0d1f4a)">⌨️<span class="pbadge" style="background:var(--accent2)">NEW</span></div><div class="pinfo"><div class="pcat">Aksesoris</div><div class="pname">Mechanical Keyboard RGB TKL</div><div class="pr"><div><span class="price">Rp 385.000</span></div><button class="addBtn" onclick="openPayment('prod_2','⌨️','Mechanical Keyboard RGB TKL',385000)">🛒</button></div></div></div>
-    <div class="pc"><div class="pi" style="background:linear-gradient(135deg,#0a2010,#0d3a1a)">🖱️<span class="pbadge" style="background:#00B896">DISKON</span></div><div class="pinfo"><div class="pcat">Periferal</div><div class="pname">Gaming Mouse Wireless 25K DPI</div><div class="pr"><div><span class="price">Rp 289.000</span><span class="oprice">Rp 400.000</span></div><button class="addBtn" onclick="openPayment('prod_3','🖱️','Gaming Mouse Wireless 25K DPI',289000)">🛒</button></div></div></div>
-    <div class="pc"><div class="pi" style="background:linear-gradient(135deg,#2a1000,#3a1f00)">💡</div><div class="pinfo"><div class="pcat">Smart Home</div><div class="pname">Smart LED Lamp RGB 16M Colors</div><div class="pr"><div><span class="price">Rp 125.000</span></div><button class="addBtn" onclick="openPayment('prod_4','💡','Smart LED Lamp RGB 16M Colors',125000)">🛒</button></div></div></div>
-    <div class="pc"><div class="pi" style="background:linear-gradient(135deg,#150a30,#200a4b)">📷<span class="pbadge">TERLARIS</span></div><div class="pinfo"><div class="pcat">Kamera &amp; Foto</div><div class="pname">Ring Light 18 inch Pro Streaming</div><div class="pr"><div><span class="price">Rp 215.000</span><span class="oprice">Rp 280.000</span></div><button class="addBtn" onclick="openPayment('prod_5','📷','Ring Light 18 inch Pro Streaming',215000)">🛒</button></div></div></div>
-    <div class="pc"><div class="pi" style="background:linear-gradient(135deg,#001520,#002040)">📱<span class="pbadge" style="background:var(--accent2)">HOT</span></div><div class="pinfo"><div class="pcat">Aksesoris HP</div><div class="pname">MagSafe Charger Stand 3-in-1</div><div class="pr"><div><span class="price">Rp 199.000</span></div><button class="addBtn" onclick="openPayment('prod_6','📱','MagSafe Charger Stand 3-in-1',199000)">🛒</button></div></div></div>
+  <div class="pg rv" id="productGrid">
+    <div style="color:var(--muted);text-align:center;padding:40px;width:100%">⏳ Memuat produk...</div>
   </div>
 </section>
 
@@ -625,7 +620,7 @@ footer{background:var(--surface);padding:60px 5% 28px;border-top:1px solid var(-
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { getDatabase, ref, push, onValue, serverTimestamp, set, onDisconnect }
+import { getDatabase, ref, push, onValue, serverTimestamp, set, onDisconnect, get }
   from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
 const firebaseConfig = {
@@ -640,6 +635,54 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
+// ===== LOAD PRODUK DARI FIREBASE =====
+function fmtRupiah(n) {
+  return 'Rp ' + parseInt(n).toLocaleString('id-ID');
+}
+
+const bgColors = [
+  'linear-gradient(135deg,#0e1525,#1a1040)',
+  'linear-gradient(135deg,#1a0b4b,#0d1f4a)',
+  'linear-gradient(135deg,#0a2010,#0d3a1a)',
+  'linear-gradient(135deg,#2a1000,#3a1f00)',
+  'linear-gradient(135deg,#150a30,#200a4b)',
+  'linear-gradient(135deg,#001520,#002040)',
+];
+
+onValue(ref(db, 'products'), (snap) => {
+  const grid = document.getElementById('productGrid');
+  if (!grid) return;
+  const data = snap.val();
+  if (!data) {
+    grid.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px;width:100%">Belum ada produk tersedia.</div>';
+    return;
+  }
+  const products = Object.entries(data).filter(([k,p]) => p.status === 'active');
+  if (!products.length) {
+    grid.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px;width:100%">Belum ada produk aktif.</div>';
+    return;
+  }
+  let html = '';
+  products.forEach(([key, p], i) => {
+    const bg = bgColors[i % bgColors.length];
+    const imgHtml = p.image
+      ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`
+      : `<span style="font-size:2.5rem">${p.emoji || '📦'}</span>`;
+    html += `<div class="pc">
+      <div class="pi" style="background:${bg};display:flex;align-items:center;justify-content:center;overflow:hidden">${imgHtml}</div>
+      <div class="pinfo">
+        <div class="pcat">${p.category || 'Produk'}</div>
+        <div class="pname">${p.name}</div>
+        <div class="pr">
+          <div><span class="price">${fmtRupiah(p.price)}</span></div>
+          <button class="addBtn" onclick="openPayment('${key}','${p.emoji || '📦'}','${p.name}',${p.price})">🛒</button>
+        </div>
+      </div>
+    </div>`;
+  });
+  grid.innerHTML = html;
+});
 
 // --- User identity ---
 let userId = localStorage.getItem("nexo_uid");
