@@ -4,7 +4,7 @@ NEXO Store — Backend Flask + Bot Telegram
 Pembeli order di website → Flask terima → notif admin Telegram → admin konfirm → kirim produk ke Gmail
 """
 
-import os, json, time, smtplib, logging, threading
+import os, json, time, smtplib, logging, threading, urllib.request
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from email.mime.multipart import MIMEMultipart
@@ -48,26 +48,20 @@ def fmt_rupiah(n):
     return f"Rp {int(n):,}".replace(",", ".")
 
 # =====================
-# PRODUK
+# PRODUK — dari Firebase Realtime Database
 # =====================
-PRODUCTS = {
-    "prod_1": {"name": "Wireless Headphone Pro X", "price": 459000, "emoji": "🎧",
-        "content": "Terima kasih membeli Wireless Headphone Pro X!\nSerial: WH-PRO-{oid}\nGaransi: 12 bulan\nManual: https://nexo.store/manual/headphone"},
-    "prod_2": {"name": "Mechanical Keyboard RGB TKL", "price": 385000, "emoji": "⌨️",
-        "content": "Terima kasih membeli Mechanical Keyboard RGB TKL!\nSerial: KB-RGB-{oid}\nDriver: https://nexo.store/driver/keyboard"},
-    "prod_3": {"name": "Gaming Mouse Wireless 25K DPI", "price": 289000, "emoji": "🖱️",
-        "content": "Terima kasih membeli Gaming Mouse Wireless!\nSerial: MS-25K-{oid}\nSoftware: https://nexo.store/software/mouse"},
-    "prod_4": {"name": "Smart LED Lamp RGB", "price": 125000, "emoji": "💡",
-        "content": "Terima kasih membeli Smart LED Lamp!\nKode Aktivasi: LED-{oid}\nApp: https://nexo.store/app/smart-led"},
-    "prod_5": {"name": "Ring Light 18 inch Pro", "price": 215000, "emoji": "📷",
-        "content": "Terima kasih membeli Ring Light 18 inch Pro!\nSerial: RL-18-{oid}\nGaransi: 6 bulan"},
-    "prod_6": {"name": "MagSafe Charger Stand 3-in-1", "price": 199000, "emoji": "📱",
-        "content": "Terima kasih membeli MagSafe Charger Stand!\nSerial: CS-3IN1-{oid}\nGaransi: 12 bulan"},
-    "svc_1": {"name": "Desain Logo", "price": 150000, "emoji": "🎨",
-        "content": "Terima kasih memesan Desain Logo!\nOrder: {oid}\nAdmin akan menghubungi dalam 1x24 jam.\nEmail brief: design@nexo.store"},
-    "svc_2": {"name": "Pembuatan Website", "price": 500000, "emoji": "💻",
-        "content": "Terima kasih memesan Pembuatan Website!\nOrder: {oid}\nAdmin akan menghubungi dalam 1x24 jam."},
-}
+FIREBASE_URL = os.environ.get("FIREBASE_URL", "https://rapi-chat-default-rtdb.asia-southeast1.firebasedatabase.app")
+
+def get_product(prod_id):
+    """Ambil satu produk dari Firebase"""
+    try:
+        url = f"{FIREBASE_URL}/products/{prod_id}.json"
+        with urllib.request.urlopen(url, timeout=5) as r:
+            data = json.loads(r.read().decode())
+        return data
+    except Exception as e:
+        log.error(f"Gagal ambil produk {prod_id}: {e}")
+        return None
 
 # =====================
 # API ENDPOINTS
@@ -84,7 +78,7 @@ def create_order():
     if not prod_id or not email or not method:
         return jsonify({"ok": False, "msg": "Data tidak lengkap"}), 400
 
-    product = PRODUCTS.get(prod_id)
+    product = get_product(prod_id)
     if not product:
         return jsonify({"ok": False, "msg": "Produk tidak ditemukan"}), 404
 
