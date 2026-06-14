@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapi Dev | AI Hub Dashboard</title>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJJjcICAkbVWjrw5-zYMzcKqPGhS0nS0I",
+            authDomain: "piwstore.firebaseapp.com",
+            projectId: "piwstore",
+            storageBucket: "piwstore.firebasestorage.app",
+            messagingSenderId: "419258630997",
+            appId: "1:419258630997:web:44dc66ee3840a14a6d25dc"
+        };
+        initializeApp(firebaseConfig);
+        const auth = getAuth();
+        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "index.html"; });
+        window.logout = () => signOut(auth).then(() => window.location.href = "index.html");
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #03030a;
+            --surface: rgba(15, 15, 35, 0.7);
+            --blue: #3b82f6;
+            --violet: #7c3aed;
+            --cyan: #06b6d4;
+            --pink: #ec4899;
+            --amber: #f59e0b;
+            --text: #e2e8f0;
+            --muted: #64748b;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #stars-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+        .aurora {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 10%, rgba(124,58,237,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(6,182,212,0.14) 0%, transparent 60%),
+                radial-gradient(ellipse 70% 50% at 50% 50%, rgba(59,130,246,0.08) 0%, transparent 70%);
+            animation: auroraShift 12s ease-in-out infinite alternate;
+        }
+        @keyframes auroraShift {
+            0%   { transform: scale(1)   rotate(0deg); }
+            100% { transform: scale(1.1) rotate(3deg); }
+        }
+
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image:
+                linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        .wrapper {
+            position: relative; z-index: 1;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 40px 20px 60px;
+        }
+
+        .orb { position: fixed; border-radius: 50%; pointer-events: none; filter: blur(80px); z-index: 0; }
+        .orb-1 { width: 350px; height: 350px; background: rgba(124,58,237,0.25); top: -100px; left: -100px; animation: floatOrb 14s ease-in-out infinite; }
+        .orb-2 { width: 250px; height: 250px; background: rgba(6,182,212,0.2); bottom: 100px; right: -80px; animation: floatOrb 10s ease-in-out infinite reverse; }
+        .orb-3 { width: 180px; height: 180px; background: rgba(236,72,153,0.18); top: 50%; left: 30%; animation: floatOrb 18s ease-in-out infinite 4s; }
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33%       { transform: translate(30px, -40px) scale(1.05); }
+            66%       { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        .header-section {
+            text-align: center; margin-bottom: 48px;
+            animation: slideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: translateY(0); } }
+
+        .logo-ring {
+            position: relative; display: inline-block; margin-bottom: 20px;
+        }
+        .logo-ring::before {
+            content: ''; position: absolute; inset: -6px; border-radius: 28px;
+            background: linear-gradient(135deg, var(--blue), var(--violet), var(--cyan));
+            animation: spinRing 6s linear infinite; z-index: -1;
+        }
+        .logo-ring::after {
+            content: ''; position: absolute; inset: -3px; border-radius: 25px;
+            background: var(--bg); z-index: -1;
+        }
+        @keyframes spinRing { to { transform: rotate(360deg); } }
+
+        .logo-img {
+            width: 100px; height: 100px; border-radius: 22px; display: block;
+            position: relative; z-index: 1;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s;
+        }
+        .logo-img:hover { transform: scale(1.12) rotate(-3deg); box-shadow: 0 0 40px rgba(59,130,246,0.6); }
+
+        .site-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2rem, 6vw, 3.2rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 20%, var(--cyan) 50%, var(--blue) 80%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em; line-height: 1; margin-bottom: 6px;
+        }
+
+        .typewriter-wrap { font-size: 0.95rem; color: var(--muted); margin-bottom: 14px; height: 1.5em; }
+        #typewriter { color: var(--cyan); font-weight: 600; }
+        .cursor { display: inline-block; width: 2px; height: 1em; background: var(--cyan); animation: blink 0.8s step-end infinite; vertical-align: text-bottom; margin-left: 2px; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .about-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--blue); text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            padding: 6px 16px; border: 1px solid rgba(59,130,246,0.3); border-radius: 50px;
+            transition: 0.3s; backdrop-filter: blur(10px);
+        }
+        .about-link:hover { background: rgba(59,130,246,0.15); border-color: var(--blue); transform: translateY(-2px); }
+        .about-link span { transition: transform 0.3s; }
+        .about-link:hover span { transform: translateX(4px); }
+
+        .status-bar {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.78rem; color: var(--muted);
+            margin-bottom: 36px; padding: 8px 18px;
+            background: var(--surface); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 50px; backdrop-filter: blur(12px);
+            animation: fadeUp 0.8s 0.3s both;
+        }
+        .dot-live { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px #22c55e; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+        .section-label {
+            font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em;
+            text-transform: uppercase; color: var(--muted);
+            margin-bottom: 16px; text-align: center;
+            animation: fadeUp 0.8s 0.4s both;
+        }
+
+        .dashboard {
+            width: 100%; max-width: 620px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 14px; margin-bottom: 32px;
+        }
+
+        .tool-card {
+            background: var(--surface); backdrop-filter: blur(14px);
+            padding: 22px 12px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.07);
+            text-align: center; text-decoration: none; color: var(--text);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s, box-shadow 0.3s;
+            animation: cardPop 0.6s both;
+            position: relative; overflow: hidden;
+        }
+        .tool-card::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(124,58,237,0.08));
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .tool-card:hover::before { opacity: 1; }
+        .tool-card:hover {
+            transform: translateY(-10px) scale(1.04);
+            border-color: rgba(59,130,246,0.5);
+            box-shadow: 0 8px 32px rgba(59,130,246,0.2), 0 0 0 1px rgba(59,130,246,0.2);
+        }
+        .tool-card .icon { font-size: 1.8rem; display: block; margin-bottom: 8px; transition: transform 0.3s; }
+        .tool-card:hover .icon { transform: scale(1.2) rotate(-5deg); }
+        .tool-card .label { font-size: 0.78rem; font-weight: 600; color: var(--muted); transition: color 0.3s; }
+        .tool-card:hover .label { color: #fff; }
+
+        .tool-card:nth-child(1)  { animation-delay: 0.05s; }
+        .tool-card:nth-child(2)  { animation-delay: 0.10s; }
+        .tool-card:nth-child(3)  { animation-delay: 0.15s; }
+        .tool-card:nth-child(4)  { animation-delay: 0.20s; }
+        .tool-card:nth-child(5)  { animation-delay: 0.25s; }
+        .tool-card:nth-child(6)  { animation-delay: 0.30s; }
+        .tool-card:nth-child(7)  { animation-delay: 0.35s; }
+        .tool-card:nth-child(8)  { animation-delay: 0.40s; }
+        .tool-card:nth-child(9)  { animation-delay: 0.45s; }
+        .tool-card:nth-child(10) { animation-delay: 0.50s; }
+        .tool-card:nth-child(11) { animation-delay: 0.55s; }
+        .tool-card:nth-child(12) { animation-delay: 0.60s; }
+        .tool-card:nth-child(13) { animation-delay: 0.65s; }
+        .tool-card:nth-child(14) { animation-delay: 0.70s; }
+        .tool-card:nth-child(15) { animation-delay: 0.75s; }
+        @keyframes cardPop { from { opacity:0; transform: scale(0.8) translateY(20px); } to { opacity:1; transform: scale(1) translateY(0); } }
+
+        /* ── CARD WARNA KHUSUS ── */
+        /* Cuaca */
+        .card-cyan:hover { border-color: rgba(6,182,212,0.5); box-shadow: 0 8px 32px rgba(6,182,212,0.2), 0 0 0 1px rgba(6,182,212,0.2); }
+        .card-cyan::before { background: linear-gradient(135deg,rgba(6,182,212,0.1),rgba(59,130,246,0.1)); }
+        /* Konverter */
+        .card-green:hover { border-color: rgba(74,222,128,0.5); box-shadow: 0 8px 32px rgba(74,222,128,0.2), 0 0 0 1px rgba(74,222,128,0.2); }
+        .card-green::before { background: linear-gradient(135deg,rgba(74,222,128,0.1),rgba(6,182,212,0.1)); }
+        /* BMI */
+        .card-amber:hover { border-color: rgba(245,158,11,0.5); box-shadow: 0 8px 32px rgba(245,158,11,0.2), 0 0 0 1px rgba(245,158,11,0.2); }
+        .card-amber::before { background: linear-gradient(135deg,rgba(245,158,11,0.1),rgba(236,72,153,0.1)); }
+        /* Password */
+        .card-violet:hover { border-color: rgba(124,58,237,0.5); box-shadow: 0 8px 32px rgba(124,58,237,0.2), 0 0 0 1px rgba(124,58,237,0.2); }
+        .card-violet::before { background: linear-gradient(135deg,rgba(124,58,237,0.1),rgba(59,130,246,0.1)); }
+        /* Terjemah */
+        .card-pink:hover { border-color: rgba(236,72,153,0.5); box-shadow: 0 8px 32px rgba(236,72,153,0.2), 0 0 0 1px rgba(236,72,153,0.2); }
+        .card-pink::before { background: linear-gradient(135deg,rgba(236,72,153,0.1),rgba(124,58,237,0.1)); }
+        /* Stopwatch */
+        .card-blue2:hover { border-color: rgba(96,165,250,0.5); box-shadow: 0 8px 32px rgba(96,165,250,0.2), 0 0 0 1px rgba(96,165,250,0.2); }
+        .card-blue2::before { background: linear-gradient(135deg,rgba(96,165,250,0.1),rgba(6,182,212,0.1)); }
+        /* QR Gen baru */
+        .card-indigo:hover { border-color: rgba(129,140,248,0.5); box-shadow: 0 8px 32px rgba(129,140,248,0.2), 0 0 0 1px rgba(129,140,248,0.2); }
+        .card-indigo::before { background: linear-gradient(135deg,rgba(129,140,248,0.1),rgba(52,211,153,0.1)); }
+
+        /* ── LAPOR CARD (oranye/merah) ── */
+        .tool-card.card-lapor {
+            border-color: rgba(249,115,22,0.25);
+            background: linear-gradient(135deg, rgba(15,8,0,0.85), rgba(30,12,0,0.7));
+        }
+        .tool-card.card-lapor::before { background: linear-gradient(135deg,rgba(249,115,22,0.12),rgba(239,68,68,0.1)); }
+        .tool-card.card-lapor:hover {
+            border-color: rgba(249,115,22,0.6);
+            box-shadow: 0 8px 32px rgba(249,115,22,0.25), 0 0 0 1px rgba(249,115,22,0.25);
+        }
+        .tool-card.card-lapor .label { color: rgba(249,115,22,0.7); }
+        .tool-card.card-lapor:hover .label { color: #fb923c; }
+
+        /* ── ADMIN CARD (merah + animasi khusus) ── */
+        .tool-card.card-admin {
+            border-color: rgba(239,68,68,0.3);
+            background: linear-gradient(135deg, rgba(15,0,0,0.9), rgba(25,4,4,0.8));
+            position: relative;
+        }
+        .tool-card.card-admin::before { background: linear-gradient(135deg,rgba(239,68,68,0.15),rgba(185,28,28,0.1)); }
+        .tool-card.card-admin:hover {
+            border-color: rgba(239,68,68,0.7);
+            box-shadow: 0 8px 32px rgba(239,68,68,0.3), 0 0 0 1px rgba(239,68,68,0.3), 0 0 60px rgba(239,68,68,0.1);
+        }
+        .tool-card.card-admin .label { color: rgba(239,68,68,0.7); }
+        .tool-card.card-admin:hover .label { color: #f87171; }
+        /* glow pulse merah di balik admin card */
+        .tool-card.card-admin::after {
+            content: '';
+            position: absolute; inset: -1px; border-radius: 20px; z-index: -1;
+            background: linear-gradient(135deg, rgba(239,68,68,0.2), transparent);
+            animation: adminGlow 2.5s ease-in-out infinite;
+        }
+        @keyframes adminGlow {
+            0%,100% { opacity:0.4; }
+            50%      { opacity:1; }
+        }
+
+        /* ── SECTION LABEL EXTRA ── */
+        .dashboard-section { width: 100%; max-width: 620px; margin-bottom: 32px; animation: fadeUp 0.8s 0.45s both; }
+        .dashboard-section + .dashboard-section { margin-top: 0; }
+
+        /* divider antara section */
+        .section-divider {
+            width: 100%; max-width: 620px;
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 14px;
+            animation: fadeUp 0.8s 0.44s both;
+        }
+        .section-divider span { font-size:0.7rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); white-space:nowrap; }
+        .section-divider::before, .section-divider::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.07); }
+
+        /* ═══════════════════════════════════════
+           TOKO BUTTON — SIGNATURE ELEMENT
+        ═══════════════════════════════════════ */
+        .toko-section {
+            width: 100%; max-width: 620px;
+            margin-bottom: 32px;
+            animation: fadeUp 0.8s 0.55s both;
+        }
+
+        .toko-banner {
+            position: relative; overflow: hidden;
+            border-radius: 24px;
+            text-decoration: none;
+            display: block;
+            background: linear-gradient(135deg, #0a0a1a 0%, #0f0820 50%, #080d1a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 28px 28px 28px 32px;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s;
+            cursor: pointer;
+        }
+
+        /* animated gradient border */
+        .toko-banner::before {
+            content: '';
+            position: absolute; inset: -2px;
+            border-radius: 26px;
+            background: linear-gradient(90deg,
+                var(--amber), var(--pink), var(--violet),
+                var(--blue), var(--cyan), var(--amber));
+            background-size: 300% 300%;
+            animation: borderFlow 3s linear infinite;
+            z-index: -1;
+        }
+        @keyframes borderFlow {
+            0%   { background-position: 0%   50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0%   50%; }
+        }
+
+        /* inner mask so gradient only shows as border */
+        .toko-banner::after {
+            content: '';
+            position: absolute; inset: 1px;
+            border-radius: 23px;
+            background: linear-gradient(135deg, #0a0a1a 0%, #0f0820 50%, #080d1a 100%);
+            z-index: 0;
+        }
+
+        .toko-banner:hover {
+            transform: translateY(-6px) scale(1.01);
+            box-shadow:
+                0 20px 60px rgba(245,158,11,0.2),
+                0 0 0 1px rgba(245,158,11,0.3),
+                0 0 80px rgba(124,58,237,0.15);
+        }
+
+        /* sheen sweep on hover */
+        .toko-sheen {
+            position: absolute; inset: 0; z-index: 1;
+            background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 50%, transparent 60%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+            border-radius: 24px;
+        }
+        .toko-banner:hover .toko-sheen { transform: translateX(150%); }
+
+        /* floating particles inside the banner */
+        .toko-particles {
+            position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; border-radius: 24px;
+        }
+        .toko-particle {
+            position: absolute; border-radius: 50%;
+            animation: tokoFloat linear infinite;
+        }
+        .tp1 { width:3px; height:3px; background:var(--amber); left:10%; animation-duration:4s; animation-delay:0s; }
+        .tp2 { width:2px; height:2px; background:var(--cyan);  left:30%; animation-duration:5s; animation-delay:1s; }
+        .tp3 { width:4px; height:4px; background:var(--pink);  left:55%; animation-duration:3.5s; animation-delay:0.5s; }
+        .tp4 { width:2px; height:2px; background:var(--violet);left:75%; animation-duration:6s; animation-delay:2s; }
+        .tp5 { width:3px; height:3px; background:var(--blue);  left:90%; animation-duration:4.5s; animation-delay:1.5s; }
+        @keyframes tokoFloat {
+            0%   { bottom: -8px; opacity:0; transform:scale(0); }
+            10%  { opacity:1; transform:scale(1); }
+            90%  { opacity:0.6; }
+            100% { bottom: 108%; opacity:0; }
+        }
+
+        .toko-content {
+            position: relative; z-index: 2;
+            display: flex; align-items: center; gap: 20px;
+        }
+
+        .toko-icon-wrap {
+            flex-shrink: 0;
+            width: 68px; height: 68px; border-radius: 18px;
+            background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(236,72,153,0.2));
+            border: 1px solid rgba(245,158,11,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem;
+            position: relative;
+            animation: iconPulse 3s ease-in-out infinite;
+        }
+        @keyframes iconPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+            50%       { box-shadow: 0 0 0 12px rgba(245,158,11,0); }
+        }
+
+        /* rotating ring around icon */
+        .toko-icon-wrap::before {
+            content: '';
+            position: absolute; inset: -5px; border-radius: 22px;
+            border: 1.5px solid transparent;
+            border-top-color: var(--amber);
+            border-right-color: var(--pink);
+            animation: spinRing 3s linear infinite;
+        }
+
+        .toko-text { flex: 1; }
+        .toko-eyebrow {
+            font-size: 0.65rem; font-weight: 700; letter-spacing: 0.18em;
+            text-transform: uppercase; color: var(--amber);
+            margin-bottom: 4px; display: flex; align-items: center; gap: 6px;
+        }
+        .toko-eyebrow .live-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: var(--amber);
+            box-shadow: 0 0 8px var(--amber); animation: pulse 1.5s infinite;
+        }
+        .toko-title {
+            font-family: 'Syne', sans-serif; font-size: 1.35rem; font-weight: 800;
+            background: linear-gradient(90deg, #fff 0%, var(--amber) 50%, var(--pink) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            line-height: 1.2; margin-bottom: 5px;
+        }
+        .toko-desc {
+            font-size: 0.78rem; color: var(--muted); line-height: 1.5;
+        }
+
+        .toko-arrow {
+            flex-shrink: 0;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--amber), var(--pink));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; color: #fff;
+            box-shadow: 0 4px 16px rgba(245,158,11,0.4);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+        }
+        .toko-banner:hover .toko-arrow {
+            transform: translateX(5px) scale(1.12);
+            box-shadow: 0 6px 24px rgba(245,158,11,0.6);
+        }
+
+        /* bottom tag strip */
+        .toko-tags {
+            position: relative; z-index: 2;
+            display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;
+        }
+        .toko-tag {
+            font-size: 0.68rem; font-weight: 600; padding: 3px 10px;
+            border-radius: 50px; border: 1px solid;
+        }
+        .tt-amber  { color: var(--amber); border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.08); }
+        .tt-pink   { color: var(--pink);  border-color: rgba(236,72,153,0.35); background: rgba(236,72,153,0.08); }
+        .tt-violet { color: #a78bfa;      border-color: rgba(124,58,237,0.35); background: rgba(124,58,237,0.08); }
+
+        /* ═══════════════════════════════════════ */
+
+        .marquee-wrap {
+            width: 100%; max-width: 620px; overflow: hidden;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 12px 0; margin-bottom: 32px;
+            mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+        }
+        .marquee-track {
+            display: flex; gap: 40px; width: max-content;
+            animation: marquee 18s linear infinite;
+        }
+        .marquee-item { font-size: 0.8rem; color: var(--muted); white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+        .marquee-item span { color: var(--cyan); }
+        @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        .badges {
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+            max-width: 620px; margin-bottom: 32px;
+            animation: fadeUp 0.8s 0.6s both;
+        }
+        .badge {
+            padding: 5px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 600;
+            border: 1px solid; transition: 0.25s;
+        }
+        .badge:hover { transform: translateY(-3px); }
+        .badge-blue   { color: var(--blue);   border-color: rgba(59,130,246,0.4);   background: rgba(59,130,246,0.08); }
+        .badge-violet { color: #a78bfa;        border-color: rgba(124,58,237,0.4);   background: rgba(124,58,237,0.08); }
+        .badge-cyan   { color: var(--cyan);    border-color: rgba(6,182,212,0.4);    background: rgba(6,182,212,0.08); }
+        .badge-pink   { color: var(--pink);    border-color: rgba(236,72,153,0.4);   background: rgba(236,72,153,0.08); }
+        .badge-green  { color: #4ade80;        border-color: rgba(74,222,128,0.4);   background: rgba(74,222,128,0.08); }
+
+        .actions {
+            display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+            margin-bottom: 48px;
+            animation: fadeUp 0.8s 0.7s both;
+        }
+        .glow-btn {
+            display: flex; align-items: center; gap: 6px;
+            background: var(--surface); color: var(--text);
+            padding: 11px 22px; border-radius: 50px; text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem; font-weight: 600;
+            transition: 0.3s; backdrop-filter: blur(12px); cursor: pointer;
+        }
+        .glow-btn:hover { background: rgba(59,130,246,0.2); border-color: var(--blue); color: #fff; transform: translateY(-3px); box-shadow: 0 6px 20px rgba(59,130,246,0.25); }
+        .logout-btn { background: rgba(127,29,29,0.4); border-color: rgba(239,68,68,0.3); }
+        .logout-btn:hover { background: rgba(239,68,68,0.25); border-color: rgba(239,68,68,0.6); box-shadow: 0 6px 20px rgba(239,68,68,0.2); }
+
+        .wall-title {
+            font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800;
+            text-align: center; margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--blue), var(--violet));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        #testimonialWall { width: 100%; max-width: 540px; }
+
+        .testi-card {
+            background: var(--surface); border: 1px solid rgba(255,255,255,0.07);
+            border-left: 3px solid var(--blue); padding: 18px 20px;
+            border-radius: 16px; margin-bottom: 12px;
+            backdrop-filter: blur(12px);
+            animation: fadeUp 0.5s both;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .testi-card:hover { transform: translateX(4px); border-left-color: var(--cyan); }
+        .testi-stars { color: #fbbf24; font-size: 0.9rem; margin-bottom: 6px; }
+        .testi-msg { font-size: 0.88rem; color: var(--text); line-height: 1.6; margin-bottom: 8px; }
+        .testi-author { font-size: 0.78rem; color: var(--blue); font-weight: 600; }
+
+        .footer {
+            margin-top: 60px; text-align: center;
+            font-size: 0.75rem; color: var(--muted);
+            animation: fadeUp 0.8s 0.9s both;
+        }
+        .footer a { color: var(--blue); text-decoration: none; }
+
+        @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+
+        .code-particle {
+            position: fixed; font-family: monospace; font-size: 0.7rem;
+            color: rgba(59,130,246,0.25); pointer-events: none; z-index: 0;
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp { from { transform: translateY(100vh) rotate(0deg); opacity:0; } 10% { opacity:1; } 90% { opacity:0.4; } to { transform: translateY(-10vh) rotate(360deg); opacity:0; } }
+
+        #mouse-glow {
+            position: fixed; width: 300px; height: 300px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(59,130,246,0.08), transparent 70%);
+            pointer-events: none; z-index: 0; transform: translate(-50%,-50%);
+            transition: left 0.12s, top 0.12s;
+        }
+
+        @media (max-width: 480px) {
+            .dashboard { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+            .toko-banner { padding: 20px; }
+            .toko-content { gap: 14px; }
+            .toko-icon-wrap { width: 54px; height: 54px; font-size: 1.5rem; }
+            .toko-title { font-size: 1.1rem; }
+            .toko-arrow { width: 38px; height: 38px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+<div class="aurora"></div>
+<div class="grid-overlay"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div id="mouse-glow"></div>
+
+<div class="wrapper">
+
+    <!-- HEADER -->
+    <div class="header-section">
+        <div class="logo-ring">
+            <img src="https://i.postimg.cc/ctKx1m8x/file-000000009a3c7207a2ab2d81fdc90db8.png" class="logo-img" alt="Rapi Dev Logo">
+        </div>
+        <h1 class="site-title">Rapi Dev</h1>
+        <div class="typewriter-wrap">
+            <span id="typewriter"></span><span class="cursor"></span>
+        </div>
+        <a href="about.html" class="about-link">Tentang Saya <span>→</span></a>
+    </div>
+
+    <!-- STATUS -->
+    <div class="status-bar">
+        <div class="dot-live"></div>
+        Semua sistem aktif &nbsp;·&nbsp; 17 Tools tersedia &nbsp;·&nbsp; Versi 2.1
+    </div>
+
+    <!-- TECH BADGES -->
+    <div class="badges">
+        <span class="badge badge-blue">Firebase</span>
+        <span class="badge badge-violet">Supabase</span>
+        <span class="badge badge-cyan">Claude AI</span>
+        <span class="badge badge-pink">TTS Engine</span>
+        <span class="badge badge-green">QR Generator</span>
+        <span class="badge badge-blue">Image Gen</span>
+        <span class="badge badge-violet">Chord DB</span>
+        <span class="badge badge-cyan">Content AI</span>
+    </div>
+
+    <!-- SECTION LABEL -->
+    <p class="section-label">⚡ Pilih Tool</p>
+
+    <!-- DASHBOARD GRID — AI TOOLS UTAMA -->
+    <div class="dashboard">
+        <a href="chatbot.html"     class="tool-card"><span class="icon">💬</span><span class="label">Asisten</span></a>
+        <a href="gambar.html"      class="tool-card"><span class="icon">🎨</span><span class="label">Generator</span></a>
+        <a href="chord.html"       class="tool-card"><span class="icon">🎸</span><span class="label">Chord</span></a>
+        <a href="konten.html"      class="tool-card"><span class="icon">📱</span><span class="label">Konten</span></a>
+        <a href="tiktok.html"      class="tool-card"><span class="icon">🎵</span><span class="label">TikTok</span></a>
+        <a href="suara.html"       class="tool-card"><span class="icon">🔊</span><span class="label">Teks-Suara</span></a>
+        <a href="tugas.html"       class="tool-card"><span class="icon">📚</span><span class="label">Tugas</span></a>
+        <a href="penghitung.html"  class="tool-card"><span class="icon">🔢</span><span class="label">Hitung</span></a>
+        <a href="teks.html"        class="tool-card"><span class="icon">📝</span><span class="label">Teks</span></a>
+        <a href="qr.html"          class="tool-card"><span class="icon">🔲</span><span class="label">QR Code</span></a>
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="section-divider"><span>🛠️ Tools Tambahan</span></div>
+
+    <!-- DASHBOARD GRID — TOOLS BARU -->
+    <div class="dashboard" style="margin-bottom:32px;">
+        <a href="cuaca.html"    class="tool-card card-cyan">   <span class="icon">🌤️</span><span class="label">Cuaca</span></a>
+        <a href="qrgen.html"    class="tool-card card-indigo"> <span class="icon">⬛</span><span class="label">QR Gen</span></a>
+        <a href="bmi.html"      class="tool-card card-amber">  <span class="icon">⚖️</span><span class="label">BMI</span></a>
+        <a href="konverter.html" class="tool-card card-green"> <span class="icon">💱</span><span class="label">Konverter</span></a>
+        <a href="password.html" class="tool-card card-violet"> <span class="icon">🔐</span><span class="label">Password</span></a>
+        <a href="terjemah.html" class="tool-card card-pink">   <span class="icon">🌐</span><span class="label">Terjemah</span></a>
+        <a href="stopwatch.html" class="tool-card card-blue2"> <span class="icon">⏱️</span><span class="label">Stopwatch</span></a>
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="section-divider"><span>⚠️ Zona Khusus</span></div>
+
+    <!-- LAPOR & ADMIN -->
+    <div class="dashboard" style="max-width:260px;margin-bottom:32px;">
+        <a href="lapor.html" class="tool-card card-lapor">
+            <span class="icon">🐛</span>
+            <span class="label">Lapor Bug</span>
+        </a>
+        <a href="admin.html" class="tool-card card-admin">
+            <span class="icon">🛡️</span>
+            <span class="label">Admin</span>
+        </a>
+    </div>
+
+    <!-- ════════════════════════════════
+         TOKO BANNER
+    ════════════════════════════════ -->
+    <div class="toko-section">
+        <p class="section-label" style="margin-bottom:12px;">🛍️ Kunjungi Toko</p>
+        <a href="toko.html" class="toko-banner">
+            <!-- animated border handled by ::before / ::after -->
+            <div class="toko-sheen"></div>
+
+            <!-- floating particles -->
+            <div class="toko-particles">
+                <div class="toko-particle tp1"></div>
+                <div class="toko-particle tp2"></div>
+                <div class="toko-particle tp3"></div>
+                <div class="toko-particle tp4"></div>
+                <div class="toko-particle tp5"></div>
+            </div>
+
+            <div class="toko-content">
+                <div class="toko-icon-wrap">🛒</div>
+
+                <div class="toko-text">
+                    <div class="toko-eyebrow">
+                        <span class="live-dot"></span> Buka Sekarang
+                    </div>
+                    <div class="toko-title">Toko Rapi Dev</div>
+                    <div class="toko-desc">Template, source code, dan produk digital premium tersedia di sini.</div>
+
+                    <div class="toko-tags">
+                        <span class="toko-tag tt-amber">⚡ Premium</span>
+                        <span class="toko-tag tt-pink">🎁 Eksklusif</span>
+                        <span class="toko-tag tt-violet">🚀 Digital</span>
+                    </div>
+                </div>
+
+                <div class="toko-arrow">→</div>
+            </div>
+        </a>
+    </div>
+    <!-- ════════════════════════════════ -->
+
+    <!-- MARQUEE -->
+    <div class="marquee-wrap">
+        <div class="marquee-track">
+            <span class="marquee-item">🤖 <span>AI Powered</span> Tools</span>
+            <span class="marquee-item">🎨 <span>Generatif</span> Images</span>
+            <span class="marquee-item">💬 <span>Smart</span> Chatbot</span>
+            <span class="marquee-item">🎵 <span>TikTok</span> Scripts</span>
+            <span class="marquee-item">🔊 <span>Text to</span> Speech</span>
+            <span class="marquee-item">🎸 <span>Chord</span> Finder</span>
+            <span class="marquee-item">📚 <span>Homework</span> Helper</span>
+            <span class="marquee-item">🔲 <span>QR</span> Generator</span>
+            <span class="marquee-item">🛍️ <span>Rapi</span> Store</span>
+            <span class="marquee-item">🤖 <span>AI Powered</span> Tools</span>
+            <span class="marquee-item">🎨 <span>Generatif</span> Images</span>
+            <span class="marquee-item">💬 <span>Smart</span> Chatbot</span>
+            <span class="marquee-item">🎵 <span>TikTok</span> Scripts</span>
+            <span class="marquee-item">🔊 <span>Text to</span> Speech</span>
+            <span class="marquee-item">🎸 <span>Chord</span> Finder</span>
+            <span class="marquee-item">📚 <span>Homework</span> Helper</span>
+            <span class="marquee-item">🔲 <span>QR</span> Generator</span>
+            <span class="marquee-item">🛍️ <span>Rapi</span> Store</span>
+        </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="actions">
+        <a href="about.html" class="glow-btn">👤 Tentang</a>
+        <button class="glow-btn logout-btn" onclick="logout()">🚪 Keluar</button>
+    </div>
+
+    <div id="testimonialWall"></div>
+
+    <footer class="footer">
+        <p>© 2025 <a href="#">Rapi Dev</a> · Dibuat dengan ☕ dan semangat</p>
+    </footer>
+</div>
+
+<script>
+/* ── STARS ── */
+(function() {
+    const canvas = document.getElementById('stars-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        stars = Array.from({length: 160}, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.4 + 0.2,
+            o: Math.random(),
+            s: Math.random() * 0.005 + 0.002
+        }));
+    }
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+            s.o += s.s;
+            if (s.o > 1 || s.o < 0) s.s *= -1;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(200,210,255,${s.o * 0.7})`;
+            ctx.fill();
+        });
+        requestAnimationFrame(draw);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    draw();
+})();
+
+/* ── MOUSE GLOW ── */
+(function() {
+    const g = document.getElementById('mouse-glow');
+    document.addEventListener('mousemove', e => {
+        g.style.left = e.clientX + 'px';
+        g.style.top  = e.clientY + 'px';
+    });
+})();
+
+/* ── CODE PARTICLES ── */
+(function() {
+    const snippets = ['{}', '/>', '()', '=>', '[]', '&&', '||', '!=', '++', '**'];
+    setInterval(() => {
+        const el = document.createElement('div');
+        el.className = 'code-particle';
+        el.textContent = snippets[Math.floor(Math.random() * snippets.length)];
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.animationDuration = (8 + Math.random() * 10) + 's';
+        el.style.animationDelay = '0s';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 20000);
+    }, 2500);
+})();
+
+/* ── TYPEWRITER ── */
+(function() {
+    const phrases = [
+        'AI Hub untuk semua kebutuhan Anda',
+        'Smart Tools · Fast Results',
+        'Powered by Claude AI',
+        'Kunjungi toko kami! 🛒'
+    ];
+    const el = document.getElementById('typewriter');
+    let pi = 0, ci = 0, del = false;
+    function tick() {
+        const cur = phrases[pi];
+        if (!del) {
+            el.textContent = cur.slice(0, ++ci);
+            if (ci === cur.length) { del = true; setTimeout(tick, 1800); return; }
+        } else {
+            el.textContent = cur.slice(0, --ci);
+            if (ci === 0) { del = false; pi = (pi + 1) % phrases.length; }
+        }
+        setTimeout(tick, del ? 40 : 70);
+    }
+    tick();
+})();
+</script>
+</body>
+</html>
