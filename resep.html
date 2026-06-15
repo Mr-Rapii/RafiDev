@@ -110,7 +110,7 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 <div class="grid-overlay"></div>
 
 <div class="wrapper">
-  <a href="portofolio-1.html" class="back-btn">← Kembali</a>
+  <a href="portofolio.html" class="back-btn">← Kembali</a>
 
   <div class="header">
     <p class="brand">🍳 Rapi Dev · Generator Resep</p>
@@ -209,7 +209,7 @@ function addIngredient(item){
   inp.focus();
 }
 
-const CLAUDE_KEY = 'MASUKKAN_API_KEY_KAMU_DISINI'; // ← Ganti dengan API key dari https://console.anthropic.com
+const CLAUDE_KEY = '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'; // ← Ganti dengan API key dari https://console.anthropic.com
 async function generateRecipe(){
   const ingredients=document.getElementById('ingredientsInput').value.trim();
   if(!ingredients){alert('Masukkan dulu bahan-bahan yang kamu punya!');return}
