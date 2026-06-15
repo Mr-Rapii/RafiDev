@@ -90,7 +90,7 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 <div class="grid-overlay"></div>
 
 <div class="wrapper">
-  <a href="portofolio-1.html" class="back-btn">← Kembali</a>
+  <a href="portofolio.html" class="back-btn">← Kembali</a>
 
   <div class="header">
     <p class="brand">📖 Rapi Dev · Kamus Pintar</p>
@@ -156,7 +156,7 @@ function addHistory(word){
   row.innerHTML=history.map(w=>`<span class="hist-tag" onclick="document.getElementById('wordInput').value='${w}';searchWord()">${w}</span>`).join('');
 }
 
-const CLAUDE_KEY = 'MASUKKAN_API_KEY_KAMU_DISINI'; // ← Ganti dengan API key dari https://console.anthropic.com
+const CLAUDE_KEY = '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'; // ← Ganti dengan API key dari https://console.anthropic.com
 async function searchWord(){
   const word=document.getElementById('wordInput').value.trim();
   if(!word)return;
