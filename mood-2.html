@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mood Tracker · Rapi Dev</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#03030a;--surface:rgba(15,15,35,.75);--pink:#ec4899;--violet:#7c3aed;--cyan:#06b6d4;--amber:#f59e0b;--green:#4ade80;--text:#e2e8f0;--muted:#64748b}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+#stars-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 50% at 25% 15%,rgba(236,72,153,.18) 0%,transparent 60%),
+             radial-gradient(ellipse 55% 40% at 75% 80%,rgba(124,58,237,.15) 0%,transparent 60%);
+  animation:auroraShift 10s ease-in-out infinite alternate}
+@keyframes auroraShift{0%{transform:scale(1)}100%{transform:scale(1.1) rotate(2deg)}}
+.grid-overlay{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(236,72,153,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(236,72,153,.025) 1px,transparent 1px);
+  background-size:55px 55px}
+
+.wrapper{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:40px 20px 60px;max-width:660px;margin:0 auto}
+
+.back-btn{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:.85rem;font-weight:600;padding:6px 14px;border:1px solid rgba(255,255,255,.07);border-radius:50px;transition:.3s;margin-bottom:28px}
+.back-btn:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+
+.header{text-align:center;margin-bottom:36px;animation:slideDown .8s cubic-bezier(.16,1,.3,1) both}
+@keyframes slideDown{from{opacity:0;transform:translateY(-30px)}to{opacity:1;transform:translateY(0)}}
+.brand{font-size:.75rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--pink);margin-bottom:8px;opacity:.8}
+.page-title{font-family:'Syne',sans-serif;font-size:clamp(2rem,7vw,2.8rem);font-weight:800;background:linear-gradient(135deg,#fff 20%,var(--pink) 55%,var(--violet) 85%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:8px}
+.page-sub{font-size:.9rem;color:var(--muted)}
+
+/* DATE BADGE */
+.date-badge{font-size:.8rem;color:var(--muted);padding:6px 16px;background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:50px;margin-bottom:32px;animation:fadeUp .8s .15s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* MOOD PICKER */
+.section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:14px;text-align:center;animation:fadeUp .8s .2s both}
+.mood-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;width:100%;margin-bottom:32px;animation:fadeUp .8s .25s both}
+.mood-btn{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:18px 8px;text-align:center;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.56,.64,1),border-color .3s,box-shadow .3s;font-family:'Space Grotesk',sans-serif;position:relative;overflow:hidden}
+.mood-btn::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s}
+.mood-btn:hover::before,.mood-btn.active::before{opacity:1}
+.mood-btn:hover,.mood-btn.active{transform:translateY(-6px) scale(1.06)}
+.mood-emoji{font-size:2rem;display:block;margin-bottom:6px;transition:transform .3s}
+.mood-btn:hover .mood-emoji,.mood-btn.active .mood-emoji{transform:scale(1.3)}
+.mood-name{font-size:.68rem;font-weight:600;display:block;transition:color .3s}
+
+/* mood colors */
+.mood-btn[data-mood="Sangat Senang"]{border-color:rgba(74,222,128,.15)}
+.mood-btn[data-mood="Sangat Senang"]::before{background:linear-gradient(135deg,rgba(74,222,128,.12),rgba(6,182,212,.08))}
+.mood-btn[data-mood="Sangat Senang"]:hover,.mood-btn[data-mood="Sangat Senang"].active{border-color:rgba(74,222,128,.5);box-shadow:0 6px 24px rgba(74,222,128,.25)}
+.mood-btn[data-mood="Senang"]{border-color:rgba(245,158,11,.15)}
+.mood-btn[data-mood="Senang"]::before{background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(74,222,128,.08))}
+.mood-btn[data-mood="Senang"]:hover,.mood-btn[data-mood="Senang"].active{border-color:rgba(245,158,11,.5);box-shadow:0 6px 24px rgba(245,158,11,.25)}
+.mood-btn[data-mood="Biasa"]{border-color:rgba(100,116,139,.2)}
+.mood-btn[data-mood="Biasa"]::before{background:linear-gradient(135deg,rgba(100,116,139,.12),rgba(59,130,246,.06))}
+.mood-btn[data-mood="Biasa"]:hover,.mood-btn[data-mood="Biasa"].active{border-color:rgba(148,163,184,.4);box-shadow:0 6px 24px rgba(148,163,184,.15)}
+.mood-btn[data-mood="Sedih"]{border-color:rgba(59,130,246,.15)}
+.mood-btn[data-mood="Sedih"]::before{background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(124,58,237,.08))}
+.mood-btn[data-mood="Sedih"]:hover,.mood-btn[data-mood="Sedih"].active{border-color:rgba(59,130,246,.5);box-shadow:0 6px 24px rgba(59,130,246,.25)}
+.mood-btn[data-mood="Marah"]{border-color:rgba(239,68,68,.15)}
+.mood-btn[data-mood="Marah"]::before{background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(236,72,153,.08))}
+.mood-btn[data-mood="Marah"]:hover,.mood-btn[data-mood="Marah"].active{border-color:rgba(239,68,68,.5);box-shadow:0 6px 24px rgba(239,68,68,.25)}
+
+/* ENERGY SLIDER */
+.slider-section{width:100%;margin-bottom:28px;animation:fadeUp .8s .35s both}
+.slider-label{display:flex;justify-content:space-between;align-items:center;font-size:.82rem;font-weight:600;color:var(--muted);margin-bottom:10px}
+.slider-val{color:var(--pink);font-size:1rem}
+input[type=range]{width:100%;-webkit-appearance:none;height:6px;border-radius:6px;background:rgba(255,255,255,.1);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--violet));cursor:pointer;box-shadow:0 0 12px rgba(236,72,153,.5);transition:transform .2s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+
+/* NOTE INPUT */
+.note-wrap{width:100%;margin-bottom:28px;animation:fadeUp .8s .4s both}
+.note-input{width:100%;background:var(--surface);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px 20px;font-family:'Space Grotesk',sans-serif;font-size:.92rem;color:var(--text);outline:none;resize:vertical;min-height:90px;transition:border-color .3s,box-shadow .3s;backdrop-filter:blur(14px)}
+.note-input::placeholder{color:var(--muted)}
+.note-input:focus{border-color:rgba(236,72,153,.4);box-shadow:0 0 0 3px rgba(236,72,153,.08)}
+
+/* ANALYZE BTN */
+.analyze-btn{background:linear-gradient(135deg,var(--pink),var(--violet));color:#fff;border:none;border-radius:50px;padding:14px 40px;font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;animation:fadeUp .8s .5s both;position:relative;overflow:hidden;margin-bottom:28px}
+.analyze-btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);opacity:0;transition:.3s}
+.analyze-btn:hover::before{opacity:1}
+.analyze-btn:hover{transform:translateY(-4px) scale(1.04);box-shadow:0 8px 32px rgba(236,72,153,.4)}
+.analyze-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* LOADING */
+.loading-orbs{display:none;gap:8px;justify-content:center;padding:20px}
+.loading-orbs.visible{display:flex}
+.orb-dot{width:10px;height:10px;border-radius:50%;animation:orbPulse 1.2s ease-in-out infinite}
+.orb-dot:nth-child(1){background:var(--pink)}
+.orb-dot:nth-child(2){background:var(--violet);animation-delay:.2s}
+.orb-dot:nth-child(3){background:var(--cyan);animation-delay:.4s}
+@keyframes orbPulse{0%,100%{transform:scale(.6);opacity:.4}50%{transform:scale(1.2);opacity:1}}
+
+/* RESULT */
+.result-card{width:100%;background:var(--surface);border:1px solid rgba(236,72,153,.2);border-radius:24px;padding:28px;backdrop-filter:blur(16px);position:relative;overflow:hidden;display:none}
+.result-card.visible{display:block;animation:fadeUp .5s both}
+.result-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--pink),var(--violet),var(--cyan));border-radius:24px 24px 0 0}
+.result-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.result-body{font-size:.9rem;line-height:1.8;color:var(--text);white-space:pre-wrap}
+.result-body.typing::after{content:'▋';animation:blink .7s step-end infinite;color:var(--pink)}
+@keyframes blink{50%{opacity:0}}
+
+.tip-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.tip-chip{font-size:.75rem;font-weight:600;padding:5px 12px;border-radius:50px;border:1px solid rgba(236,72,153,.3);background:rgba(236,72,153,.08);color:var(--pink)}
+
+/* HISTORY BAR */
+.history-bar{width:100%;margin-top:32px;animation:fadeUp .8s .6s both}
+.history-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px}
+.history-list{display:flex;flex-direction:column;gap:8px}
+.history-item{background:var(--surface);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:10px;font-size:.82rem}
+.history-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+.footer{margin-top:60px;text-align:center;font-size:.75rem;color:var(--muted)}
+.footer a{color:var(--pink);text-decoration:none}
+
+@media(max-width:480px){.mood-grid{grid-template-columns:repeat(3,1fr)}.mood-btn{padding:14px 4px}}
+</style>
+</head>
+<body>
+<canvas id="stars-canvas"></canvas>
+<div class="aurora"></div>
+<div class="grid-overlay"></div>
+
+<div class="wrapper">
+  <a href="portofolio-1.html" class="back-btn">← Kembali</a>
+
+  <div class="header">
+    <p class="brand">💜 Rapi Dev · Mood Tracker</p>
+    <h1 class="page-title">Mood Tracker</h1>
+    <p class="page-sub">Lacak perasaanmu, dapatkan saran AI</p>
+  </div>
+
+  <div class="date-badge" id="dateBadge">📅 Loading...</div>
+
+  <p class="section-label">Bagaimana perasaanmu hari ini?</p>
+
+  <div class="mood-grid">
+    <button class="mood-btn" data-mood="Sangat Senang" onclick="selectMood(this)">
+      <span class="mood-emoji">😄</span><span class="mood-name">Sangat Senang</span>
+    </button>
+    <button class="mood-btn" data-mood="Senang" onclick="selectMood(this)">
+      <span class="mood-emoji">🙂</span><span class="mood-name">Senang</span>
+    </button>
+    <button class="mood-btn" data-mood="Biasa" onclick="selectMood(this)">
+      <span class="mood-emoji">😐</span><span class="mood-name">Biasa Saja</span>
+    </button>
+    <button class="mood-btn" data-mood="Sedih" onclick="selectMood(this)">
+      <span class="mood-emoji">😢</span><span class="mood-name">Sedih</span>
+    </button>
+    <button class="mood-btn" data-mood="Marah" onclick="selectMood(this)">
+      <span class="mood-emoji">😤</span><span class="mood-name">Marah / Stres</span>
+    </button>
+  </div>
+
+  <div class="slider-section">
+    <div class="slider-label">
+      <span>⚡ Level Energi Hari Ini</span>
+      <span class="slider-val" id="energyVal">5 / 10</span>
+    </div>
+    <input type="range" id="energySlider" min="1" max="10" value="5"
+      oninput="document.getElementById('energyVal').textContent=this.value+' / 10'">
+  </div>
+
+  <div class="note-wrap">
+    <p class="section-label" style="text-align:left;margin-bottom:10px">📝 Ceritakan lebih lanjut (opsional)</p>
+    <textarea class="note-input" id="noteInput" placeholder="Apa yang membuatmu merasa seperti ini hari ini?"></textarea>
+  </div>
+
+  <button class="analyze-btn" onclick="analyzeMood()" id="analyzeBtn">💜 Analisis Moodku</button>
+
+  <div class="loading-orbs" id="loadingOrbs">
+    <div class="orb-dot"></div><div class="orb-dot"></div><div class="orb-dot"></div>
+  </div>
+
+  <div class="result-card" id="resultCard">
+    <div class="result-title">🤖 Analisis AI untuk Moodmu</div>
+    <div class="result-body" id="resultBody"></div>
+    <div class="tip-chips" id="tipChips"></div>
+  </div>
+
+  <div class="history-bar">
+    <p class="history-title">📊 Riwayat Mood (Sesi Ini)</p>
+    <div class="history-list" id="historyList"><p style="font-size:.8rem;color:var(--muted)">Belum ada data.</p></div>
+  </div>
+
+  <div class="footer"><p>© 2025 <a href="#">Rapi Dev</a> · Powered by Claude AI 💜</p></div>
+</div>
+
+<script>
+/* ── STARS ── */
+(function(){
+  const c=document.getElementById('stars-canvas'),ctx=c.getContext('2d');let stars=[];
+  function resize(){c.width=innerWidth;c.height=innerHeight;stars=Array.from({length:160},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.3+.2,o:Math.random(),s:Math.random()*.005+.002}))}
+  function draw(){ctx.clearRect(0,0,c.width,c.height);stars.forEach(s=>{s.o+=s.s;if(s.o>1||s.o<0)s.s*=-1;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(230,180,255,${s.o*.5})`;ctx.fill()});requestAnimationFrame(draw)}
+  resize();window.addEventListener('resize',resize);draw();
+})();
+
+/* DATE */
+document.getElementById('dateBadge').textContent='📅 '+new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+let selectedMood=null;
+const moodColors={'Sangat Senang':'#4ade80','Senang':'#f59e0b','Biasa':'#94a3b8','Sedih':'#3b82f6','Marah':'#ef4444'};
+const moodHistory=[];
+
+function selectMood(el){
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');selectedMood=el.dataset.mood;
+}
+
+const GEMINI_KEY = 'MASUKKAN_GEMINI_API_KEY_DISINI'; // ← Ambil gratis di: aistudio.google.com
+async function analyzeMood(){
+  if(!selectedMood){alert('Pilih mood kamu dulu!');return}
+  const energy=document.getElementById('energySlider').value;
+  const note=document.getElementById('noteInput').value.trim();
+  const btn=document.getElementById('analyzeBtn');
+  const loading=document.getElementById('loadingOrbs');
+  const card=document.getElementById('resultCard');
+  const body=document.getElementById('resultBody');
+
+  btn.disabled=true;loading.classList.add('visible');card.classList.remove('visible');
+
+  const prompt=`Kamu adalah psikolog positif dan life coach yang penuh empati. Seseorang melaporkan mood mereka hari ini:
+- Mood: ${selectedMood}
+- Level energi: ${energy}/10
+- Cerita: ${note||'(tidak ada cerita tambahan)'}
+
+Berikan respons dalam Bahasa Indonesia dengan format:
+[ANALISIS]
+2 paragraf analisis psikologis yang hangat, empatik, dan tidak menghakimi (sekitar 100 kata)
+
+[TIPS]
+3 tips praktis singkat (format: "💡 tips") pisahkan dengan baris baru
+
+Jaga tone tetap positif, suportif, dan personal.`;
+
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+    });
+    const data=await res.json();
+    const text=data.candidates[0].content.parts[0].text;
+
+    const analisisMatch=text.match(/\[ANALISIS\]([\s\S]*?)\[TIPS\]/);
+    const tipsMatch=text.match(/\[TIPS\]([\s\S]*?)$/);
+
+    const analisis=analisisMatch?analisisMatch[1].trim():text;
+    const tips=tipsMatch?tipsMatch[1].trim().split('\n').filter(t=>t.trim()):[];
+
+    loading.classList.remove('visible');card.classList.add('visible');
+    body.classList.add('typing');body.textContent='';
+    let i=0;
+    const interval=setInterval(()=>{
+      if(i<analisis.length){body.textContent+=analisis[i++]}
+      else{
+        clearInterval(interval);body.classList.remove('typing');
+        const chips=document.getElementById('tipChips');
+        chips.innerHTML=tips.map(t=>`<span class="tip-chip">${t.trim()}</span>`).join('');
+      }
+    },20);
+
+    // add to history
+    moodHistory.unshift({mood:selectedMood,energy,time:new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})});
+    if(moodHistory.length>5)moodHistory.pop();
+    updateHistory();
+
+  }catch(e){
+    loading.classList.remove('visible');
+    body.textContent='Gagal menganalisis mood. Coba lagi!';
+    card.classList.add('visible');
+  }
+  btn.disabled=false;
+}
+
+function updateHistory(){
+  const list=document.getElementById('historyList');
+  if(!moodHistory.length){list.innerHTML='<p style="font-size:.8rem;color:var(--muted)">Belum ada data.</p>';return}
+  const moodEmoji={'Sangat Senang':'😄','Senang':'🙂','Biasa':'😐','Sedih':'😢','Marah':'😤'};
+  list.innerHTML=moodHistory.map(h=>`
+    <div class="history-item">
+      <div class="history-dot" style="background:${moodColors[h.mood]};box-shadow:0 0 8px ${moodColors[h.mood]}"></div>
+      <span style="flex:1">${moodEmoji[h.mood]} ${h.mood}</span>
+      <span style="color:var(--muted);font-size:.75rem">⚡${h.energy}/10 · ${h.time}</span>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>
