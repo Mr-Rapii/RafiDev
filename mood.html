@@ -124,7 +124,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 <div class="grid-overlay"></div>
 
 <div class="wrapper">
-  <a href="portofolio-1.html" class="back-btn">← Kembali</a>
+  <a href="portofolio.html" class="back-btn">← Kembali</a>
 
   <div class="header">
     <p class="brand">💜 Rapi Dev · Mood Tracker</p>
@@ -209,7 +209,7 @@ function selectMood(el){
   el.classList.add('active');selectedMood=el.dataset.mood;
 }
 
-const GEMINI_KEY = 'MASUKKAN_GEMINI_API_KEY_DISINI'; // ← Ambil gratis di: aistudio.google.com
+const GEMINI_KEY = 'AQ.Ab8RN6IFZ5S3E1dIDJNTE13h8xVfO1RMCYXEdaPb2WilV1c3sA'; // ← Ambil gratis di: aistudio.google.com
 async function analyzeMood(){
   if(!selectedMood){alert('Pilih mood kamu dulu!');return}
   const energy=document.getElementById('energySlider').value;
