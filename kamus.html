@@ -90,7 +90,7 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 <div class="grid-overlay"></div>
 
 <div class="wrapper">
-  <a href="portofolio-1.html" class="back-btn">← Kembali</a>
+  <a href="portofolio.html" class="back-btn">← Kembali</a>
 
   <div class="header">
     <p class="brand">📖 Rapi Dev · Kamus Pintar</p>
@@ -156,7 +156,7 @@ function addHistory(word){
   row.innerHTML=history.map(w=>`<span class="hist-tag" onclick="document.getElementById('wordInput').value='${w}';searchWord()">${w}</span>`).join('');
 }
 
-const GEMINI_KEY = 'MASUKKAN_GEMINI_API_KEY_DISINI'; // ← Ambil gratis di: aistudio.google.com
+const GEMINI_KEY = 'AQ.Ab8RN6IFZ5S3E1dIDJNTE13h8xVfO1RMCYXEdaPb2WilV1c3sA'; // ← Ambil gratis di: aistudio.google.com
 async function searchWord(){
   const word=document.getElementById('wordInput').value.trim();
   if(!word)return;
