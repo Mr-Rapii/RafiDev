@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Roasting Generator — Rapi Dev</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0f0a00;
+    --card: #1a1200;
+    --accent: #f59e0b;
+    --accent2: #ef4444;
+    --text: #fff8e7;
+    --muted: #7a6a40;
+    --border: rgba(245,158,11,0.15);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
+
+  body::before {
+    content:''; position:fixed; inset:0;
+    background: radial-gradient(ellipse at 30% 20%, rgba(245,158,11,0.05) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 80%, rgba(239,68,68,0.05) 0%, transparent 60%);
+    pointer-events:none;
+  }
+
+  #loading { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; transition:opacity 0.5s,visibility 0.5s; }
+  #loading.hide { opacity:0; visibility:hidden; }
+  .loading-logo { font-size:2rem; font-weight:800; background:linear-gradient(135deg,#f59e0b,#ef4444); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px; }
+  .loading-sub { color:var(--muted); font-size:0.82rem; margin-bottom:36px; }
+  .loader-track { width:200px; height:2px; background:rgba(245,158,11,0.15); border-radius:99px; overflow:hidden; }
+  .loader-fill { height:100%; background:linear-gradient(90deg,#f59e0b,#ef4444); border-radius:99px; animation:fill 2s ease forwards; }
+  @keyframes fill { from{width:0} to{width:100%} }
+  .loading-label { margin-top:16px; color:var(--muted); font-size:0.8rem; animation:blink 1.2s ease infinite; }
+  @keyframes blink { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+  .header { padding:18px 24px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); position:relative; z-index:1; }
+  .brand { font-size:1rem; font-weight:800; background:linear-gradient(135deg,#f59e0b,#ef4444); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .back-btn { display:flex; align-items:center; gap:6px; text-decoration:none; font-size:0.83rem; color:var(--muted); padding:7px 13px; border:1px solid var(--border); border-radius:8px; transition:all 0.2s; }
+  .back-btn:hover { color:var(--accent); border-color:var(--accent); }
+
+  .main { max-width:680px; margin:0 auto; padding:40px 20px 60px; position:relative; z-index:1; }
+
+  .page-hero { text-align:center; margin-bottom:32px; }
+  .page-hero .emo { font-size:3rem; display:block; margin-bottom:10px; animation:shake 2s ease infinite; }
+  @keyframes shake { 0%,90%,100%{transform:rotate(0)} 92%{transform:rotate(-8deg)} 95%{transform:rotate(8deg)} 98%{transform:rotate(-4deg)} }
+  .page-hero h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.5px; background:linear-gradient(135deg,#f59e0b,#ef4444); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .page-hero p { color:var(--muted); font-size:0.88rem; margin-top:8px; }
+
+  .card { background:var(--card); border:1px solid var(--border); border-radius:18px; padding:24px; margin-bottom:20px; }
+
+  label { display:block; font-size:0.75rem; font-weight:600; color:var(--muted); margin-bottom:7px; text-transform:uppercase; letter-spacing:0.5px; }
+
+  input[type="text"], textarea, select {
+    width:100%; background:rgba(255,255,255,0.03); border:1px solid var(--border);
+    border-radius:10px; color:var(--text); padding:11px 14px;
+    font-family:'Inter',sans-serif; font-size:0.9rem; outline:none;
+    transition:border-color 0.2s;
+  }
+  textarea { resize:vertical; min-height:90px; }
+  input:focus, textarea:focus, select:focus { border-color:var(--accent); }
+  select option { background:#1a1200; }
+
+  .level-row { display:flex; gap:8px; margin-bottom:16px; }
+  .level-btn { flex:1; padding:9px; border-radius:10px; font-size:0.8rem; font-weight:600; cursor:pointer; border:1px solid var(--border); color:var(--muted); background:transparent; transition:all 0.2s; text-align:center; }
+  .level-btn.active { border-color:var(--accent); color:var(--accent); background:rgba(245,158,11,0.08); }
+
+  .gen-btn { width:100%; padding:14px; border:none; border-radius:12px; background:linear-gradient(135deg,#f59e0b,#ef4444); color:white; font-size:1rem; font-weight:800; cursor:pointer; margin-top:16px; transition:all 0.2s; letter-spacing:0.3px; }
+  .gen-btn:hover { opacity:0.9; transform:scale(1.01); }
+  .gen-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+
+  .result-area { display:none; animation:fadeUp 0.5s ease; }
+  .result-area.show { display:block; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  .roast-bubble {
+    background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(239,68,68,0.05));
+    border: 1px solid var(--border);
+    border-radius: 18px 18px 4px 18px;
+    padding: 20px 22px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .roast-bubble::before {
+    content: '🔥';
+    position: absolute; top: -12px; left: 16px;
+    font-size: 1.4rem;
+  }
+  .roast-text { font-size:1rem; line-height:1.75; color:var(--text); }
+  .roast-meta { margin-top:12px; display:flex; justify-content:space-between; align-items:center; }
+  .roast-level-badge { padding:3px 10px; border-radius:99px; font-size:0.72rem; font-weight:700; }
+  .copy-roast { padding:8px 16px; background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:8px; font-size:0.8rem; cursor:pointer; transition:all 0.2s; }
+  .copy-roast:hover { color:var(--accent); border-color:var(--accent); }
+
+  .loading-fire { text-align:center; padding:40px; }
+  .fire-anim { font-size:2.5rem; display:block; animation:flicker 0.5s ease infinite alternate; }
+  @keyframes flicker { from{transform:scale(1) rotate(-3deg)} to{transform:scale(1.1) rotate(3deg)} }
+
+  .disclaimer { font-size:0.72rem; color:var(--muted); text-align:center; padding:12px; border-top:1px solid var(--border); margin-top:12px; }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="loading-logo">Rapi Dev</div>
+  <div class="loading-sub">Tools Collection</div>
+  <div class="loader-track"><div class="loader-fill"></div></div>
+  <div class="loading-label">🔥 Memuat AI Roasting Generator...</div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="header">
+    <div class="brand">✦ Rapi Dev</div>
+    <a href="portofolio.html" class="back-btn">← Kembali ke Portofolio</a>
+  </div>
+
+  <div class="main">
+    <div class="page-hero">
+      <span class="emo">🔥</span>
+      <h1>AI Roasting Generator</h1>
+      <p>Buat roasting lucu & santai untuk konten, stand-up, atau main-main sama teman</p>
+    </div>
+
+    <div class="card">
+      <div style="margin-bottom:16px">
+        <label>Nama / Panggilan Target</label>
+        <input type="text" id="targetName" placeholder="contoh: Budi, Si Anak Bucin, Teman Sekelas...">
+      </div>
+      <div style="margin-bottom:16px">
+        <label>Deskripsi Singkat (kebiasaan, hobi, sifat, dll)</label>
+        <textarea id="targetDesc" placeholder="contoh: suka tidur di kelas, selalu terlambat, tiap hari ngomongin mantan, fomo banget sama trend..."></textarea>
+      </div>
+      <div style="margin-bottom:16px">
+        <label>Level Roasting</label>
+        <div class="level-row">
+          <button class="level-btn" onclick="setLevel(this,'ringan','🌱 Ringan')">🌱 Ringan</button>
+          <button class="level-btn active" onclick="setLevel(this,'medium','🌶️ Medium')">🌶️ Medium</button>
+          <button class="level-btn" onclick="setLevel(this,'pedas','🔥 Pedas')">🔥 Pedas</button>
+          <button class="level-btn" onclick="setLevel(this,'savage','💀 Savage')">💀 Savage</button>
+        </div>
+      </div>
+      <div>
+        <label>Gaya Humor</label>
+        <select id="humorStyle">
+          <option value="Gen Z / anak muda">😎 Gen Z / Anak Muda</option>
+          <option value="Receh / lucu biasa">😄 Receh / Lucu Biasa</option>
+          <option value="Sarkas halus">🎭 Sarkas Halus</option>
+          <option value="Stand-up comedy">🎤 Stand-up Comedy</option>
+        </select>
+      </div>
+      <button class="gen-btn" id="genBtn" onclick="generateRoast()">🔥 BAKAR DIA SEKARANG!</button>
+    </div>
+
+    <div class="result-area" id="resultArea">
+      <div id="resultContent"></div>
+      <div class="disclaimer">⚠️ Roasting ini untuk hiburan semata. Gunakan dengan bijak & atas dasar persetujuan.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('loading').classList.add('hide');
+      document.getElementById('app').style.display = 'block';
+    }, 2000);
+  });
+
+  let currentLevel = 'medium';
+  let currentLevelLabel = '🌶️ Medium';
+  function setLevel(el, level, label) {
+    document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    currentLevel = level; currentLevelLabel = label;
+  }
+
+  async function generateRoast() {
+    const name = document.getElementById('targetName').value || 'seseorang';
+    const desc = document.getElementById('targetDesc').value;
+    const humorStyle = document.getElementById('humorStyle').value;
+    if (!desc.trim()) { alert('Isi deskripsi targetnya dulu!'); return; }
+
+    const btn = document.getElementById('genBtn');
+    btn.disabled = true; btn.textContent = '⏳ Lagi ngeyalah...';
+
+    const resultArea = document.getElementById('resultArea');
+    resultArea.classList.add('show');
+    document.getElementById('resultContent').innerHTML = '<div class="loading-fire"><span class="fire-anim">🔥</span><p style="color:var(--muted);font-size:0.88rem;margin-top:12px">AI lagi memanaskan roastannya...</p></div>';
+
+    const levelColors = {ringan:'#34d399',medium:'#f59e0b',pedas:'#ef4444',savage:'#9b59b6'};
+    const color = levelColors[currentLevel] || '#f59e0b';
+
+    const prompt = `Kamu adalah comedian dan roaster profesional Indonesia. Buat roasting untuk "${name}" dengan:
+- Informasi tentang dia: ${desc}
+- Level roasting: ${currentLevel}
+- Gaya humor: ${humorStyle}
+
+Buat 3 roasting yang berbeda, masing-masing 2-3 kalimat. Roasting harus lucu, kreatif, dan tidak kasar/vulgar.
+Balas dalam format JSON (HANYA JSON):
+{
+  "roastings": ["roasting1...", "roasting2...", "roasting3..."]
+}`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:1000, messages:[{role:'user',content:prompt}] })
+      });
+      const data = await res.json();
+      const text = data.content[0].text.replace(/```json|```/g,'').trim();
+      const r = JSON.parse(text);
+
+      let html = r.roastings.map((roast, i) => `
+        <div class="roast-bubble card">
+          <p class="roast-text">${roast}</p>
+          <div class="roast-meta">
+            <span class="roast-level-badge" style="background:${color}22;color:${color}">${currentLevelLabel}</span>
+            <button class="copy-roast" onclick="copyRoast(this,'${encodeURIComponent(roast)}')">📋 Copy</button>
+          </div>
+        </div>`).join('');
+
+      html += `<div style="text-align:center;margin-top:4px"><button onclick="generateRoast()" style="padding:10px 24px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:10px;font-size:0.88rem;font-weight:600;cursor:pointer;">🔄 Generate Lagi</button></div>`;
+      document.getElementById('resultContent').innerHTML = html;
+    } catch(e) {
+      document.getElementById('resultContent').innerHTML = '<p style="color:#e74c3c;text-align:center;padding:20px">❌ Gagal generate. Coba lagi!</p>';
+    }
+    btn.disabled = false; btn.textContent = '🔥 BAKAR DIA SEKARANG!';
+  }
+
+  function copyRoast(btn, encoded) {
+    navigator.clipboard.writeText(decodeURIComponent(encoded));
+    btn.textContent = '✅ Disalin!';
+    setTimeout(() => btn.textContent = '📋 Copy', 2000);
+  }
+</script>
+</body>
+</html>

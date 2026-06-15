@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Tafsir Mimpi — Rapi Dev</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #06050f;
+    --card: #0e0c1c;
+    --accent: #a78bfa;
+    --accent2: #818cf8;
+    --text: #e8e6ff;
+    --muted: #6b6b8a;
+    --border: rgba(167,139,250,0.12);
+    --glow: 0 0 40px rgba(167,139,250,0.15);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
+
+  /* Stars bg */
+  body::before {
+    content:''; position:fixed; inset:0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* LOADING */
+  #loading { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; transition:opacity 0.5s,visibility 0.5s; }
+  #loading.hide { opacity:0; visibility:hidden; }
+  .loading-logo { font-size:2rem; font-weight:800; background:linear-gradient(135deg,#a78bfa,#818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px; }
+  .loading-sub { color:var(--muted); font-size:0.82rem; margin-bottom:36px; }
+  .loader-track { width:200px; height:2px; background:rgba(167,139,250,0.15); border-radius:99px; overflow:hidden; }
+  .loader-fill { height:100%; background:linear-gradient(90deg,#a78bfa,#818cf8); border-radius:99px; animation:fill 2s ease forwards; }
+  @keyframes fill { from{width:0} to{width:100%} }
+  .loading-label { margin-top:16px; color:var(--muted); font-size:0.8rem; animation:blink 1.2s ease infinite; }
+  @keyframes blink { 0%,100%{opacity:0.3} 50%{opacity:0.9} }
+
+  /* HEADER */
+  .header { padding:18px 24px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); position:relative; z-index:1; }
+  .brand { font-size:1rem; font-weight:800; background:linear-gradient(135deg,#a78bfa,#818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .back-btn { display:flex; align-items:center; gap:6px; text-decoration:none; font-size:0.83rem; color:var(--muted); padding:7px 13px; border:1px solid var(--border); border-radius:8px; transition:all 0.2s; }
+  .back-btn:hover { color:var(--accent); border-color:var(--accent); }
+
+  .main { max-width:700px; margin:0 auto; padding:40px 20px 60px; position:relative; z-index:1; }
+
+  .page-hero { text-align:center; margin-bottom:32px; }
+  .page-hero .emo { font-size:3rem; display:block; margin-bottom:10px; filter:drop-shadow(0 0 20px rgba(167,139,250,0.5)); }
+  .page-hero h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.5px; background:linear-gradient(135deg,#a78bfa,#c4b5fd); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .page-hero p { color:var(--muted); font-size:0.88rem; margin-top:8px; }
+
+  .card { background:var(--card); border:1px solid var(--border); border-radius:18px; padding:24px; margin-bottom:20px; box-shadow:var(--glow); }
+
+  label { display:block; font-size:0.75rem; font-weight:600; color:var(--muted); margin-bottom:7px; text-transform:uppercase; letter-spacing:0.5px; }
+
+  textarea, select {
+    width:100%; background:rgba(255,255,255,0.03); border:1px solid var(--border);
+    border-radius:10px; color:var(--text); padding:12px 14px;
+    font-family:'Inter',sans-serif; font-size:0.9rem; outline:none;
+    transition:border-color 0.2s;
+  }
+  textarea { resize:vertical; min-height:120px; }
+  textarea:focus, select:focus { border-color:var(--accent); }
+  select option { background:#0e0c1c; }
+
+  .mood-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+  .mood-btn { padding:7px 14px; border-radius:99px; font-size:0.82rem; font-weight:500; cursor:pointer; border:1px solid var(--border); color:var(--muted); background:transparent; transition:all 0.2s; }
+  .mood-btn.active { background:rgba(167,139,250,0.2); border-color:var(--accent); color:var(--accent); }
+
+  .gen-btn { width:100%; padding:14px; border:none; border-radius:12px; background:linear-gradient(135deg,#a78bfa,#818cf8); color:white; font-size:1rem; font-weight:700; cursor:pointer; margin-top:16px; transition:opacity 0.2s; }
+  .gen-btn:hover { opacity:0.9; }
+  .gen-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+  /* Result */
+  .result-box { display:none; }
+  .result-box.show { display:block; animation:fadeUp 0.5s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  .result-header { display:flex; align-items:center; gap:10px; margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--border); }
+  .result-tag { padding:4px 12px; background:rgba(167,139,250,0.15); border-radius:99px; font-size:0.75rem; color:var(--accent); font-weight:600; }
+
+  .result-section { margin-bottom:16px; }
+  .result-section h3 { font-size:0.8rem; color:var(--accent); font-weight:600; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px; }
+  .result-section p { font-size:0.9rem; line-height:1.7; color:var(--text); }
+
+  .symbols-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; }
+  .symbol-chip { background:rgba(167,139,250,0.07); border:1px solid var(--border); border-radius:10px; padding:10px 12px; }
+  .symbol-chip .sym { font-size:1.2rem; margin-bottom:4px; }
+  .symbol-chip .sym-name { font-size:0.8rem; font-weight:600; color:var(--text); }
+  .symbol-chip .sym-meaning { font-size:0.72rem; color:var(--muted); }
+
+  .loading-anim { text-align:center; padding:40px; color:var(--muted); font-size:0.88rem; }
+  .star-spin { display:inline-block; animation:spin 2s linear infinite; font-size:2rem; }
+  @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="loading-logo">Rapi Dev</div>
+  <div class="loading-sub">Tools Collection</div>
+  <div class="loader-track"><div class="loader-fill"></div></div>
+  <div class="loading-label">🌙 Memuat AI Tafsir Mimpi...</div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="header">
+    <div class="brand">✦ Rapi Dev</div>
+    <a href="portofolio.html" class="back-btn">← Kembali ke Portofolio</a>
+  </div>
+
+  <div class="main">
+    <div class="page-hero">
+      <span class="emo">🌙</span>
+      <h1>AI Tafsir Mimpi</h1>
+      <p>Ungkap makna tersembunyi di balik mimpimu dengan analisis AI</p>
+    </div>
+
+    <div class="card">
+      <div style="margin-bottom:16px">
+        <label>Ceritakan Mimpimu</label>
+        <textarea id="dreamText" placeholder="Ceritakan mimpimu dengan detail... misalnya: Aku mimpi terbang di atas kota, lalu jatuh ke lautan yang tenang..."></textarea>
+      </div>
+      <div style="margin-bottom:16px">
+        <label>Bagaimana Perasaanmu Saat Mimpi?</label>
+        <div class="mood-row">
+          <button class="mood-btn" onclick="setMood(this,'Senang')">😊 Senang</button>
+          <button class="mood-btn active" onclick="setMood(this,'Takut')">😨 Takut</button>
+          <button class="mood-btn" onclick="setMood(this,'Bingung')">😕 Bingung</button>
+          <button class="mood-btn" onclick="setMood(this,'Sedih')">😢 Sedih</button>
+          <button class="mood-btn" onclick="setMood(this,'Damai')">😌 Damai</button>
+        </div>
+      </div>
+      <div>
+        <label>Metode Tafsir</label>
+        <select id="method">
+          <option value="psikologi modern (Carl Jung)">🧠 Psikologi Modern (Carl Jung)</option>
+          <option value="Islam">☪️ Islam</option>
+          <option value="budaya Jawa">🏝️ Budaya Jawa</option>
+          <option value="umum spiritual">✨ Spiritual Umum</option>
+        </select>
+      </div>
+      <button class="gen-btn" id="genBtn" onclick="interpretDream()">🔮 Tafsirkan Mimpiku</button>
+    </div>
+
+    <div class="result-box card" id="resultBox">
+      <div id="resultContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('loading').classList.add('hide');
+      document.getElementById('app').style.display = 'block';
+    }, 2000);
+  });
+
+  let currentMood = 'Takut';
+  function setMood(el, mood) {
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    currentMood = mood;
+  }
+
+  async function interpretDream() {
+    const dream = document.getElementById('dreamText').value;
+    const method = document.getElementById('method').value;
+    if (!dream.trim()) { alert('Ceritakan dulu mimpimu!'); return; }
+
+    const btn = document.getElementById('genBtn');
+    btn.disabled = true; btn.textContent = '⏳ Sedang menafsirkan...';
+
+    const resultBox = document.getElementById('resultBox');
+    resultBox.classList.add('show');
+    document.getElementById('resultContent').innerHTML = '<div class="loading-anim"><div class="star-spin">🌟</div><br>AI sedang menganalisis mimpimu...</div>';
+
+    const prompt = `Kamu adalah ahli tafsir mimpi. Seorang pengguna menceritakan mimpinya:
+
+"${dream}"
+
+Perasaan saat mimpi: ${currentMood}
+Metode tafsir yang diminta: ${method}
+
+Berikan analisis dalam format JSON berikut (HANYA JSON, tidak ada teks lain):
+{
+  "ringkasan": "ringkasan 1 kalimat tentang mimpi ini",
+  "kategori": "kategori mimpi (misalnya: Mimpi Kebebasan, Mimpi Ketakutan, dll)",
+  "tafsir_utama": "penjelasan utama 2-3 kalimat berdasarkan metode ${method}",
+  "pesan_tersembunyi": "pesan atau makna tersembunyi untuk kehidupan nyata 2 kalimat",
+  "simbol": [
+    {"simbol": "...", "emoji": "...", "makna": "..."},
+    {"simbol": "...", "emoji": "...", "makna": "..."},
+    {"simbol": "...", "emoji": "...", "makna": "..."}
+  ],
+  "saran": "saran praktis 1-2 kalimat berdasarkan mimpi ini"
+}`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          model:'claude-sonnet-4-6', max_tokens:1000,
+          messages:[{role:'user',content:prompt}]
+        })
+      });
+      const data = await res.json();
+      const text = data.content[0].text.replace(/```json|```/g,'').trim();
+      const r = JSON.parse(text);
+
+      let symbolsHtml = r.simbol.map(s => `
+        <div class="symbol-chip">
+          <div class="sym">${s.emoji}</div>
+          <div class="sym-name">${s.simbol}</div>
+          <div class="sym-meaning">${s.makna}</div>
+        </div>`).join('');
+
+      document.getElementById('resultContent').innerHTML = `
+        <div class="result-header">
+          <div class="result-tag">🌙 ${r.kategori}</div>
+          <div style="font-size:0.8rem;color:var(--muted)">${method}</div>
+        </div>
+        <div class="result-section">
+          <h3>📖 Tafsir Utama</h3>
+          <p>${r.tafsir_utama}</p>
+        </div>
+        <div class="result-section">
+          <h3>💡 Pesan Tersembunyi</h3>
+          <p>${r.pesan_tersembunyi}</p>
+        </div>
+        <div class="result-section">
+          <h3>🔍 Simbol dalam Mimpi</h3>
+          <div class="symbols-grid">${symbolsHtml}</div>
+        </div>
+        <div class="result-section">
+          <h3>✨ Saran untuk Hari Ini</h3>
+          <p>${r.saran}</p>
+        </div>
+      `;
+    } catch(e) {
+      document.getElementById('resultContent').innerHTML = '<p style="color:#e74c3c;text-align:center">❌ Gagal menafsirkan. Coba lagi.</p>';
+    }
+    btn.disabled = false; btn.textContent = '🔮 Tafsirkan Mimpiku';
+  }
+</script>
+</body>
+</html>

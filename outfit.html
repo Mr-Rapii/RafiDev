@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Outfit Rekomendasi — Rapi Dev</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #fafaf5;
+    --card: #ffffff;
+    --accent: #16a34a;
+    --accent2: #0891b2;
+    --text: #1a2212;
+    --muted: #7a8a72;
+    --border: rgba(0,0,0,0.08);
+    --shadow: 0 4px 24px rgba(22,163,74,0.08);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
+
+  #loading { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; transition:opacity 0.5s,visibility 0.5s; }
+  #loading.hide { opacity:0; visibility:hidden; }
+  .loading-logo { font-size:2rem; font-weight:800; background:linear-gradient(135deg,#16a34a,#0891b2); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px; }
+  .loading-sub { color:var(--muted); font-size:0.82rem; margin-bottom:36px; }
+  .loader-track { width:200px; height:3px; background:#dcfce7; border-radius:99px; overflow:hidden; }
+  .loader-fill { height:100%; background:linear-gradient(90deg,#16a34a,#0891b2); border-radius:99px; animation:fill 2s ease forwards; }
+  @keyframes fill { from{width:0} to{width:100%} }
+  .loading-label { margin-top:16px; color:var(--muted); font-size:0.8rem; animation:blink 1.2s ease infinite; }
+  @keyframes blink { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+  .header { padding:18px 24px; display:flex; align-items:center; justify-content:space-between; background:var(--card); border-bottom:1px solid var(--border); }
+  .brand { font-size:1rem; font-weight:800; background:linear-gradient(135deg,#16a34a,#0891b2); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .back-btn { display:flex; align-items:center; gap:6px; text-decoration:none; font-size:0.83rem; color:var(--muted); padding:7px 13px; border:1px solid var(--border); border-radius:8px; transition:all 0.2s; }
+  .back-btn:hover { color:var(--accent); border-color:var(--accent); }
+
+  .main { max-width:760px; margin:0 auto; padding:40px 20px 60px; }
+
+  .page-hero { text-align:center; margin-bottom:32px; }
+  .page-hero .emo { font-size:3rem; display:block; margin-bottom:10px; }
+  .page-hero h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.5px; }
+  .page-hero p { color:var(--muted); font-size:0.88rem; margin-top:8px; }
+
+  .card { background:var(--card); border:1px solid var(--border); border-radius:18px; padding:24px; margin-bottom:20px; box-shadow:var(--shadow); }
+
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media(max-width:520px){ .grid2 { grid-template-columns:1fr; } }
+
+  label { display:block; font-size:0.75rem; font-weight:600; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
+
+  select, input[type="text"] {
+    width:100%; background:#f7fdf8; border:1.5px solid #d1fae5;
+    border-radius:10px; color:var(--text); padding:11px 14px;
+    font-family:'Inter',sans-serif; font-size:0.9rem; outline:none; transition:border-color 0.2s;
+  }
+  select:focus, input:focus { border-color:var(--accent); }
+  select option { background:#fff; }
+
+  .style-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+  @media(max-width:420px){ .style-grid { grid-template-columns:repeat(2,1fr); } }
+  .style-card { padding:12px 8px; border-radius:12px; text-align:center; cursor:pointer; border:2px solid var(--border); background:transparent; transition:all 0.2s; }
+  .style-card .sico { font-size:1.5rem; display:block; margin-bottom:4px; }
+  .style-card .sname { font-size:0.75rem; font-weight:600; color:var(--muted); }
+  .style-card.active { border-color:var(--accent); background:#f0fdf4; }
+  .style-card.active .sname { color:var(--accent); }
+
+  .gen-btn { width:100%; padding:14px; border:none; border-radius:12px; background:linear-gradient(135deg,#16a34a,#0891b2); color:white; font-size:1rem; font-weight:700; cursor:pointer; margin-top:4px; transition:opacity 0.2s; }
+  .gen-btn:hover { opacity:0.9; }
+  .gen-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+  /* Result */
+  .result-area { display:none; }
+  .result-area.show { display:block; animation:fadeUp 0.5s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  .outfit-card { border:1.5px solid var(--border); border-radius:14px; padding:18px; margin-bottom:14px; position:relative; overflow:hidden; }
+  .outfit-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,#16a34a,#0891b2); }
+  .outfit-num { font-size:0.7rem; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+  .outfit-name { font-size:1rem; font-weight:700; margin-bottom:8px; }
+  .outfit-items { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .outfit-item { padding:4px 12px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:99px; font-size:0.78rem; color:#16a34a; font-weight:500; }
+  .outfit-tip { font-size:0.83rem; color:var(--muted); line-height:1.5; }
+
+  .loading-dots { text-align:center; padding:40px; }
+  .loading-dots span { display:inline-block; width:8px; height:8px; background:var(--accent); border-radius:50%; margin:0 3px; animation:bounce 1.2s ease infinite; }
+  .loading-dots span:nth-child(2) { animation-delay:0.2s; background:var(--accent2); }
+  .loading-dots span:nth-child(3) { animation-delay:0.4s; }
+  @keyframes bounce { 0%,80%,100%{transform:scale(0.5)} 40%{transform:scale(1)} }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="loading-logo">Rapi Dev</div>
+  <div class="loading-sub">Tools Collection</div>
+  <div class="loader-track"><div class="loader-fill"></div></div>
+  <div class="loading-label">👗 Memuat AI Outfit Rekomendasi...</div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="header">
+    <div class="brand">✦ Rapi Dev</div>
+    <a href="portofolio.html" class="back-btn">← Kembali ke Portofolio</a>
+  </div>
+
+  <div class="main">
+    <div class="page-hero">
+      <span class="emo">👗</span>
+      <h1>AI Outfit Rekomendasi</h1>
+      <p>Dapatkan rekomendasi outfit stylish dari AI sesuai acara & selera kamu</p>
+    </div>
+
+    <div class="card">
+      <div class="grid2" style="margin-bottom:16px">
+        <div>
+          <label>Jenis Kelamin</label>
+          <select id="gender">
+            <option value="Pria">👨 Pria</option>
+            <option value="Wanita">👩 Wanita</option>
+          </select>
+        </div>
+        <div>
+          <label>Acara / Kesempatan</label>
+          <select id="occasion">
+            <option value="kerja / kantor">💼 Kerja / Kantor</option>
+            <option value="kencan romantis">💕 Kencan</option>
+            <option value="hangout kasual">😎 Hangout Kasual</option>
+            <option value="pesta / acara formal">🎉 Pesta / Formal</option>
+            <option value="kuliah">📚 Kuliah</option>
+            <option value="kondangan / pernikahan">💍 Kondangan</option>
+            <option value="olahraga / gym">🏃 Olahraga</option>
+            <option value="liburan / traveling">✈️ Traveling</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label>Pilih Gaya Favoritmu</label>
+        <div class="style-grid">
+          <button class="style-card active" onclick="setStyle(this,'Minimalis')"><span class="sico">⬜</span><span class="sname">Minimalis</span></button>
+          <button class="style-card" onclick="setStyle(this,'Streetwear')"><span class="sico">🧢</span><span class="sname">Streetwear</span></button>
+          <button class="style-card" onclick="setStyle(this,'Elegan')"><span class="sico">✨</span><span class="sname">Elegan</span></button>
+          <button class="style-card" onclick="setStyle(this,'Vintage')"><span class="sico">🎞️</span><span class="sname">Vintage</span></button>
+          <button class="style-card" onclick="setStyle(this,'Sporty')"><span class="sico">⚡</span><span class="sname">Sporty</span></button>
+          <button class="style-card" onclick="setStyle(this,'Korean Style')"><span class="sico">🌸</span><span class="sname">Korean</span></button>
+        </div>
+      </div>
+      <div class="grid2" style="margin-bottom:16px">
+        <div>
+          <label>Warna yang Kamu Suka</label>
+          <input type="text" id="colors" placeholder="contoh: hitam, putih, navy...">
+        </div>
+        <div>
+          <label>Cuaca Hari Ini</label>
+          <select id="weather">
+            <option value="panas / terik">☀️ Panas / Terik</option>
+            <option value="sejuk / mendung">🌤️ Sejuk / Mendung</option>
+            <option value="hujan / dingin">🌧️ Hujan / Dingin</option>
+          </select>
+        </div>
+      </div>
+      <button class="gen-btn" id="genBtn" onclick="getOutfit()">✨ Rekomendasi Outfit</button>
+    </div>
+
+    <div class="result-area" id="resultArea">
+      <div id="resultContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('loading').classList.add('hide');
+      document.getElementById('app').style.display = 'block';
+    }, 2000);
+  });
+
+  let currentStyle = 'Minimalis';
+  function setStyle(el, style) {
+    document.querySelectorAll('.style-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    currentStyle = style;
+  }
+
+  async function getOutfit() {
+    const gender = document.getElementById('gender').value;
+    const occasion = document.getElementById('occasion').value;
+    const colors = document.getElementById('colors').value || 'bebas';
+    const weather = document.getElementById('weather').value;
+    const btn = document.getElementById('genBtn');
+    btn.disabled = true; btn.textContent = '⏳ Mencari outfit...';
+
+    const resultArea = document.getElementById('resultArea');
+    resultArea.classList.add('show');
+    document.getElementById('resultContent').innerHTML = '<div class="card"><div class="loading-dots"><span></span><span></span><span></span></div></div>';
+
+    const prompt = `Kamu adalah fashion stylist profesional. Rekomendasikan 3 outfit untuk:
+- Jenis kelamin: ${gender}
+- Acara: ${occasion}
+- Gaya: ${currentStyle}
+- Warna favorit: ${colors}
+- Cuaca: ${weather}
+
+Format JSON (HANYA JSON):
+{
+  "outfits": [
+    {
+      "nama": "nama outfit",
+      "items": ["item 1", "item 2", "item 3", "item 4"],
+      "tips": "tips styling singkat 1-2 kalimat"
+    }
+  ]
+}`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:1000, messages:[{role:'user',content:prompt}] })
+      });
+      const data = await res.json();
+      const text = data.content[0].text.replace(/```json|```/g,'').trim();
+      const r = JSON.parse(text);
+
+      let html = r.outfits.map((o, i) => `
+        <div class="outfit-card card">
+          <div class="outfit-num">Outfit ${i+1}</div>
+          <div class="outfit-name">${o.nama}</div>
+          <div class="outfit-items">${o.items.map(item => `<span class="outfit-item">👕 ${item}</span>`).join('')}</div>
+          <div class="outfit-tip">💡 ${o.tips}</div>
+        </div>`).join('');
+      html += `<div style="text-align:center"><button onclick="getOutfit()" style="padding:10px 24px;background:transparent;border:1.5px solid #d1fae5;color:var(--accent);border-radius:10px;font-size:0.88rem;font-weight:600;cursor:pointer;">🔄 Coba Lagi</button></div>`;
+      document.getElementById('resultContent').innerHTML = html;
+    } catch(e) {
+      document.getElementById('resultContent').innerHTML = '<div class="card" style="text-align:center;color:#e74c3c">❌ Gagal generate. Coba lagi!</div>';
+    }
+    btn.disabled = false; btn.textContent = '✨ Rekomendasi Outfit';
+  }
+</script>
+</body>
+</html>

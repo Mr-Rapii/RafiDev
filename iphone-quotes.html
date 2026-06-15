@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iPhone Quotes Generator — Rapi Dev</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --card: #111118;
+    --border: rgba(255,255,255,0.08);
+    --accent: #7c6af7;
+    --accent2: #f472b6;
+    --text: #f0f0f5;
+    --muted: #6b6b80;
+    --green: #34d399;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* LOADING SCREEN */
+  #loading {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+  }
+  #loading.hide { opacity: 0; visibility: hidden; }
+
+  .loading-logo {
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+    letter-spacing: -1px;
+  }
+  .loading-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 40px; }
+
+  .loader-bar {
+    width: 220px; height: 3px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 99px; overflow: hidden;
+  }
+  .loader-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    animation: fill 1.8s ease forwards;
+  }
+  @keyframes fill { from { width: 0 } to { width: 100% } }
+
+  .loading-tool {
+    margin-top: 20px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    animation: pulse 1.2s ease infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+  /* HEADER */
+  .header {
+    padding: 20px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand {
+    font-size: 1.1rem; font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .back-btn {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--muted); text-decoration: none;
+    font-size: 0.85rem; font-weight: 500;
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+  .back-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  /* MAIN */
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+  }
+
+  .page-title {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .page-title .emoji { font-size: 2.5rem; display: block; margin-bottom: 12px; }
+  .page-title h1 {
+    font-size: 1.8rem; font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .page-title p { color: var(--muted); margin-top: 8px; font-size: 0.9rem; }
+
+  /* CONTROLS */
+  .controls {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media(max-width:580px){ .row { grid-template-columns: 1fr; } }
+
+  label { display: block; font-size: 0.78rem; color: var(--muted); font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  input[type="text"], input[type="time"], select, textarea {
+    width: 100%; background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 11px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  select option { background: #1a1a2e; }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  .full-row { margin-bottom: 16px; }
+
+  .generate-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .generate-btn:hover { opacity: 0.92; }
+  .generate-btn:active { transform: scale(0.99); }
+  .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* IPHONE FRAME */
+  .preview-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .iphone-wrapper {
+    display: flex;
+    justify-content: center;
+    animation: fadeUp 0.5s ease;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+  .iphone-frame {
+    width: 280px;
+    background: #1a1a1a;
+    border-radius: 44px;
+    padding: 12px;
+    box-shadow: 0 0 0 2px #333, 0 40px 80px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.08);
+    position: relative;
+  }
+  .iphone-notch {
+    width: 100px; height: 28px;
+    background: #1a1a1a;
+    border-radius: 0 0 18px 18px;
+    margin: 0 auto 0;
+    position: relative; z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .notch-pill {
+    width: 70px; height: 20px;
+    background: #000;
+    border-radius: 99px;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+  }
+  .notch-pill .camera { width: 9px; height: 9px; background: #222; border-radius: 50%; border: 1.5px solid #333; }
+  .notch-pill .speaker { width: 30px; height: 4px; background: #222; border-radius: 99px; }
+
+  .iphone-screen {
+    background: #000;
+    border-radius: 36px;
+    overflow: hidden;
+    position: relative;
+    min-height: 420px;
+  }
+
+  .screen-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(160deg, #1a0533 0%, #0d0d1a 50%, #001a2c 100%);
+  }
+
+  .screen-content {
+    position: relative; z-index: 1;
+    padding: 20px 18px;
+    min-height: 420px;
+    display: flex; flex-direction: column;
+  }
+
+  .screen-time {
+    text-align: center;
+    color: rgba(255,255,255,0.9);
+    font-size: 0.7rem;
+    font-weight: 500;
+    margin-bottom: 6px;
+    display: flex; justify-content: space-between;
+  }
+  .screen-time .icons { display: flex; gap: 4px; align-items: center; font-size: 0.6rem; }
+
+  .quote-container {
+    flex: 1;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center;
+    padding: 10px 0;
+  }
+
+  .quote-sender {
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .sender-avatar {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .bubble-wrapper {
+    display: flex; flex-direction: column;
+    gap: 8px; width: 100%;
+    align-items: flex-end;
+  }
+
+  .chat-bubble {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 18px 18px 4px 18px;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    text-align: left;
+    word-wrap: break-word;
+    position: relative;
+  }
+  .chat-bubble.sent {
+    background: #0B84FF;
+    color: white;
+    align-self: flex-end;
+  }
+  .chat-bubble.received {
+    background: #2c2c2e;
+    color: white;
+    border-radius: 18px 18px 18px 4px;
+    align-self: flex-start;
+  }
+
+  .bubble-time {
+    font-size: 0.55rem;
+    color: rgba(255,255,255,0.4);
+    text-align: right;
+    margin-top: 2px;
+  }
+
+  .screen-bottom {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 0 4px;
+  }
+  .msg-input-bar {
+    flex: 1; background: rgba(255,255,255,0.1);
+    border-radius: 99px; padding: 6px 12px;
+    font-size: 0.65rem; color: rgba(255,255,255,0.4);
+  }
+  .send-icon { font-size: 1.1rem; }
+
+  .iphone-home {
+    width: 100px; height: 4px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 99px;
+    margin: 10px auto 4px;
+  }
+
+  /* ACTION BUTTONS */
+  .action-btns {
+    display: flex; gap: 12px;
+  }
+  .dl-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all 0.2s;
+  }
+  .dl-btn.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+  }
+  .dl-btn.secondary {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .dl-btn:hover { opacity: 0.85; }
+
+  /* PLACEHOLDER */
+  .placeholder {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .placeholder .big-icon { font-size: 3rem; margin-bottom: 12px; }
+  .placeholder p { font-size: 0.88rem; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="loading-logo">Rapi Dev</div>
+  <div class="loading-sub">Tools Collection</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+  <div class="loading-tool">📱 Memuat iPhone Quotes Generator...</div>
+</div>
+
+<div id="app" style="display:none">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="brand">✦ Rapi Dev</div>
+    <a href="portofolio.html" class="back-btn">← Kembali ke Portofolio</a>
+  </div>
+
+  <div class="main">
+    <div class="page-title">
+      <span class="emoji">📱</span>
+      <h1>iPhone Quotes Generator</h1>
+      <p>Buat screenshot chat iPhone aesthetic dengan quote favoritmu</p>
+    </div>
+
+    <div class="controls">
+      <div class="row">
+        <div>
+          <label>Nama Pengirim</label>
+          <input type="text" id="sender" placeholder="contoh: Mama, Bestie, Dia..." value="Bestie">
+        </div>
+        <div>
+          <label>Warna Avatar</label>
+          <select id="avatarColor">
+            <option value="linear-gradient(135deg,#7c6af7,#f472b6)">Ungu Pink</option>
+            <option value="linear-gradient(135deg,#34d399,#0ea5e9)">Hijau Biru</option>
+            <option value="linear-gradient(135deg,#f59e0b,#ef4444)">Oranye Merah</option>
+            <option value="linear-gradient(135deg,#8b5cf6,#06b6d4)">Violet Cyan</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Waktu Pesan</label>
+          <input type="time" id="msgTime" value="22:14">
+        </div>
+        <div>
+          <label>Tema Latar</label>
+          <select id="bgTheme">
+            <option value="linear-gradient(160deg,#1a0533 0%,#0d0d1a 50%,#001a2c 100%)">Purple Night</option>
+            <option value="linear-gradient(160deg,#0f2027 0%,#203a43 50%,#2c5364 100%)">Ocean Dark</option>
+            <option value="linear-gradient(160deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)">Midnight Blue</option>
+            <option value="linear-gradient(160deg,#0d0d0d 0%,#1a1a1a 100%)">Pure Black</option>
+          </select>
+        </div>
+      </div>
+      <div class="full-row">
+        <label>Quote / Pesan (bisa multi baris, tiap baris = 1 bubble)</label>
+        <textarea id="quoteText" placeholder="ketik quote disini...&#10;tiap enter = bubble baru">Hidup terlalu pendek buat overthinking
+Tapi terlalu panjang buat gak mikirin kamu 😭</textarea>
+      </div>
+      <div class="full-row">
+        <label>Balas Pesan (opsional)</label>
+        <input type="text" id="replyText" placeholder="contoh: haha beneran deh ✨ (kosongkan jika tidak ada)">
+      </div>
+      <button class="generate-btn" id="generateBtn" onclick="generateQuote()">
+        ✨ Generate iPhone Quote
+      </button>
+    </div>
+
+    <div class="preview-area" id="previewArea">
+      <div class="placeholder">
+        <div class="big-icon">📱</div>
+        <p>Isi form di atas lalu klik Generate<br>untuk melihat preview iPhone quotes-mu</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+  // Loading
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('loading').classList.add('hide');
+      document.getElementById('app').style.display = 'block';
+    }, 2000);
+  });
+
+  function getInitials(name) {
+    return name.slice(0, 2).toUpperCase();
+  }
+
+  function formatTime(t) {
+    const [h, m] = t.split(':');
+    const hr = parseInt(h);
+    return `${hr > 12 ? hr-12 : hr}:${m} ${hr >= 12 ? 'PM' : 'AM'}`;
+  }
+
+  function generateQuote() {
+    const sender = document.getElementById('sender').value || 'Someone';
+    const avatarColor = document.getElementById('avatarColor').value;
+    const msgTime = document.getElementById('msgTime').value;
+    const bgTheme = document.getElementById('bgTheme').value;
+    const quoteRaw = document.getElementById('quoteText').value;
+    const reply = document.getElementById('replyText').value;
+
+    const lines = quoteRaw.split('\n').filter(l => l.trim());
+    if (!lines.length) { alert('Isi quote terlebih dahulu!'); return; }
+
+    const timeFormatted = formatTime(msgTime);
+    const currentTime = new Date().toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'});
+
+    const bubbles = lines.map(line => `
+      <div class="chat-bubble received">${line}</div>
+    `).join('');
+
+    const replyBubble = reply ? `
+      <div class="chat-bubble sent">${reply}</div>
+      <div class="bubble-time">${timeFormatted} · Read</div>
+    ` : '';
+
+    const html = `
+      <div class="iphone-wrapper" id="iphoneWrapper">
+        <div class="iphone-frame">
+          <div class="iphone-notch">
+            <div class="notch-pill">
+              <div class="camera"></div>
+              <div class="speaker"></div>
+            </div>
+          </div>
+          <div class="iphone-screen">
+            <div class="screen-bg" style="background:${bgTheme}"></div>
+            <div class="screen-content">
+              <div class="screen-time">
+                <span>${currentTime}</span>
+                <span class="icons">▲ 🔋</span>
+              </div>
+              <div style="text-align:center;padding:12px 0 8px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:12px">
+                <div style="width:40px;height:40px;border-radius:50%;background:${avatarColor};margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:white">${getInitials(sender)}</div>
+                <div style="font-size:0.72rem;color:rgba(255,255,255,0.9);font-weight:600">${sender}</div>
+                <div style="font-size:0.6rem;color:rgba(255,255,255,0.4);margin-top:2px">iMessage</div>
+              </div>
+              <div class="bubble-wrapper">
+                <div style="font-size:0.6rem;color:rgba(255,255,255,0.35);text-align:center;width:100%;margin-bottom:6px">Today ${timeFormatted}</div>
+                ${bubbles}
+                ${replyBubble}
+              </div>
+              <div class="screen-bottom">
+                <div class="msg-input-bar">iMessage</div>
+                <span class="send-icon">⬆️</span>
+              </div>
+            </div>
+          </div>
+          <div class="iphone-home"></div>
+        </div>
+      </div>
+      <div class="action-btns">
+        <button class="dl-btn primary" onclick="downloadImage()">📥 Download PNG</button>
+        <button class="dl-btn secondary" onclick="copyQuote()">📋 Copy Teks</button>
+      </div>
+    `;
+
+    document.getElementById('previewArea').innerHTML = html;
+    window._quoteText = lines.join('\n') + (reply ? '\n— ' + sender : '');
+  }
+
+  function downloadImage() {
+    const el = document.getElementById('iphoneWrapper');
+    html2canvas(el, { backgroundColor: null, scale: 2 }).then(canvas => {
+      const a = document.createElement('a');
+      a.download = 'iphone-quote-rapidev.png';
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    });
+  }
+
+  function copyQuote() {
+    navigator.clipboard.writeText(window._quoteText || '');
+    alert('Teks quote berhasil disalin! ✅');
+  }
+</script>
+</body>
+</html>

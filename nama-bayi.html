@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Nama Bayi — Rapi Dev</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #fdf6ff;
+    --card: #ffffff;
+    --accent: #9b59d1;
+    --accent2: #f472b6;
+    --text: #1a1a2e;
+    --muted: #8a8aaa;
+    --border: rgba(0,0,0,0.07);
+    --shadow: 0 4px 24px rgba(155,89,209,0.1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+
+  /* LOADING */
+  #loading {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 9999; transition: opacity 0.5s, visibility 0.5s;
+  }
+  #loading.hide { opacity: 0; visibility: hidden; }
+
+  .loading-logo { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg,#9b59d1,#f472b6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px; }
+  .loading-sub { color: var(--muted); font-size: 0.82rem; margin-bottom: 36px; }
+  .loader-track { width: 200px; height: 3px; background: #e5d5f7; border-radius: 99px; overflow: hidden; }
+  .loader-fill { height: 100%; background: linear-gradient(90deg,#9b59d1,#f472b6); border-radius: 99px; animation: fill 2s ease forwards; }
+  @keyframes fill { from{width:0} to{width:100%} }
+  .loading-label { margin-top:16px; color:var(--muted); font-size:0.8rem; animation: blink 1.2s ease infinite; }
+  @keyframes blink { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+  /* HEADER */
+  .header { padding: 18px 24px; display:flex; align-items:center; justify-content:space-between; background:var(--card); border-bottom:1px solid var(--border); }
+  .brand { font-size:1rem; font-weight:800; background:linear-gradient(135deg,#9b59d1,#f472b6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .back-btn { display:flex; align-items:center; gap:6px; text-decoration:none; font-size:0.83rem; font-weight:500; color:var(--muted); padding:7px 13px; border:1px solid var(--border); border-radius:8px; transition:all 0.2s; }
+  .back-btn:hover { color:var(--accent); border-color:var(--accent); }
+
+  .main { max-width: 720px; margin: 0 auto; padding: 40px 20px 60px; }
+
+  .page-hero { text-align:center; margin-bottom:32px; }
+  .page-hero .emo { font-size:2.5rem; display:block; margin-bottom:10px; }
+  .page-hero h1 { font-size:1.9rem; font-weight:800; letter-spacing:-0.5px; }
+  .page-hero p { color:var(--muted); font-size:0.88rem; margin-top:8px; }
+
+  .card { background:var(--card); border:1px solid var(--border); border-radius:18px; padding:24px; margin-bottom:20px; box-shadow:var(--shadow); }
+
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media(max-width:520px) { .grid2 { grid-template-columns:1fr; } }
+
+  label { display:block; font-size:0.75rem; font-weight:600; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
+  select, input[type="text"] {
+    width:100%; background:#faf5ff; border:1.5px solid #e5d5f7;
+    border-radius:10px; color:var(--text); padding:11px 14px;
+    font-family:'Inter',sans-serif; font-size:0.9rem; outline:none;
+    transition:border-color 0.2s;
+  }
+  select:focus, input:focus { border-color:var(--accent); }
+  select option { background:#fff; }
+
+  .tags-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .tag { padding:6px 14px; border-radius:99px; font-size:0.8rem; font-weight:500; cursor:pointer; border:1.5px solid #e5d5f7; color:var(--muted); background:transparent; transition:all 0.2s; }
+  .tag.active { background:linear-gradient(135deg,#9b59d1,#f472b6); color:white; border-color:transparent; }
+
+  .gen-btn { width:100%; padding:14px; border:none; border-radius:12px; background:linear-gradient(135deg,#9b59d1,#f472b6); color:white; font-size:1rem; font-weight:700; cursor:pointer; transition:opacity 0.2s; }
+  .gen-btn:hover { opacity:0.9; }
+  .gen-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+  .results { display:none; }
+  .results.show { display:block; }
+
+  .name-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; margin-bottom:20px; }
+  .name-card {
+    background:linear-gradient(135deg,#fdf6ff,#fff0fb);
+    border:1.5px solid #e5d5f7;
+    border-radius:14px; padding:16px;
+    text-align:center; cursor:pointer;
+    transition:all 0.2s;
+  }
+  .name-card:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 8px 24px rgba(155,89,209,0.15); }
+  .name-card .name-text { font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .name-card .name-meaning { font-size:0.75rem; color:var(--muted); line-height:1.4; }
+  .name-card .name-origin { font-size:0.68rem; margin-top:6px; padding:2px 8px; background:#ede8f7; color:#9b59d1; border-radius:99px; display:inline-block; }
+
+  .regenerate-btn { display:block; margin:0 auto; padding:10px 24px; border:1.5px solid #e5d5f7; background:transparent; color:var(--accent); border-radius:10px; font-size:0.88rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+  .regenerate-btn:hover { background:#f5eeff; }
+
+  .loading-dots { text-align:center; padding:40px; }
+  .loading-dots span { display:inline-block; width:10px; height:10px; background:var(--accent); border-radius:50%; margin:0 4px; animation:bounce 1.2s ease infinite; }
+  .loading-dots span:nth-child(2) { animation-delay:0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay:0.4s; }
+  @keyframes bounce { 0%,80%,100%{transform:scale(0.5);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="loading-logo">Rapi Dev</div>
+  <div class="loading-sub">Tools Collection</div>
+  <div class="loader-track"><div class="loader-fill"></div></div>
+  <div class="loading-label">👶 Memuat AI Nama Bayi...</div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="header">
+    <div class="brand">✦ Rapi Dev</div>
+    <a href="portofolio.html" class="back-btn">← Kembali ke Portofolio</a>
+  </div>
+
+  <div class="main">
+    <div class="page-hero">
+      <span class="emo">👶</span>
+      <h1>AI Nama Bayi</h1>
+      <p>Generator nama bayi bermakna & indah dengan kecerdasan AI</p>
+    </div>
+
+    <div class="card">
+      <div class="grid2" style="margin-bottom:16px">
+        <div>
+          <label>Jenis Kelamin</label>
+          <select id="gender">
+            <option value="laki-laki">👦 Laki-laki</option>
+            <option value="perempuan">👧 Perempuan</option>
+            <option value="unisex">🌟 Unisex / Netral</option>
+          </select>
+        </div>
+        <div>
+          <label>Asal Nama</label>
+          <select id="origin">
+            <option value="Arab Islam">Arab / Islam</option>
+            <option value="Jawa">Jawa</option>
+            <option value="Sunda">Sunda</option>
+            <option value="Indonesia modern">Indonesia Modern</option>
+            <option value="Internasional">Internasional</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label>Karakter yang Diinginkan</label>
+        <div class="tags-row" id="traitTags">
+          <button class="tag active" onclick="toggleTag(this,'Cerdas')">🧠 Cerdas</button>
+          <button class="tag" onclick="toggleTag(this,'Pemberani')">⚔️ Pemberani</button>
+          <button class="tag" onclick="toggleTag(this,'Lembut')">🌸 Lembut</button>
+          <button class="tag" onclick="toggleTag(this,'Pemimpin')">👑 Pemimpin</button>
+          <button class="tag" onclick="toggleTag(this,'Kreatif')">🎨 Kreatif</button>
+          <button class="tag" onclick="toggleTag(this,'Mulia')">✨ Mulia</button>
+        </div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label>Nama Ayah & Ibu (opsional, untuk keserasian)</label>
+        <input type="text" id="parentNames" placeholder="contoh: Ahmad & Siti">
+      </div>
+      <button class="gen-btn" id="genBtn" onclick="generateNames()">✨ Generate Nama Bayi</button>
+    </div>
+
+    <div class="results" id="results">
+      <div id="resultsContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('loading').classList.add('hide');
+      document.getElementById('app').style.display = 'block';
+    }, 2000);
+  });
+
+  let selectedTraits = ['Cerdas'];
+  function toggleTag(el, trait) {
+    el.classList.toggle('active');
+    if (el.classList.contains('active')) selectedTraits.push(trait);
+    else selectedTraits = selectedTraits.filter(t => t !== trait);
+  }
+
+  async function generateNames() {
+    const gender = document.getElementById('gender').value;
+    const origin = document.getElementById('origin').value;
+    const parents = document.getElementById('parentNames').value;
+    const traits = selectedTraits.join(', ') || 'Baik hati';
+    const btn = document.getElementById('genBtn');
+
+    btn.disabled = true; btn.textContent = '⏳ Sedang membuat...';
+    document.getElementById('results').classList.add('show');
+    document.getElementById('resultsContent').innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+
+    const prompt = `Kamu adalah ahli penamaan bayi. Buatkan 6 nama bayi ${gender} dengan:
+- Asal/budaya: ${origin}
+- Sifat yang diinginkan: ${traits}
+${parents ? '- Nama orang tua: ' + parents : ''}
+
+Berikan dalam format JSON array seperti ini:
+[
+  {"name": "...", "meaning": "... (penjelasan singkat 1 kalimat)", "origin": "..."}
+]
+
+HANYA balas dengan JSON array, tidak ada teks lain.`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await res.json();
+      const text = data.content[0].text.replace(/```json|```/g,'').trim();
+      const names = JSON.parse(text);
+
+      let html = '<div class="card"><div class="name-grid">';
+      names.forEach(n => {
+        html += `<div class="name-card" onclick="copyName('${n.name}')">
+          <div class="name-text">${n.name}</div>
+          <div class="name-meaning">${n.meaning}</div>
+          <span class="name-origin">${n.origin}</span>
+        </div>`;
+      });
+      html += `</div><button class="regenerate-btn" onclick="generateNames()">🔄 Generate Ulang</button></div>`;
+      document.getElementById('resultsContent').innerHTML = html;
+    } catch(e) {
+      document.getElementById('resultsContent').innerHTML = '<div class="card" style="text-align:center;color:#e74c3c">❌ Gagal generate. Coba lagi.</div>';
+    }
+    btn.disabled = false; btn.textContent = '✨ Generate Nama Bayi';
+  }
+
+  function copyName(name) {
+    navigator.clipboard.writeText(name);
+    alert('Nama "' + name + '" berhasil disalin! ✅');
+  }
+</script>
+</body>
+</html>
