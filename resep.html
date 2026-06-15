@@ -110,7 +110,7 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
 <div class="grid-overlay"></div>
 
 <div class="wrapper">
-  <a href="portofolio-1.html" class="back-btn">← Kembali</a>
+  <a href="portofolio.html" class="back-btn">← Kembali</a>
 
   <div class="header">
     <p class="brand">🍳 Rapi Dev · Generator Resep</p>
@@ -209,7 +209,7 @@ function addIngredient(item){
   inp.focus();
 }
 
-const GEMINI_KEY = 'MASUKKAN_GEMINI_API_KEY_DISINI'; // ← Ambil gratis di: aistudio.google.com
+const GEMINI_KEY = 'AQ.Ab8RN6IFZ5S3E1dIDJNTE13h8xVfO1RMCYXEdaPb2WilV1c3sA'; // ← Ambil gratis di: aistudio.google.com
 async function generateRecipe(){
   const ingredients=document.getElementById('ingredientsInput').value.trim();
   if(!ingredients){alert('Masukkan dulu bahan-bahan yang kamu punya!');return}
