@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generator Resep · Rapi Dev</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#03030a;--surface:rgba(15,15,35,.75);--amber:#f59e0b;--orange:#f97316;--green:#4ade80;--cyan:#06b6d4;--text:#e2e8f0;--muted:#64748b}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+#stars-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 65% 45% at 20% 20%,rgba(249,115,22,.16) 0%,transparent 60%),
+             radial-gradient(ellipse 50% 40% at 80% 75%,rgba(74,222,128,.1) 0%,transparent 60%);
+  animation:auroraShift 11s ease-in-out infinite alternate}
+@keyframes auroraShift{0%{transform:scale(1)}100%{transform:scale(1.08) rotate(2deg)}}
+.grid-overlay{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(249,115,22,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(249,115,22,.025) 1px,transparent 1px);
+  background-size:55px 55px}
+
+.wrapper{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:40px 20px 60px;max-width:680px;margin:0 auto}
+
+.back-btn{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:.85rem;font-weight:600;padding:6px 14px;border:1px solid rgba(255,255,255,.07);border-radius:50px;transition:.3s;margin-bottom:28px}
+.back-btn:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+
+.header{text-align:center;margin-bottom:36px;animation:slideDown .8s cubic-bezier(.16,1,.3,1) both}
+@keyframes slideDown{from{opacity:0;transform:translateY(-30px)}to{opacity:1;transform:translateY(0)}}
+.brand{font-size:.75rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--amber);margin-bottom:8px;opacity:.8}
+.page-title{font-family:'Syne',sans-serif;font-size:clamp(2rem,7vw,2.8rem);font-weight:800;background:linear-gradient(135deg,#fff 20%,var(--amber) 55%,var(--orange) 85%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:8px}
+.page-sub{font-size:.9rem;color:var(--muted)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* INGREDIENT INPUT */
+.input-card{width:100%;background:var(--surface);border:1px solid rgba(249,115,22,.15);border-radius:20px;padding:24px;margin-bottom:20px;animation:fadeUp .8s .2s both;backdrop-filter:blur(14px)}
+.input-label{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;display:block}
+.ingredients-input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 16px;font-family:'Space Grotesk',sans-serif;font-size:.92rem;color:var(--text);outline:none;resize:vertical;min-height:80px;transition:border-color .3s;backdrop-filter:blur(8px)}
+.ingredients-input::placeholder{color:var(--muted)}
+.ingredients-input:focus{border-color:rgba(249,115,22,.4);box-shadow:0 0 0 3px rgba(249,115,22,.08)}
+.hint{font-size:.72rem;color:var(--muted);margin-top:6px}
+
+/* FILTERS ROW */
+.filters-row{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:20px;animation:fadeUp .8s .3s both}
+.filter-group{flex:1;min-width:140px}
+.filter-group label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;display:block}
+.filter-select{width:100%;background:var(--surface);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 14px;font-family:'Space Grotesk',sans-serif;font-size:.85rem;color:var(--text);outline:none;cursor:pointer;transition:.3s;appearance:none;backdrop-filter:blur(10px)}
+.filter-select:focus{border-color:rgba(249,115,22,.4)}
+
+/* QUICK TAGS */
+.quick-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;animation:fadeUp .8s .35s both}
+.quick-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);width:100%;margin-bottom:4px}
+.qtag{font-size:.75rem;font-weight:600;padding:6px 14px;background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.2);border-radius:50px;color:var(--amber);cursor:pointer;transition:.25s}
+.qtag:hover{background:rgba(249,115,22,.18);border-color:rgba(249,115,22,.4)}
+
+/* GEN BTN */
+.gen-btn{background:linear-gradient(135deg,var(--amber),var(--orange));color:#fff;border:none;border-radius:50px;padding:14px 44px;font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;animation:fadeUp .8s .45s both;position:relative;overflow:hidden;margin-bottom:28px}
+.gen-btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);opacity:0;transition:.3s}
+.gen-btn:hover::before{opacity:1}
+.gen-btn:hover{transform:translateY(-4px) scale(1.04);box-shadow:0 8px 32px rgba(249,115,22,.45)}
+.gen-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* LOADING */
+.loading-orbs{display:none;gap:8px;justify-content:center;padding:20px}
+.loading-orbs.visible{display:flex}
+.orb-dot{width:10px;height:10px;border-radius:50%;animation:orbPulse 1.2s ease-in-out infinite}
+.orb-dot:nth-child(1){background:var(--amber)}
+.orb-dot:nth-child(2){background:var(--orange);animation-delay:.2s}
+.orb-dot:nth-child(3){background:var(--green);animation-delay:.4s}
+@keyframes orbPulse{0%,100%{transform:scale(.6);opacity:.4}50%{transform:scale(1.2);opacity:1}}
+
+/* RECIPE CARD */
+.recipe-card{width:100%;display:none}
+.recipe-card.visible{display:block;animation:fadeUp .5s both}
+.recipe-hero{background:var(--surface);border:1px solid rgba(249,115,22,.2);border-radius:24px;padding:28px;backdrop-filter:blur(16px);position:relative;overflow:hidden;margin-bottom:16px}
+.recipe-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--amber),var(--orange),var(--green));border-radius:24px 24px 0 0}
+
+.recipe-name{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#fff,var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.recipe-desc{font-size:.9rem;color:var(--muted);line-height:1.6;margin-bottom:18px}
+.recipe-meta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.meta-badge{font-size:.75rem;font-weight:600;padding:5px 12px;border-radius:50px;border:1px solid}
+.mb-amber{color:var(--amber);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)}
+.mb-green{color:var(--green);border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.08)}
+.mb-cyan{color:var(--cyan);border-color:rgba(6,182,212,.3);background:rgba(6,182,212,.08)}
+
+.recipe-section{margin-bottom:20px}
+.rs-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ingredient-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ingr-item{background:rgba(249,115,22,.05);border:1px solid rgba(249,115,22,.1);border-radius:10px;padding:8px 12px;font-size:.85rem;display:flex;align-items:center;gap:6px}
+.ingr-item::before{content:'•';color:var(--amber)}
+
+.steps-list{display:flex;flex-direction:column;gap:10px}
+.step-item{display:flex;gap:12px;align-items:flex-start}
+.step-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--orange));display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;color:#fff;flex-shrink:0;margin-top:2px}
+.step-text{font-size:.88rem;line-height:1.7;flex:1}
+
+.tip-box{background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.15);border-radius:14px;padding:14px;font-size:.85rem;line-height:1.7}
+.tip-box::before{content:'💡 Tips Chef:';display:block;font-weight:700;color:var(--green);margin-bottom:6px;font-size:.78rem}
+
+.footer{margin-top:60px;text-align:center;font-size:.75rem;color:var(--muted)}
+.footer a{color:var(--amber);text-decoration:none}
+
+@media(max-width:480px){.filters-row{flex-direction:column}.ingredient-list{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<canvas id="stars-canvas"></canvas>
+<div class="aurora"></div>
+<div class="grid-overlay"></div>
+
+<div class="wrapper">
+  <a href="portofolio-1.html" class="back-btn">← Kembali</a>
+
+  <div class="header">
+    <p class="brand">🍳 Rapi Dev · Generator Resep</p>
+    <h1 class="page-title">Generator Resep</h1>
+    <p class="page-sub">Masukkan bahan yang ada, AI buatkan resepnya!</p>
+  </div>
+
+  <div class="input-card">
+    <label class="input-label">🧅 Bahan-bahan yang kamu punya</label>
+    <textarea class="ingredients-input" id="ingredientsInput" placeholder="Contoh: ayam, bawang merah, kecap, cabe, tomat..."></textarea>
+    <p class="hint">Pisahkan dengan koma. Tidak perlu lengkap!</p>
+  </div>
+
+  <div class="filters-row">
+    <div class="filter-group">
+      <label>🍽️ Jenis Masakan</label>
+      <select class="filter-select" id="cuisineFilter">
+        <option value="Indonesia">🇮🇩 Indonesia</option>
+        <option value="Asia">🌏 Asia</option>
+        <option value="Western">🌎 Western</option>
+        <option value="Fusion">✨ Fusion</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>⏱️ Waktu Memasak</label>
+      <select class="filter-select" id="timeFilter">
+        <option value="cepat (di bawah 20 menit)">⚡ Cepat (&lt;20 mnt)</option>
+        <option value="sedang (20-45 menit)">🕐 Sedang (20-45 mnt)</option>
+        <option value="lama (lebih dari 45 menit)">⏳ Lama (&gt;45 mnt)</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>💪 Tingkat Kesulitan</label>
+      <select class="filter-select" id="diffFilter">
+        <option value="mudah untuk pemula">🟢 Mudah</option>
+        <option value="sedang">🟡 Sedang</option>
+        <option value="sulit untuk chef berpengalaman">🔴 Sulit</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="quick-tags">
+    <span class="quick-label">⚡ Bahan populer:</span>
+    <span class="qtag" onclick="addIngredient('ayam')">🍗 Ayam</span>
+    <span class="qtag" onclick="addIngredient('telur')">🥚 Telur</span>
+    <span class="qtag" onclick="addIngredient('tahu, tempe')">🟫 Tahu & Tempe</span>
+    <span class="qtag" onclick="addIngredient('mie')">🍜 Mie</span>
+    <span class="qtag" onclick="addIngredient('nasi')">🍚 Nasi</span>
+    <span class="qtag" onclick="addIngredient('ikan')">🐟 Ikan</span>
+    <span class="qtag" onclick="addIngredient('udang')">🍤 Udang</span>
+    <span class="qtag" onclick="addIngredient('daging sapi')">🥩 Sapi</span>
+  </div>
+
+  <button class="gen-btn" id="genBtn" onclick="generateRecipe()">🍳 Buat Resepnya!</button>
+
+  <div class="loading-orbs" id="loadingOrbs">
+    <div class="orb-dot"></div><div class="orb-dot"></div><div class="orb-dot"></div>
+  </div>
+
+  <div class="recipe-card" id="recipeCard">
+    <div class="recipe-hero">
+      <div class="recipe-name" id="recipeName"></div>
+      <div class="recipe-desc" id="recipeDesc"></div>
+      <div class="recipe-meta" id="recipeMeta"></div>
+
+      <div class="recipe-section">
+        <div class="rs-title">🧅 Bahan-bahan</div>
+        <div class="ingredient-list" id="ingredientList"></div>
+      </div>
+
+      <div class="recipe-section">
+        <div class="rs-title">👨‍🍳 Langkah Memasak</div>
+        <div class="steps-list" id="stepsList"></div>
+      </div>
+
+      <div class="tip-box" id="tipBox"></div>
+    </div>
+  </div>
+
+  <div class="footer"><p>© 2025 <a href="#">Rapi Dev</a> · Powered by Claude AI 🍳</p></div>
+</div>
+
+<script>
+/* ── STARS ── */
+(function(){
+  const c=document.getElementById('stars-canvas'),ctx=c.getContext('2d');let stars=[];
+  function resize(){c.width=innerWidth;c.height=innerHeight;stars=Array.from({length:140},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.3+.2,o:Math.random(),s:Math.random()*.004+.002}))}
+  function draw(){ctx.clearRect(0,0,c.width,c.height);stars.forEach(s=>{s.o+=s.s;if(s.o>1||s.o<0)s.s*=-1;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,200,100,${s.o*.45})`;ctx.fill()});requestAnimationFrame(draw)}
+  resize();window.addEventListener('resize',resize);draw();
+})();
+
+function addIngredient(item){
+  const inp=document.getElementById('ingredientsInput');
+  const current=inp.value.trim();
+  inp.value=current?(current.endsWith(',')?(current+' '+item):(current+', '+item)):item;
+  inp.focus();
+}
+
+async function generateRecipe(){
+  const ingredients=document.getElementById('ingredientsInput').value.trim();
+  if(!ingredients){alert('Masukkan dulu bahan-bahan yang kamu punya!');return}
+  const cuisine=document.getElementById('cuisineFilter').value;
+  const time=document.getElementById('timeFilter').value;
+  const diff=document.getElementById('diffFilter').value;
+  const btn=document.getElementById('genBtn');
+  const loading=document.getElementById('loadingOrbs');
+  const card=document.getElementById('recipeCard');
+
+  btn.disabled=true;loading.classList.add('visible');card.classList.remove('visible');
+
+  const prompt=`Kamu adalah chef profesional Indonesia yang kreatif. Buat resep masakan berdasarkan bahan berikut:
+Bahan tersedia: ${ingredients}
+Jenis masakan: ${cuisine}
+Waktu memasak: ${time}
+Tingkat kesulitan: ${diff}
+
+Balas HANYA dalam format JSON berikut (tanpa backtick):
+{
+  "nama": "Nama Hidangan",
+  "deskripsi": "Deskripsi singkat yang menggugah selera (2 kalimat)",
+  "waktu": "XX menit",
+  "porsi": "X porsi",
+  "kalori": "~XXX kkal per porsi",
+  "bahan": ["bahan 1 dengan takaran", "bahan 2", "bahan 3", "bahan 4", "bahan 5", "bahan 6"],
+  "langkah": ["Langkah 1 detail", "Langkah 2 detail", "Langkah 3 detail", "Langkah 4 detail", "Langkah 5 detail"],
+  "tips": "Tips memasak yang berguna"
+}`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    let text=data.content.map(i=>i.text||'').join('');
+    text=text.replace(/```json|```/g,'').trim();
+    const r=JSON.parse(text);
+
+    document.getElementById('recipeName').textContent=r.nama||'Resep Spesial';
+    document.getElementById('recipeDesc').textContent=r.deskripsi||'';
+    document.getElementById('recipeMeta').innerHTML=`
+      <span class="meta-badge mb-amber">⏱️ ${r.waktu||'?'}</span>
+      <span class="meta-badge mb-green">👥 ${r.porsi||'?'}</span>
+      <span class="meta-badge mb-cyan">🔥 ${r.kalori||'?'}</span>`;
+    document.getElementById('ingredientList').innerHTML=(r.bahan||[]).map(b=>`<div class="ingr-item">${b}</div>`).join('');
+    document.getElementById('stepsList').innerHTML=(r.langkah||[]).map((s,i)=>`<div class="step-item"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`).join('');
+    document.getElementById('tipBox').textContent=r.tips||'Sajikan selagi hangat!';
+
+    loading.classList.remove('visible');card.classList.add('visible');
+    card.scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){
+    loading.classList.remove('visible');
+    alert('Gagal membuat resep. Coba lagi!');
+  }
+  btn.disabled=false;
+}
+</script>
+</body>
+</html>
