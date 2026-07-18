@@ -1,0 +1,593 @@
+/* ================================
+   RESPONSIVE STYLESHEET
+   Mobile, Tablet, Desktop Optimization
+   ================================ */
+
+/* ================================
+   SMALL DEVICES (Mobile)
+   ================================ */
+
+@media (max-width: 640px) {
+    :root {
+        --spacing-lg: 1.5rem;
+        --spacing-xl: 2rem;
+        --spacing-2xl: 2.5rem;
+    }
+
+    /* Navbar */
+    .navbar-menu {
+        gap: 0;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(5, 8, 16, 0.95);
+        border-top: 1px solid rgba(0, 255, 136, 0.2);
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+
+    .navbar-menu.active {
+        max-height: 400px;
+    }
+
+    .navbar-menu li {
+        padding: 1rem 2rem;
+        border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+    }
+
+    .navbar-toggle {
+        display: flex;
+    }
+
+    /* Hero Section */
+    .hero-title {
+        font-size: 2rem;
+        line-height: 1.3;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    /* Countdown */
+    .countdown {
+        gap: 1rem;
+    }
+
+    .countdown-item {
+        padding: 1rem 1.5rem;
+        min-width: 80px;
+    }
+
+    .countdown-value {
+        font-size: 1.8rem;
+    }
+
+    /* Section Title */
+    .section-title {
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* About Cards */
+    .about-content {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    /* Letter Card */
+    .letter-card {
+        padding: 1.5rem;
+    }
+
+    /* Timeline */
+    .memories-timeline::before {
+        left: 15px;
+    }
+
+    .timeline-item {
+        flex-direction: column;
+        margin-bottom: 2rem;
+    }
+
+    .timeline-item:nth-child(even) {
+        justify-content: flex-start;
+    }
+
+    .timeline-dot {
+        position: static;
+        margin-bottom: 1rem;
+    }
+
+    .timeline-content {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    /* Gallery Grid */
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .gallery-item {
+        height: 150px;
+    }
+
+    /* Lightbox */
+    .lightbox-prev,
+    .lightbox-next {
+        width: 40px;
+        height: 40px;
+        left: 10px;
+        right: auto;
+    }
+
+    .lightbox-next {
+        left: auto;
+        right: 10px;
+    }
+
+    .lightbox-close {
+        top: 10px;
+        right: 10px;
+    }
+
+    /* Wishes */
+    .wishes-container {
+        grid-template-columns: 1fr;
+    }
+
+    /* Surprise Section */
+    .surprise-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    /* Contact Form */
+    .contact-form {
+        max-width: 100%;
+    }
+
+    /* Music Player */
+    .music-player {
+        max-width: 100%;
+        padding: 1.5rem;
+    }
+
+    .player-album {
+        width: 120px;
+        height: 120px;
+    }
+
+    /* Floating Buttons */
+    .floating-music-btn,
+    .back-to-top {
+        width: 50px;
+        height: 50px;
+        bottom: 1rem;
+        right: 1rem;
+    }
+
+    /* Section */
+    .section {
+        padding: 1.5rem;
+        min-height: auto;
+    }
+
+    /* Footer */
+    .footer {
+        padding: 1.5rem;
+    }
+
+    .social-icons {
+        gap: 1rem;
+    }
+}
+
+/* ================================
+   MEDIUM DEVICES (Tablet)
+   ================================ */
+
+@media (min-width: 641px) and (max-width: 1024px) {
+    .hero-title {
+        font-size: 3rem;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+    }
+
+    .about-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    .countdown {
+        gap: 1.5rem;
+    }
+
+    .countdown-item {
+        padding: 1rem 1.5rem;
+    }
+
+    .surprise-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ================================
+   LARGE DEVICES (Desktop)
+   ================================ */
+
+@media (min-width: 1025px) {
+    .navbar-toggle {
+        display: none;
+    }
+
+    .navbar-menu {
+        max-height: none !important;
+    }
+
+    /* Additional desktop optimizations */
+}
+
+/* ================================
+   EXTRA LARGE DEVICES (4K)
+   ================================ */
+
+@media (min-width: 1920px) {
+    :root {
+        --spacing-xl: 4rem;
+        --spacing-2xl: 5rem;
+    }
+
+    .hero-title {
+        font-size: 5rem;
+    }
+
+    .section-title {
+        font-size: 4rem;
+    }
+
+    .section {
+        min-height: 100vh;
+    }
+}
+
+/* ================================
+   LANDSCAPE MODE
+   ================================ */
+
+@media (max-height: 500px) {
+    .section {
+        min-height: auto;
+        padding: 2rem;
+    }
+
+    .hero-section {
+        min-height: auto;
+        padding: 2rem;
+    }
+
+    .countdown {
+        margin: 1rem 0;
+    }
+
+    .countdown-item {
+        padding: 0.75rem 1rem;
+    }
+
+    .countdown-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* ================================
+   PORTRAIT MODE
+   ================================ */
+
+@media (orientation: portrait) and (max-width: 768px) {
+    .navbar-container {
+        padding: 0 1rem;
+    }
+
+    .section-container {
+        padding: 0 1rem;
+    }
+}
+
+/* ================================
+   DARK MODE & PREFERS-COLOR-SCHEME
+   ================================ */
+
+@media (prefers-color-scheme: dark) {
+    /* Already dark themed, no changes needed */
+}
+
+@media (prefers-color-scheme: light) {
+    /* Fallback - not recommended for this design */
+    body {
+        background-color: #f0f0f0;
+        color: #222;
+    }
+}
+
+/* ================================
+   HIGH CONTRAST MODE
+   ================================ */
+
+@media (prefers-contrast: more) {
+    :root {
+        --primary: #00ff00;
+        --neon-cyan: #00ffff;
+        --neon-green: #00ff00;
+    }
+
+    .navbar {
+        border-bottom-width: 2px;
+    }
+
+    .nav-link::after {
+        height: 3px;
+    }
+}
+
+/* ================================
+   REDUCED MOTION
+   ================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    html {
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ================================ */
+
+@media (hover: none) and (pointer: coarse) {
+    .button-hover:hover,
+    .card-hover:hover {
+        transform: none;
+    }
+
+    .gift-button {
+        padding: 1.5rem 3.5rem;
+    }
+
+    .nav-link {
+        padding: 0.5rem;
+    }
+
+    .player-btn {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* ================================
+   PRINT STYLES
+   ================================ */
+
+@media print {
+    body::before,
+    .navbar,
+    .floating-music-btn,
+    .back-to-top,
+    footer {
+        display: none;
+    }
+
+    canvas {
+        display: none;
+    }
+
+    .section {
+        page-break-inside: avoid;
+    }
+}
+
+/* ================================
+   RESPONSIVE GRID SYSTEMS
+   ================================ */
+
+@media (max-width: 480px) {
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .wishes-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .wishes-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .gallery-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .wishes-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1025px) {
+    .gallery-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .wishes-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ================================
+   SAFE AREA INSETS (Notch Support)
+   ================================ */
+
+@supports (padding: max(0px)) {
+    body {
+        padding-left: max(0.5rem, env(safe-area-inset-left));
+        padding-right: max(0.5rem, env(safe-area-inset-right));
+        padding-top: max(0.5rem, env(safe-area-inset-top));
+        padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
+
+    .navbar {
+        padding-top: env(safe-area-inset-top);
+    }
+
+    .floating-music-btn,
+    .back-to-top {
+        bottom: max(1rem, env(safe-area-inset-bottom));
+        right: max(1rem, env(safe-area-inset-right));
+    }
+}
+
+/* ================================
+   SPECIFIC DEVICE OPTIMIZATIONS
+   ================================ */
+
+/* iPhone SE / Small phones */
+@media (max-width: 375px) {
+    .hero-title {
+        font-size: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .countdown-value {
+        font-size: 1.3rem;
+    }
+
+    .gift-button {
+        padding: 1rem 2rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* iPad and tablets */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+    .section {
+        padding: 2rem;
+    }
+
+    .countdown {
+        gap: 2rem;
+    }
+}
+
+/* Landscape tablets */
+@media (min-width: 1024px) and (orientation: landscape) and (max-height: 768px) {
+    .section {
+        min-height: auto;
+        padding: 2rem;
+    }
+
+    .hero-section {
+        padding: 1rem 2rem;
+    }
+}
+
+/* ================================
+   FONT SIZE RESPONSIVE SCALING
+   ================================ */
+
+@media (min-width: 320px) and (max-width: 480px) {
+    html {
+        font-size: 14px;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    html {
+        font-size: 15px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 1025px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+/* ================================
+   ACCESSIBILITY RESPONSIVE
+   ================================ */
+
+@media (prefers-reduced-transparency: reduce) {
+    .navbar,
+    .about-card,
+    .letter-card {
+        background: var(--bg-dark);
+    }
+}
+
+/* ================================
+   NETWORK CONDITIONS
+   ================================ */
+
+@media (prefers-reduced-data: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+    }
+
+    img {
+        transition: none;
+    }
+}
+
+/* ================================
+   CUSTOM SCROLLBAR RESPONSIVE
+   ================================ */
+
+@media (min-width: 1025px) {
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--neon-green);
+        border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--neon-cyan);
+    }
+}
